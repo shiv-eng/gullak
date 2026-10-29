@@ -19,6 +19,10 @@ complexity:
     ignoreAnnotatedFunctions: ['Composable', 'Preview']
 
 style:
+  # Failures propagate with `result.getOrElse { return it }` (typed early returns instead of exceptions),
+  # so a use case naturally has one return per gateway call.
+  ReturnCount:
+    active: false
   MagicNumber:
     ignorePropertyDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
