@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">Gullak</string>
+    <string name="home_new_goal">New goal</string>
+    <string name="home_empty_prompt">Bolo, kya bachana hai?</string>
+    <string name="home_empty_hint">Tell Gullak what you are saving for, how much, and by when.</string>
+    <string name="home_mic_description">Speak a new savings goal</string>
+</resources>

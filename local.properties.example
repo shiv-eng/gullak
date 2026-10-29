@@ -1,0 +1,12 @@
+# Copy to local.properties (never commit it).
+sdk.dir=/path/to/Android/Sdk
+
+# Gemini (prototype only; a shipped app would call the model through a backend).
+GEMINI_API_KEY=
+GEMINI_MODEL_ID=
+
+# Optional release signing. Without these, the release build is signed with the debug key.
+RELEASE_STORE_FILE=
+RELEASE_STORE_PASSWORD=
+RELEASE_KEY_ALIAS=
+RELEASE_KEY_PASSWORD=
