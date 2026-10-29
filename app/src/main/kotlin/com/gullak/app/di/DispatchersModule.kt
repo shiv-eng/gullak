@@ -1,13 +1,17 @@
 package com.gullak.app.di
 
+import com.gullak.core.domain.di.ApplicationScope
 import com.gullak.core.domain.di.DefaultDispatcher
 import com.gullak.core.domain.di.IoDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -19,4 +23,10 @@ internal object DispatchersModule {
     @Provides
     @DefaultDispatcher
     fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    @Provides
+    @Singleton
+    @ApplicationScope
+    fun provideApplicationScope(@DefaultDispatcher dispatcher: CoroutineDispatcher): CoroutineScope =
+        CoroutineScope(SupervisorJob() + dispatcher)
 }

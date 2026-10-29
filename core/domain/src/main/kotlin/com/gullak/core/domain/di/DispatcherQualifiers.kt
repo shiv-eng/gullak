@@ -11,3 +11,8 @@ annotation class IoDispatcher
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class DefaultDispatcher
+
+/** A process-lifetime scope for work that must outlive any screen (e.g. keeping the demo clock in sync). */
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ApplicationScope
