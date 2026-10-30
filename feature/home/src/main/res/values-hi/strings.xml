@@ -16,4 +16,5 @@
     <string name="home_next_sip">अगली SIP: %2$s को %1$s · %3$s</string>
     <string name="home_destination_gold">Paytm Gold</string>
     <string name="home_destination_fund">Paytm Money</string>
+    <string name="home_settings">सेटिंग्स</string>
 </resources>

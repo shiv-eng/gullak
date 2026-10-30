@@ -65,6 +65,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -92,6 +94,7 @@ internal fun PaytmHomeEntry(
     onOpenGullak: () -> Unit,
     onNewGoal: () -> Unit,
     onOpenGoal: (String) -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: PaytmHomeViewModel = hiltViewModel(),
 ) {
@@ -102,6 +105,7 @@ internal fun PaytmHomeEntry(
     val openGullak by rememberUpdatedState(onOpenGullak)
     val newGoal by rememberUpdatedState(onNewGoal)
     val openGoal by rememberUpdatedState(onOpenGoal)
+    val openSettings by rememberUpdatedState(onOpenSettings)
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
@@ -109,6 +113,7 @@ internal fun PaytmHomeEntry(
                 PaytmHomeEffect.OpenGullak -> openGullak()
                 PaytmHomeEffect.OpenNewGoal -> newGoal()
                 is PaytmHomeEffect.OpenGoal -> openGoal(effect.goalId)
+                PaytmHomeEffect.OpenSettings -> openSettings()
             }
         }
     }
@@ -148,7 +153,13 @@ internal fun PaytmHomeScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { HomeTopBar(onPromo = openGullak, onDemo = demo) }
+            item {
+                HomeTopBar(
+                    onAvatar = { onEvent(PaytmHomeEvent.SettingsClicked) },
+                    onPromo = openGullak,
+                    onDemo = demo,
+                )
+            }
             item { GoalSipBanner(onClick = newGoal) }
             item { ServicesCard(R.string.paytm_section_upi, UPI_SERVICES, onClick = demo, filledCircles = true) }
             item { ServicesCard(R.string.paytm_section_recharge, RECHARGE_SERVICES, onClick = demo, viewAll = true) }
@@ -178,10 +189,12 @@ internal fun PaytmHomeScreen(
 
 @Composable
 private fun HomeTopBar(
+    onAvatar: () -> Unit,
     onPromo: () -> Unit,
     onDemo: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val settingsLabel = stringResource(R.string.paytm_settings)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -191,7 +204,9 @@ private fun HomeTopBar(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .background(GullakTheme.colors.chipSelected, CircleShape),
+                .background(GullakTheme.colors.chipSelected, CircleShape)
+                .clickable(role = Role.Button, onClick = onAvatar)
+                .semantics { contentDescription = settingsLabel },
             contentAlignment = Alignment.Center,
         ) {
             Text(

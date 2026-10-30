@@ -33,6 +33,7 @@ class DomainTestEnvironment(
     val understandingService = FakeGoalUnderstandingService()
     val explanationService = FakePlanExplanationService()
     val seedSource = FakeDemoSeedSource(seedRequests)
+    val aiInfo = FakeAiInfo()
 
     val engine = PlanEngine(clock)
     val poster = DebitPoster(engine, goals, debits, autoPay, ids, analytics)

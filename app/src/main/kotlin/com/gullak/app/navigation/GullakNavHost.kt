@@ -13,6 +13,8 @@ import com.gullak.feature.home.HomeRoute
 import com.gullak.feature.home.homeScreen
 import com.gullak.feature.paytmhome.PaytmHomeRoute
 import com.gullak.feature.paytmhome.paytmHomeScreen
+import com.gullak.feature.settings.SettingsRoute
+import com.gullak.feature.settings.settingsScreen
 
 /**
  * Wires the feature graphs together. The app opens on a stand-in Paytm home; Gullak is entered from Gold & Silver,
@@ -32,12 +34,15 @@ fun GullakNavHost(
             onOpenGullak = { navController.navigate(HomeRoute) },
             onNewGoal = { navController.navigate(CreateGoalRoute()) },
             onOpenGoal = { goalId -> navController.navigate(GoalDetailRoute(goalId)) },
+            onOpenSettings = { navController.navigate(SettingsRoute) },
         )
         homeScreen(
             onBack = { navController.popBackStack() },
             onNewGoal = { withVoice -> navController.navigate(CreateGoalRoute(startWithVoice = withVoice)) },
             onOpenGoal = { goalId -> navController.navigate(GoalDetailRoute(goalId)) },
+            onOpenSettings = { navController.navigate(SettingsRoute) },
         )
+        settingsScreen(onBack = { navController.popBackStack() })
         goalDetailScreen(onBack = { navController.popBackStack() })
         createGoalScreen(
             onBack = { navController.popBackStack() },

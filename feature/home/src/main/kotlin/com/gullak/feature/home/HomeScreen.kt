@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
@@ -55,11 +56,19 @@ internal fun HomeEntry(
     onBack: () -> Unit,
     onNewGoal: (withVoice: Boolean) -> Unit,
     onOpenGoal: (String) -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeScreen(state = state, onBack = onBack, onNewGoal = onNewGoal, onOpenGoal = onOpenGoal, modifier = modifier)
+    HomeScreen(
+        state = state,
+        onBack = onBack,
+        onNewGoal = onNewGoal,
+        onOpenGoal = onOpenGoal,
+        onOpenSettings = onOpenSettings,
+        modifier = modifier,
+    )
 }
 
 /** Gullak's page as a Paytm sub-page (like Paytm Gold): summary, Goal SIPs, and Start Goal SIP. */
@@ -70,6 +79,7 @@ internal fun HomeScreen(
     onBack: () -> Unit,
     onNewGoal: (withVoice: Boolean) -> Unit,
     onOpenGoal: (String) -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -94,10 +104,16 @@ internal fun HomeScreen(
                         )
                     }
                 },
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Outlined.Settings, contentDescription = stringResource(R.string.home_settings))
+                    }
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = GullakTheme.colors.page,
                     titleContentColor = GullakTheme.colors.textPrimary,
                     navigationIconContentColor = GullakTheme.colors.textPrimary,
+                    actionIconContentColor = GullakTheme.colors.textPrimary,
                 ),
             )
         },

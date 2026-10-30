@@ -12,8 +12,14 @@ fun NavGraphBuilder.paytmHomeScreen(
     onOpenGullak: () -> Unit,
     onNewGoal: () -> Unit,
     onOpenGoal: (goalId: String) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     composable<PaytmHomeRoute> {
-        PaytmHomeEntry(onOpenGullak = onOpenGullak, onNewGoal = onNewGoal, onOpenGoal = onOpenGoal)
+        PaytmHomeEntry(
+            onOpenGullak = onOpenGullak,
+            onNewGoal = onNewGoal,
+            onOpenGoal = onOpenGoal,
+            onOpenSettings = onOpenSettings,
+        )
     }
 }

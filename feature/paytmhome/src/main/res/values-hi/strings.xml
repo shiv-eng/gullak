@@ -58,4 +58,5 @@
         <item quantity="one">%1$d सक्रिय लक्ष्य · %2$s बचत</item>
         <item quantity="other">%1$d सक्रिय लक्ष्य · %2$s बचत</item>
     </plurals>
+    <string name="paytm_settings">गुल्लक सेटिंग्स</string>
 </resources>

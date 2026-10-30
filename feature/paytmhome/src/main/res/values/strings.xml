@@ -62,4 +62,5 @@
         <item quantity="one">%1$d active goal · %2$s saved</item>
         <item quantity="other">%1$d active goals · %2$s saved</item>
     </plurals>
+    <string name="paytm_settings">Gullak settings</string>
 </resources>

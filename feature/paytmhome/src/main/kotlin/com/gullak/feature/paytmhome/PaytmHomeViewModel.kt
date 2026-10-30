@@ -43,6 +43,8 @@ sealed interface PaytmHomeEvent {
 
     data object GullakClicked : PaytmHomeEvent
 
+    data object SettingsClicked : PaytmHomeEvent
+
     data object NewGoalClicked : PaytmHomeEvent
 
     data class GoalClicked(val goalId: String) : PaytmHomeEvent
@@ -52,6 +54,8 @@ sealed interface PaytmHomeEffect {
     data object ShowDemoOnly : PaytmHomeEffect
 
     data object OpenGullak : PaytmHomeEffect
+
+    data object OpenSettings : PaytmHomeEffect
 
     data object OpenNewGoal : PaytmHomeEffect
 
@@ -78,6 +82,7 @@ class PaytmHomeViewModel @Inject constructor(observeGoals: ObserveGoalsUseCase) 
         val effect = when (event) {
             PaytmHomeEvent.DemoServiceClicked -> PaytmHomeEffect.ShowDemoOnly
             PaytmHomeEvent.GullakClicked -> PaytmHomeEffect.OpenGullak
+            PaytmHomeEvent.SettingsClicked -> PaytmHomeEffect.OpenSettings
             PaytmHomeEvent.NewGoalClicked -> PaytmHomeEffect.OpenNewGoal
             is PaytmHomeEvent.GoalClicked -> PaytmHomeEffect.OpenGoal(event.goalId)
         }

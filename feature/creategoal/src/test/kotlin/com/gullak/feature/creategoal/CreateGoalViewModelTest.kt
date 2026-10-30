@@ -35,6 +35,7 @@ class CreateGoalViewModelTest {
         createGoal = env.createGoal,
         explainer = env.explanationService,
         analytics = env.analytics,
+        settings = env.settings,
         clock = env.clock,
     )
 

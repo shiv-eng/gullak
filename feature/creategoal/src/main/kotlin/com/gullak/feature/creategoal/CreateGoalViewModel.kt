@@ -10,6 +10,7 @@ import com.gullak.core.domain.ai.Understanding
 import com.gullak.core.domain.analytics.Analytics
 import com.gullak.core.domain.analytics.AnalyticsEvent
 import com.gullak.core.domain.plan.PlanInput
+import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.domain.usecase.BuildPlanUseCase
 import com.gullak.core.domain.usecase.CreateGoalUseCase
 import com.gullak.core.domain.usecase.NewGoalRequest
@@ -23,6 +24,7 @@ import com.gullak.core.model.money.Money
 import com.gullak.core.model.plan.Plan
 import com.gullak.core.model.plan.PlanOption
 import com.gullak.core.model.result.AppResult
+import com.gullak.core.model.settings.SpeechLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.LocalDate
@@ -71,6 +73,8 @@ data class CreateGoalUiState(
     val bankAccount: DemoBankAccount = DemoBankAccount.DEMO_BANK_SAVINGS,
     /** How many demo approval digits are entered. The digits themselves are never kept. */
     val approvalDigits: Int = 0,
+    /** BCP 47 tag for speech input, from Settings. */
+    val speechLanguageTag: String = SpeechLanguage.ENGLISH_INDIA.tag,
     val createFailed: Boolean = false,
     val createdGoal: Goal? = null,
 ) {
@@ -151,6 +155,7 @@ class CreateGoalViewModel @Inject constructor(
     private val createGoal: CreateGoalUseCase,
     private val explainer: PlanExplanationService,
     private val analytics: Analytics,
+    settings: SettingsRepository,
     clock: Clock,
 ) : ViewModel() {
 
@@ -163,6 +168,14 @@ class CreateGoalViewModel @Inject constructor(
     /** The spoken conversation so far, so a follow-up answer is read together with the first sentence. */
     private val conversation = mutableListOf<ConversationTurn>()
     private var explainJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            settings.settings.collect { prefs ->
+                state.update { it.copy(speechLanguageTag = prefs.speechLanguage.tag) }
+            }
+        }
+    }
 
     fun onEvent(event: CreateGoalEvent) {
         when (event) {

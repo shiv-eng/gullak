@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">गुल्लक सेटिंग्स</string>
+    <string name="settings_back">वापस</string>
+
+    <string name="settings_demo_title">डेमो</string>
+    <string name="settings_demo_mode">डेमो मोड</string>
+    <string name="settings_demo_mode_body">सेव किए AI जवाब, टेम्पलेट विवरण और डेमो तारीख़। बिना इंटरनेट भी चलता है।</string>
+    <string name="settings_demo_date">डेमो तारीख़</string>
+    <string name="settings_fast_forward">आगे बढ़ाएँ</string>
+    <string name="settings_fast_forward_body">तारीख़ महीने के अंत तक ले जाता है और बीच की सभी SIP चलाता है।</string>
+    <string name="settings_back_to_today">आज पर वापस</string>
+    <string name="settings_moved_to">डेमो तारीख़ अब %1$s</string>
+    <string name="settings_date_reset">डेमो तारीख़ रीसेट हो गई</string>
+
+    <string name="settings_data_title">डेमो डेटा</string>
+    <string name="settings_data_body">सभी गोल SIP और भुगतान हटाता है और डेमो तारीख़ रीसेट करता है।</string>
+    <string name="settings_reset_seed">रीसेट करें और सुनीता के लक्ष्य जोड़ें</string>
+    <string name="settings_reset_empty_action">ख़ाली होम पर रीसेट करें</string>
+    <string name="settings_reset_seeded">रीसेट हो गया: सुनीता की दो गोल SIP जुड़ गईं</string>
+    <string name="settings_reset_empty">रीसेट हो गया: कोई गोल SIP नहीं</string>
+    <string name="settings_failed">कुछ गड़बड़ हुई। फिर से कोशिश करें।</string>
+
+    <string name="settings_language_title">भाषा</string>
+    <string name="settings_app_language">ऐप की भाषा</string>
+    <string name="settings_english">English</string>
+    <string name="settings_speech_language">बोलकर इनपुट</string>
+    <string name="settings_speech_language_body">English (India) हिंग्लिश को अंग्रेज़ी अक्षरों में लिखता है, जिसे गुल्लक सबसे अच्छा समझता है।</string>
+    <string name="settings_speech_english">English (India)</string>
+    <string name="settings_speech_hindi">हिन्दी (भारत)</string>
+
+    <string name="settings_ai_title">AI</string>
+    <string name="settings_ai_last_path">पिछला लक्ष्य किसने पढ़ा</string>
+    <string name="settings_ai_path_demo">सेव किया डेमो जवाब</string>
+    <string name="settings_ai_path_gemini">Gemini</string>
+    <string name="settings_ai_path_rules">ऑफ़लाइन नियम</string>
+    <string name="settings_ai_path_none">अभी इस्तेमाल नहीं हुआ</string>
+    <string name="settings_ai_model">मॉडल</string>
+    <string name="settings_ai_not_configured">सेट नहीं है</string>
+    <string name="settings_ai_body">AI लक्ष्य समझता है और योजना समझाता है। हर रक़म और तारीख़ प्लान इंजन से आती है।</string>
+
+    <string name="settings_about">Paytm Build for India AI Hackathon के लिए बनाया गया</string>
+    <string name="settings_about_demo">डेमो ऐप: कोई असली भुगतान नहीं</string>
+</resources>

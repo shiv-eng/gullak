@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Gullak Settings</string>
+    <string name="settings_back">Back</string>
+
+    <string name="settings_demo_title">Demo</string>
+    <string name="settings_demo_mode">Demo mode</string>
+    <string name="settings_demo_mode_body">Saved AI answers, template explanations and the demo date. Works offline.</string>
+    <string name="settings_demo_date">Demo date</string>
+    <string name="settings_fast_forward">Fast-forward to</string>
+    <string name="settings_fast_forward_body">Moves the date to the end of the month and runs every SIP due on the way.</string>
+    <string name="settings_back_to_today">Back to today</string>
+    <string name="settings_moved_to">Demo date moved to %1$s</string>
+    <string name="settings_date_reset">Demo date reset</string>
+
+    <string name="settings_data_title">Demo data</string>
+    <string name="settings_data_body">Clears every Goal SIP and payment, and resets the demo date.</string>
+    <string name="settings_reset_seed">Reset and add Sunita\'s goals</string>
+    <string name="settings_reset_empty_action">Reset to an empty home</string>
+    <string name="settings_reset_seeded">Reset done: Sunita\'s two Goal SIPs added</string>
+    <string name="settings_reset_empty">Reset done: no Goal SIPs</string>
+    <string name="settings_failed">Something went wrong. Please try again.</string>
+
+    <string name="settings_language_title">Language</string>
+    <string name="settings_app_language">App language</string>
+    <string name="settings_english">English</string>
+    <string name="settings_hindi" translatable="false">हिन्दी</string>
+    <string name="settings_speech_language">Speech input</string>
+    <string name="settings_speech_language_body">English (India) writes Hinglish in English letters, which Gullak reads best.</string>
+    <string name="settings_speech_english">English (India)</string>
+    <string name="settings_speech_hindi">Hindi (India)</string>
+
+    <string name="settings_ai_title">AI</string>
+    <string name="settings_ai_last_path">Last goal read by</string>
+    <string name="settings_ai_path_demo">Saved demo answer</string>
+    <string name="settings_ai_path_gemini">Gemini</string>
+    <string name="settings_ai_path_rules">Offline rules</string>
+    <string name="settings_ai_path_none">Not used yet</string>
+    <string name="settings_ai_model">Model</string>
+    <string name="settings_ai_not_configured">Not configured</string>
+    <string name="settings_ai_body">The AI reads goals and explains plans. Every amount and date comes from the plan engine.</string>
+
+    <string name="settings_about">Built for the Paytm Build for India AI Hackathon</string>
+    <string name="settings_about_demo">Demo app: no real payments</string>
+</resources>

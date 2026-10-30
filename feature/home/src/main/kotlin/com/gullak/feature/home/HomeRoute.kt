@@ -12,8 +12,9 @@ fun NavGraphBuilder.homeScreen(
     onBack: () -> Unit,
     onNewGoal: (withVoice: Boolean) -> Unit,
     onOpenGoal: (goalId: String) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     composable<HomeRoute> {
-        HomeEntry(onBack = onBack, onNewGoal = onNewGoal, onOpenGoal = onOpenGoal)
+        HomeEntry(onBack = onBack, onNewGoal = onNewGoal, onOpenGoal = onOpenGoal, onOpenSettings = onOpenSettings)
     }
 }

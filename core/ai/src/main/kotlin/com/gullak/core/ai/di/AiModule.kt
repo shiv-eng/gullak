@@ -3,9 +3,11 @@ package com.gullak.core.ai.di
 import com.gullak.core.ai.BuildConfig
 import com.gullak.core.ai.FallbackGoalUnderstandingService
 import com.gullak.core.ai.explanation.GeminiPlanExplanationService
+import com.gullak.core.ai.gemini.GeminiAiInfo
 import com.gullak.core.ai.gemini.GeminiApi
 import com.gullak.core.ai.gemini.GeminiConfig
 import com.gullak.core.ai.gemini.GeminiHttp
+import com.gullak.core.domain.ai.AiInfo
 import com.gullak.core.domain.ai.GoalUnderstandingService
 import com.gullak.core.domain.ai.PlanExplanationService
 import dagger.Binds
@@ -25,6 +27,9 @@ internal abstract class AiBindingsModule {
 
     @Binds
     abstract fun planExplanationService(impl: GeminiPlanExplanationService): PlanExplanationService
+
+    @Binds
+    abstract fun aiInfo(impl: GeminiAiInfo): AiInfo
 }
 
 @Module

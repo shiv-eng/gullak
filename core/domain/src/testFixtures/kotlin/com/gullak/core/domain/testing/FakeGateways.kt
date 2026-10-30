@@ -129,3 +129,8 @@ class FakePlanExplanationService(var reply: String = "Explanation") : PlanExplan
 class FakeDemoSeedSource(private val requests: List<NewGoalRequest>) : DemoSeedSource {
     override fun seedGoals(): List<NewGoalRequest> = requests
 }
+
+class FakeAiInfo(
+    override val modelId: String = "gemini-test",
+    override val isLiveModelConfigured: Boolean = true,
+) : com.gullak.core.domain.ai.AiInfo

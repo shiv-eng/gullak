@@ -1,0 +1,14 @@
+package com.gullak.feature.settings
+
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
+
+@Serializable
+data object SettingsRoute
+
+fun NavGraphBuilder.settingsScreen(onBack: () -> Unit) {
+    composable<SettingsRoute> {
+        SettingsEntry(onBack = onBack)
+    }
+}
