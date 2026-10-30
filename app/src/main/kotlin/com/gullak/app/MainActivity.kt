@@ -15,7 +15,8 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-            GullakTheme {
+            // The Paytm app is always light; Gullak matches it.
+            GullakTheme(darkTheme = false) {
                 GullakNavHost()
             }
         }

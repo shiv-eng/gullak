@@ -52,6 +52,7 @@ dependencies {
     implementation(projects.core.ai)
     implementation(projects.core.speech)
     implementation(projects.core.designsystem)
+    implementation(projects.feature.paytmhome)
     implementation(projects.feature.home)
     implementation(projects.feature.creategoal)
     implementation(projects.feature.plan)

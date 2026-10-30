@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Stand-in Paytm home. Service names mirror the Paytm app; only Gullak works in this prototype. -->
+    <string name="paytm_avatar_initials" translatable="false">S</string>
+    <string name="paytm_demo_only">Demo: only Gullak works in this prototype</string>
+    <string name="paytm_demo_footer">Built for the Paytm Build for India AI Hackathon. A demo: no real payments, and only Gullak works.</string>
+    <string name="paytm_search">Search</string>
+    <string name="paytm_notifications">Notifications</string>
+    <string name="paytm_view_all">View All</string>
+    <string name="paytm_scan_qr">Scan QR</string>
+    <string name="paytm_badge_new">New</string>
+    <string name="paytm_badge_new_ai">New</string>
+    <string name="paytm_badge_sip">₹1K Monthly SIP</string>
+
+    <string name="paytm_section_upi">UPI Money Transfer</string>
+    <string name="paytm_scan_any_qr">Scan any\nQR</string>
+    <string name="paytm_pay_anyone">Pay\nAnyone</string>
+    <string name="paytm_to_bank">To Bank &amp;\nSelf A/c</string>
+    <string name="paytm_balance_history">Balance &amp;\nHistory</string>
+
+    <string name="paytm_section_recharge">Recharge &amp; Bills</string>
+    <string name="paytm_mobile_recharge">Mobile\nRecharge</string>
+    <string name="paytm_credit_card_bill">Credit Card\nBill</string>
+    <string name="paytm_electricity_bill">Electricity\nBill</string>
+    <string name="paytm_fastag">FASTag\nRecharge</string>
+
+    <string name="paytm_section_gold_silver">Gold &amp; Silver</string>
+    <string name="paytm_save_gold_daily">Save Gold\nDaily</string>
+    <string name="paytm_save_silver_daily">Save Silver\nDaily</string>
+    <string name="paytm_save_in_gold">Save in\nGold</string>
+    <string name="paytm_gold_round_up">Gold\nRound-Up</string>
+
+    <string name="paytm_section_financial">Financial Services</string>
+    <string name="paytm_loan">Loan</string>
+    <string name="paytm_mutual_fund">Mutual Fund</string>
+    <string name="paytm_car_insurance">Car\nInsurance</string>
+    <string name="paytm_bike_insurance">Bike\nInsurance</string>
+    <string name="paytm_postpaid">Paytm\nPostpaid</string>
+    <string name="paytm_stocks">Stocks</string>
+    <string name="paytm_get_credit_card">Get Credit\nCard</string>
+    <string name="paytm_health_insurance">Health\nInsurance</string>
+
+    <!-- Gullak inside the Paytm home. -->
+    <string name="gullak_banner_title">Save for a goal, on a date</string>
+    <string name="gullak_banner_body">Laptop, wedding or trip: set the amount and date, get a Daily, Weekly or Monthly SIP</string>
+    <string name="gullak_banner_action">Start Goal SIP</string>
+    <string name="gullak_card_title">Your Goal SIPs</string>
+    <string name="gullak_card_total">Total saved: %1$s</string>
+    <string name="gullak_saved_of_target">%1$s of %2$s</string>
+    <string name="gullak_new_goal">Start Goal SIP</string>
+    <string name="gullak_speak_goal">Speak your goal</string>
+    <string name="gullak_status_on_track">On track</string>
+    <string name="gullak_status_behind">Behind by %1$s</string>
+    <string name="gullak_status_reached">Goal reached</string>
+    <string name="paytm_header_promo">Start a Goal SIP with Gullak</string>
+    <string name="gullak_banner_eyebrow">GOAL SIP</string>
+    <string name="gullak_strip_title">Goal SIP by Gullak</string>
+    <string name="gullak_strip_body">Set an amount and a date. We plan the SIP and AutoPay.</string>
+    <string name="gullak_strip_summary">%1$d active goals · %2$s saved</string>
+    <string name="gullak_strip_action">Start Goal SIP</string>
+    <string name="gullak_next_sip">Next SIP: %1$s on %2$s</string>
+</resources>

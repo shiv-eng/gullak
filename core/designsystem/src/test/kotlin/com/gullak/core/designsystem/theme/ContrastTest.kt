@@ -26,47 +26,38 @@ class ContrastTest {
         assertTrue("$name is %.2f:1, needs 4.5:1".format(ratio), ratio >= BODY_TEXT_MIN)
     }
 
-    @Test
-    fun lightThemePairsMeetBodyTextContrast() {
-        val c = LightGullakColors
-        val s = LightColorScheme
-        assertReadable("onPrimary on primary", s.onPrimary, s.primary)
-        assertReadable("onSecondary on secondary", s.onSecondary, s.secondary)
-        assertReadable("textPrimary on background", c.textPrimary, s.background)
-        assertReadable("textBody on background", c.textBody, s.background)
-        assertReadable("textMuted on background", c.textMuted, s.background)
-        assertReadable("textMuted on surfaceVariant", c.textMuted, s.surfaceVariant)
-        assertReadable("emphasis on background", c.emphasis, s.background)
+    private fun assertPairs(c: GullakColors) {
+        assertReadable("action button", c.onAction, c.action)
+        assertReadable("primary text on card", c.textPrimary, c.card)
+        assertReadable("body text on card", c.textBody, c.card)
+        assertReadable("muted text on card", c.textMuted, c.card)
+        assertReadable("muted text on page", c.textMuted, c.page)
+        assertReadable("link on card", c.link, c.card)
+        assertReadable("text on field", c.textPrimary, c.field)
+        assertReadable("selected chip", c.chipSelectedText, c.chipSelected)
+        assertReadable("gold value", c.gold, c.card)
+        assertReadable("gain", c.gain, c.card)
+        assertReadable("loss", c.loss, c.card)
+        assertReadable("badge", c.onBadge, c.badge)
         assertReadable("success chip", c.successText, c.successContainer)
         assertReadable("warning chip", c.warningText, c.warningContainer)
         assertReadable("error chip", c.errorText, c.errorContainer)
-        assertReadable("error text on background", s.error, s.background)
-        assertReadable("Gullak bubble", c.onGullakBubble, c.gullakBubble)
     }
 
     @Test
-    fun darkThemePairsMeetBodyTextContrast() {
-        val c = DarkGullakColors
-        val s = DarkColorScheme
-        assertReadable("onPrimary on primary", s.onPrimary, s.primary)
-        assertReadable("textPrimary on background", c.textPrimary, s.background)
-        assertReadable("textBody on card", c.textBody, s.surfaceContainer)
-        assertReadable("textMuted on card", c.textMuted, s.surfaceContainer)
-        assertReadable("emphasis on card", c.emphasis, s.surfaceContainer)
-        assertReadable("success chip", c.successText, c.successContainer)
-        assertReadable("warning chip", c.warningText, c.warningContainer)
-        assertReadable("error chip", c.errorText, c.errorContainer)
-        assertReadable("Gullak bubble", c.onGullakBubble, c.gullakBubble)
-    }
+    fun lightThemePairsMeetBodyTextContrast() = assertPairs(LightGullakColors)
 
     @Test
-    fun whiteOnPaytmBlueIsBelowLargeTextMinimum() {
-        // Documents why onPrimary is navy rather than the spec's white.
-        assertTrue(contrast(White, PaytmBlue) < LARGE_TEXT_MIN)
+    fun darkThemePairsMeetBodyTextContrast() = assertPairs(DarkGullakColors)
+
+    @Test
+    fun materialSchemeButtonsAreReadable() {
+        assertReadable("light onPrimary", LightColorScheme.onPrimary, LightColorScheme.primary)
+        assertReadable("dark onPrimary", DarkColorScheme.onPrimary, DarkColorScheme.primary)
+        assertReadable("light onSecondary", LightColorScheme.onSecondary, LightColorScheme.secondary)
     }
 
     private companion object {
         const val BODY_TEXT_MIN = 4.5
-        const val LARGE_TEXT_MIN = 3.0
     }
 }

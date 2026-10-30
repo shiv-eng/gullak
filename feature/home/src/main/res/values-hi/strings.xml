@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_title">गुल्लक</string>
-    <string name="home_new_goal">नया लक्ष्य</string>
-    <string name="home_empty_prompt">बोलो, क्या बचाना है?</string>
-    <string name="home_empty_hint">गुल्लक को बताइए कि किसके लिए, कितना और कब तक बचाना है।</string>
-    <string name="home_mic_description">बोलकर नया बचत लक्ष्य बताइए</string>
+    <string name="home_title">गोल SIP</string>
+    <string name="home_new_goal">गोल SIP शुरू करें</string>
+    <string name="home_empty_prompt">अभी कोई गोल SIP नहीं</string>
+    <string name="home_empty_hint">लक्ष्य, रक़म और तारीख़ चुनें। गुल्लक रोज़, हफ़्ते या महीने की SIP बनाकर AutoPay सेट करता है।</string>
+    <string name="home_mic_description">अपना लक्ष्य बोलें</string>
+    <string name="home_back">वापस</string>
 </resources>

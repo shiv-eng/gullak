@@ -2,39 +2,63 @@ package com.gullak.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Brand tokens from the Paytm-style palette (prompt section 9).
-internal val PaytmBlue = Color(0xFF00BAF2)
+// Paytm app theme, taken from the app's Home and Paytm Gold screens (screenshots shared 30 Oct 2026).
+// Only these colours are used; Gullak's jar is drawn in Paytm navy and blue.
+
+/** Primary pill buttons ("Start with ₹11", "Upgrade SIP"). White text is 8.4:1. */
+internal val ActionBlue = Color(0xFF0B4AA2)
+
+/** Headings on brand surfaces, the UPI icon circles and the jar outline. */
 internal val PaytmNavy = Color(0xFF002970)
+internal val IconNavy = Color(0xFF0A3D91)
+
+/** Paytm cyan: small accents and the jar's fill. Never behind text. */
+internal val PaytmCyan = Color(0xFF00BAF2)
+
+/** Text links ("View All →", "Learn about Gold Security"). 4.9:1 on white. */
+internal val LinkBlue = Color(0xFF1A6FD6)
+
 internal val White = Color(0xFFFFFFFF)
-internal val SurfaceVariantLight = Color(0xFFF7F9FC)
-internal val OutlineLight = Color(0xFFE4E9F0)
-internal val TextPrimaryLight = Color(0xFF101010)
-internal val TextBodyLight = Color(0xFF505050)
-internal val TextMutedLight = Color(0xFF707070)
-internal val Success = Color(0xFF27AE60)
-internal val Warning = Color(0xFFE8A33D)
-internal val Error = Color(0xFFD64545)
-internal val GullakClay = Color(0xFFB8572E)
-internal val Gold = Color(0xFFD9A930)
+internal val PageBackground = Color(0xFFF5F6F8)
+internal val FieldBackground = Color(0xFFF2F3F5)
+internal val Divider = Color(0xFFE6E8EC)
+internal val ChipBorder = Color(0xFFDCDFE4)
+internal val ChipSelected = Color(0xFFE8F1FC)
+internal val ChipSelectedBorder = Color(0xFFB8D2F3)
+internal val ChipSelectedText = Color(0xFF1A5FC2)
 
-// Contrast adjustments. White on Paytm blue is 2.26:1, so text on blue is navy (6.0:1).
-// Status hues fail as text on white (success 2.87, warning 2.16, error 4.38), so chips and
-// status text use a light tint with a darker shade of the same hue (all >= 5.2:1).
-internal val PrimaryTint = Color(0xFFE5F8FE)
-internal val SuccessText = Color(0xFF1B7340)
-internal val SuccessTint = Color(0xFFE6F5EC)
-internal val WarningText = Color(0xFF7A4F00)
-internal val WarningTint = Color(0xFFFDF1DC)
-internal val ErrorText = Color(0xFFA82E2E)
-internal val ErrorTint = Color(0xFFFCEAEA)
+internal val TextPrimary = Color(0xFF1B1B1F)
+internal val TextBody = Color(0xFF3C4043)
+internal val TextMuted = Color(0xFF6B7078)
 
-// Dark theme: navy-tinted surfaces.
+/** Gold values (grams, "your gold can be worth"); darkened from the screenshot's #A8862E to reach 4.9:1. */
+internal val GoldText = Color(0xFF8C6D1F)
+
+/** Returns and "+0.29%" (green) and LIVE / failures (red), as in Paytm Gold. */
+internal val Gain = Color(0xFF188038)
+internal val Loss = Color(0xFFD93025)
+
+/** Yellow "New" / "Popular" badges. */
+internal val Badge = Color(0xFFFFD15C)
+internal val OnBadge = Color(0xFF4A3800)
+
+// Status chips: light tint with a darker text of the same hue (all >= 5.2:1).
+internal val SuccessText = Color(0xFF137333)
+internal val SuccessTint = Color(0xFFE6F4EA)
+internal val WarningText = Color(0xFF7A5900)
+internal val WarningTint = Color(0xFFFFF4D6)
+internal val ErrorText = Color(0xFFB3261E)
+internal val ErrorTint = Color(0xFFFCE8E6)
+
+// Dark theme: navy surfaces with the same accents.
 internal val BackgroundDark = Color(0xFF0B1A33)
 internal val CardDark = Color(0xFF13254A)
-internal val BubbleDark = Color(0xFF1D3A70)
-internal val OutlineDark = Color(0xFF2A3D63)
+internal val FieldDark = Color(0xFF1D3A70)
+internal val DividerDark = Color(0xFF2A3D63)
 internal val TextBodyDark = Color(0xFFC5CFDF)
 internal val TextMutedDark = Color(0xFF9AA8C0)
+internal val LinkDark = Color(0xFF7CC4FF)
+internal val GoldDark = Color(0xFFE2C46B)
 internal val SuccessDark = Color(0xFF7FDCA5)
 internal val SuccessTintDark = Color(0xFF173B35)
 internal val WarningDark = Color(0xFFF5C77E)

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="paytm_demo_only">डेमो: इस प्रोटोटाइप में सिर्फ़ गुल्लक चलता है</string>
+    <string name="paytm_demo_footer">Paytm Build for India AI Hackathon के लिए बनाया गया। यह डेमो है: कोई असली भुगतान नहीं, सिर्फ़ गुल्लक चलता है।</string>
+    <string name="paytm_search">खोजें</string>
+    <string name="paytm_notifications">सूचनाएँ</string>
+    <string name="paytm_view_all">सभी देखें</string>
+    <string name="paytm_scan_qr">QR स्कैन करें</string>
+    <string name="paytm_badge_new">नया</string>
+    <string name="paytm_badge_new_ai">नया</string>
+    <string name="paytm_badge_sip">₹1K मासिक SIP</string>
+
+    <string name="paytm_section_upi">UPI मनी ट्रांसफ़र</string>
+    <string name="paytm_scan_any_qr">कोई भी QR\nस्कैन करें</string>
+    <string name="paytm_pay_anyone">किसी को भी\nभुगतान</string>
+    <string name="paytm_to_bank">बैंक और\nख़ुद के खाते</string>
+    <string name="paytm_balance_history">बैलेंस और\nहिस्ट्री</string>
+
+    <string name="paytm_section_recharge">रिचार्ज और बिल</string>
+    <string name="paytm_mobile_recharge">मोबाइल\nरिचार्ज</string>
+    <string name="paytm_credit_card_bill">क्रेडिट कार्ड\nबिल</string>
+    <string name="paytm_electricity_bill">बिजली\nबिल</string>
+    <string name="paytm_fastag">FASTag\nरिचार्ज</string>
+
+    <string name="paytm_section_gold_silver">सोना और चाँदी</string>
+    <string name="paytm_save_gold_daily">रोज़ सोना\nबचाएँ</string>
+    <string name="paytm_save_silver_daily">रोज़ चाँदी\nबचाएँ</string>
+    <string name="paytm_save_in_gold">सोने में\nबचत</string>
+    <string name="paytm_gold_round_up">गोल्ड\nराउंड-अप</string>
+
+    <string name="paytm_section_financial">वित्तीय सेवाएँ</string>
+    <string name="paytm_loan">लोन</string>
+    <string name="paytm_mutual_fund">म्यूचुअल फ़ंड</string>
+    <string name="paytm_car_insurance">कार\nबीमा</string>
+    <string name="paytm_bike_insurance">बाइक\nबीमा</string>
+    <string name="paytm_postpaid">Paytm\nपोस्टपेड</string>
+    <string name="paytm_stocks">स्टॉक्स</string>
+    <string name="paytm_get_credit_card">क्रेडिट कार्ड\nपाएँ</string>
+    <string name="paytm_health_insurance">स्वास्थ्य\nबीमा</string>
+    <string name="gullak_banner_title">तय तारीख़ तक लक्ष्य के लिए बचत</string>
+    <string name="gullak_banner_body">लैपटॉप, शादी या यात्रा: रक़म और तारीख़ चुनें, रोज़, हफ़्ते या महीने की SIP पाएँ</string>
+    <string name="gullak_banner_action">गोल SIP शुरू करें</string>
+    <string name="gullak_card_title">आपकी गोल SIP</string>
+    <string name="gullak_card_total">कुल बचत: %1$s</string>
+    <string name="gullak_saved_of_target">%2$s में से %1$s</string>
+    <string name="gullak_new_goal">गोल SIP शुरू करें</string>
+    <string name="gullak_speak_goal">अपना लक्ष्य बोलें</string>
+    <string name="gullak_status_on_track">सही रास्ते पर</string>
+    <string name="gullak_status_behind">%1$s पीछे</string>
+    <string name="gullak_status_reached">लक्ष्य पूरा</string>
+    <string name="paytm_header_promo">गुल्लक के साथ गोल SIP शुरू करें</string>
+    <string name="gullak_banner_eyebrow">गोल SIP</string>
+    <string name="gullak_strip_title">गुल्लक गोल SIP</string>
+    <string name="gullak_strip_body">रक़म और तारीख़ चुनें। SIP और AutoPay हम तय करेंगे।</string>
+    <string name="gullak_strip_summary">%1$d सक्रिय लक्ष्य · %2$s बचत</string>
+    <string name="gullak_strip_action">गोल SIP शुरू करें</string>
+    <string name="gullak_next_sip">अगली SIP: %2$s को %1$s</string>
+</resources>
