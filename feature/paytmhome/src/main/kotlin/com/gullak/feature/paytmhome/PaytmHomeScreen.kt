@@ -38,7 +38,6 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.RequestQuote
-import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Toll
 import androidx.compose.material.icons.outlined.TwoWheeler
@@ -73,12 +72,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gullak.core.designsystem.component.CardDivider
+import com.gullak.core.designsystem.component.GoalSummaryRow
+import com.gullak.core.designsystem.component.GullakImage
 import com.gullak.core.designsystem.component.PaytmBadge
 import com.gullak.core.designsystem.component.PaytmCard
-import com.gullak.core.designsystem.component.SavingsProgressBar
 import com.gullak.core.designsystem.component.SectionHeader
 import com.gullak.core.designsystem.component.ServiceTile
-import com.gullak.core.designsystem.component.StatusChip
 import com.gullak.core.designsystem.component.StatusTone
 import com.gullak.core.designsystem.theme.GullakTheme
 import com.gullak.core.model.money.IndianMoneyFormat
@@ -287,12 +286,7 @@ private fun GoalSipBanner(
                 SmallPillButton(text = stringResource(R.string.gullak_banner_action), onClick = onClick)
             }
             Spacer(Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.Outlined.Savings,
-                contentDescription = null,
-                tint = GullakTheme.colors.iconNavy,
-                modifier = Modifier.size(64.dp),
-            )
+            GullakImage(modifier = Modifier.size(84.dp))
         }
     }
 }
@@ -439,12 +433,7 @@ private fun GullakStrip(
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = Icons.Outlined.Savings,
-            contentDescription = null,
-            tint = GullakTheme.colors.iconNavy,
-            modifier = Modifier.size(32.dp),
-        )
+        GullakImage(modifier = Modifier.size(40.dp))
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -509,62 +498,37 @@ private fun GoalRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val saved = IndianMoneyFormat.format(goal.saved)
-    val target = IndianMoneyFormat.format(goal.target)
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(role = Role.Button, onClick = onClick)
-            .heightIn(min = 48.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = goal.name,
-                style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp),
-                color = GullakTheme.colors.textPrimary,
-                modifier = Modifier.weight(1f),
-            )
-            GoalStatusChip(goal.status)
-        }
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = stringResource(R.string.gullak_saved_of_target, saved, target),
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-            color = GullakTheme.colors.textMuted,
-        )
-        Spacer(Modifier.height(6.dp))
-        SavingsProgressBar(progress = goal.progress)
-        if (goal.nextDebitDate != null && goal.nextDebitAmount != null) {
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = stringResource(
-                    R.string.gullak_next_sip,
-                    IndianMoneyFormat.format(goal.nextDebitAmount),
-                    NEXT_DATE.format(goal.nextDebitDate),
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = GullakTheme.colors.textBody,
-            )
-        }
+    val (statusText, tone) = when (val status = goal.status) {
+        GoalStatus.OnTrack -> stringResource(R.string.gullak_status_on_track) to StatusTone.SUCCESS
+
+        GoalStatus.Reached -> stringResource(R.string.gullak_status_reached) to StatusTone.SUCCESS
+
+        is GoalStatus.Behind ->
+            stringResource(R.string.gullak_status_behind, IndianMoneyFormat.format(status.by)) to StatusTone.WARNING
     }
-}
-
-@Composable
-private fun GoalStatusChip(
-    status: GoalStatus,
-    modifier: Modifier = Modifier,
-) {
-    when (status) {
-        GoalStatus.OnTrack -> StatusChip(stringResource(R.string.gullak_status_on_track), StatusTone.SUCCESS, modifier)
-
-        GoalStatus.Reached -> StatusChip(stringResource(R.string.gullak_status_reached), StatusTone.SUCCESS, modifier)
-
-        is GoalStatus.Behind -> StatusChip(
-            stringResource(R.string.gullak_status_behind, IndianMoneyFormat.format(status.by)),
-            StatusTone.WARNING,
-            modifier,
+    val nextSip = if (goal.nextDebitDate != null && goal.nextDebitAmount != null) {
+        stringResource(
+            R.string.gullak_next_sip,
+            IndianMoneyFormat.format(goal.nextDebitAmount),
+            NEXT_DATE.format(goal.nextDebitDate),
         )
+    } else {
+        null
     }
+    GoalSummaryRow(
+        name = goal.name,
+        savedOfTarget = stringResource(
+            R.string.gullak_saved_of_target,
+            IndianMoneyFormat.format(goal.saved),
+            IndianMoneyFormat.format(goal.target),
+        ),
+        progress = goal.progress,
+        statusText = statusText,
+        statusTone = tone,
+        nextSip = nextSip,
+        onClick = onClick,
+        modifier = modifier,
+    )
 }
 
 @Composable

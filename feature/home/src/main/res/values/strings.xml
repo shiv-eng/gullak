@@ -6,4 +6,14 @@
     <string name="home_empty_hint">Set a goal, an amount and a date. Gullak plans a Daily, Weekly or Monthly SIP and sets up AutoPay.</string>
     <string name="home_mic_description">Speak your goal</string>
     <string name="home_back">Back</string>
+    <string name="home_total_saved">Total saved in Goal SIPs</string>
+    <string name="home_split">Paytm Gold %1$s · Paytm Money %2$s</string>
+    <string name="home_goals_title">Your Goal SIPs</string>
+    <string name="home_status_on_track">On track</string>
+    <string name="home_status_behind">Behind by %1$s</string>
+    <string name="home_status_reached">Goal reached</string>
+    <string name="home_saved_of_target">%1$s of %2$s · by %3$s</string>
+    <string name="home_next_sip">Next SIP: %1$s on %2$s · %3$s</string>
+    <string name="home_destination_gold">Paytm Gold</string>
+    <string name="home_destination_fund">Paytm Money</string>
 </resources>

@@ -4,15 +4,16 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
 
-/** Gullak's own home, opened from the Gullak tile on the Paytm home. */
+/** Gullak's own page (Goal SIPs), opened from the Paytm home. */
 @Serializable
 data object HomeRoute
 
 fun NavGraphBuilder.homeScreen(
     onBack: () -> Unit,
-    onNewGoal: () -> Unit,
+    onNewGoal: (withVoice: Boolean) -> Unit,
+    onOpenGoal: (goalId: String) -> Unit,
 ) {
     composable<HomeRoute> {
-        HomeScreen(onBack = onBack, onNewGoal = onNewGoal)
+        HomeEntry(onBack = onBack, onNewGoal = onNewGoal, onOpenGoal = onOpenGoal)
     }
 }

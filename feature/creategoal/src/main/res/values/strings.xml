@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_title">Start Goal SIP</string>
+    <string name="create_back">Back</string>
+
+    <string name="create_voice_title">Speak your goal</string>
+    <string name="create_voice_example">e.g. Laptop for my son, ₹36,000 by June</string>
+    <string name="create_voice_prompt">Say your goal, amount and date</string>
+    <string name="create_you_said">You said: “%1$s”</string>
+    <string name="create_understanding">Reading your goal…</string>
+    <string name="create_voice_failed">Could not read that. Try again or fill in the details below.</string>
+    <string name="create_festival_note">%1$s falls on %2$s. Change the date below if needed.</string>
+    <string name="create_ask_name">What are you saving for?</string>
+    <string name="create_ask_amount">How much do you need?</string>
+    <string name="create_ask_date">By when do you need it?</string>
+
+    <string name="create_details_title">Goal details</string>
+    <string name="create_name_label">Goal name</string>
+    <string name="create_name_hint">e.g. Laptop, Wedding, Goa trip</string>
+    <string name="create_amount_label">Goal amount</string>
+    <string name="create_amount_hint">Enter amount</string>
+    <string name="create_date_label">Target date</string>
+    <string name="create_date_hint">Select date</string>
+    <string name="create_date_ok">OK</string>
+    <string name="create_date_cancel">Cancel</string>
+    <string name="create_fixed_title">This date can\'t move</string>
+    <string name="create_fixed_body">If an AutoPay fails, we won\'t suggest a later date</string>
+
+    <string name="create_problem_amount_low">Minimum goal amount is ₹500</string>
+    <string name="create_problem_amount_range">Goal amount must be between ₹500 and ₹50,00,000</string>
+    <string name="create_problem_date">Choose a date after today</string>
+    <string name="create_problem_date_far">Choose a date within 10 years</string>
+    <string name="create_problem_too_close">Less than 7 days to go: too close for a SIP. Choose a later date.</string>
+    <string name="create_failed">Could not start the SIP. Please try again.</string>
+
+    <string name="create_plan_title">Your SIP plan</string>
+    <string name="frequency_daily">Daily</string>
+    <string name="frequency_weekly">Weekly</string>
+    <string name="frequency_monthly">Monthly</string>
+    <string name="per_day">/ day</string>
+    <string name="per_week">/ week</string>
+    <string name="per_month">/ month</string>
+    <string name="create_plan_schedule">%1$d payments · %2$s to %3$s</string>
+    <string name="create_plan_total">You\'ll save %1$s (rounded up)</string>
+    <string name="destination_gold">Paytm Gold</string>
+    <string name="destination_fund">Paytm Money · low-risk fund</string>
+    <string name="create_goes_to">Goes to %1$s</string>
+    <string name="create_reason_short" formatted="false">Short goal: gold carries 3% GST and its price can fall.</string>
+    <string name="create_reason_long">Long goal: gold\'s price can still move.</string>
+    <string name="create_why_title">Why this plan</string>
+
+    <string name="create_start">Start Goal SIP</string>
+    <string name="create_start_with">Start with %1$s</string>
+    <string name="create_demo_note">AutoPay via UPI · Demo: no real payment</string>
+
+    <string name="mandate_title">Set up UPI AutoPay</string>
+    <string name="mandate_subtitle">For your %1$s Goal SIP</string>
+    <string name="mandate_amount">Amount</string>
+    <string name="mandate_frequency">Frequency</string>
+    <string name="mandate_first">First payment</string>
+    <string name="mandate_last">Last payment</string>
+    <string name="mandate_destination">Goes to</string>
+    <string name="mandate_demo">Demo: no real payment</string>
+    <string name="mandate_confirm">Confirm AutoPay</string>
+
+    <string name="processing_title">Processing your request</string>
+    <string name="processing_step_plan">Registering your plan</string>
+    <string name="processing_step_autopay">Setting up AutoPay</string>
+
+    <string name="success_title">Goal SIP started</string>
+    <string name="success_body">%1$s: %2$s %3$s from %4$s</string>
+    <string name="success_destination">Goes to %1$s</string>
+    <string name="success_done">Done</string>
+    <string name="success_view_goals">View Goal SIPs</string>
+</resources>

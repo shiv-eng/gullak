@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_title">गोल SIP शुरू करें</string>
+    <string name="create_back">वापस</string>
+
+    <string name="create_voice_title">अपना लक्ष्य बोलें</string>
+    <string name="create_voice_example">जैसे: बेटे का लैपटॉप, ₹36,000, जून तक</string>
+    <string name="create_voice_prompt">अपना लक्ष्य, रक़म और तारीख़ बोलें</string>
+    <string name="create_you_said">आपने कहा: “%1$s”</string>
+    <string name="create_understanding">आपका लक्ष्य समझ रहे हैं…</string>
+    <string name="create_voice_failed">समझ नहीं पाए। फिर से बोलें या नीचे विवरण भरें।</string>
+    <string name="create_festival_note">%1$s %2$s को है। ज़रूरत हो तो नीचे तारीख़ बदलें।</string>
+    <string name="create_ask_name">आप किसके लिए बचत कर रहे हैं?</string>
+    <string name="create_ask_amount">कितनी रक़म चाहिए?</string>
+    <string name="create_ask_date">कब तक चाहिए?</string>
+
+    <string name="create_details_title">लक्ष्य का विवरण</string>
+    <string name="create_name_label">लक्ष्य का नाम</string>
+    <string name="create_name_hint">जैसे: लैपटॉप, शादी, गोवा यात्रा</string>
+    <string name="create_amount_label">लक्ष्य रक़म</string>
+    <string name="create_amount_hint">रक़म डालें</string>
+    <string name="create_date_label">लक्ष्य तारीख़</string>
+    <string name="create_date_hint">तारीख़ चुनें</string>
+    <string name="create_date_ok">ठीक है</string>
+    <string name="create_date_cancel">रद्द करें</string>
+    <string name="create_fixed_title">यह तारीख़ नहीं बदल सकती</string>
+    <string name="create_fixed_body">AutoPay चूकने पर हम आगे की तारीख़ नहीं सुझाएँगे</string>
+
+    <string name="create_problem_amount_low">कम से कम ₹500 का लक्ष्य रखें</string>
+    <string name="create_problem_amount_range">लक्ष्य रक़म ₹500 से ₹50,00,000 के बीच हो</string>
+    <string name="create_problem_date">आज के बाद की तारीख़ चुनें</string>
+    <string name="create_problem_date_far">10 साल के अंदर की तारीख़ चुनें</string>
+    <string name="create_problem_too_close">7 दिन से कम बचे हैं: SIP के लिए बहुत कम समय। आगे की तारीख़ चुनें।</string>
+    <string name="create_failed">SIP शुरू नहीं हो सकी। फिर से कोशिश करें।</string>
+
+    <string name="create_plan_title">आपकी SIP योजना</string>
+    <string name="frequency_daily">रोज़</string>
+    <string name="frequency_weekly">हर हफ़्ते</string>
+    <string name="frequency_monthly">हर महीने</string>
+    <string name="per_day">/ दिन</string>
+    <string name="per_week">/ हफ़्ता</string>
+    <string name="per_month">/ महीना</string>
+    <string name="create_plan_schedule">%1$d भुगतान · %2$s से %3$s</string>
+    <string name="create_plan_total">आप %1$s बचाएँगे (राउंड अप)</string>
+    <string name="destination_gold">Paytm Gold</string>
+    <string name="destination_fund">Paytm Money · कम जोखिम वाला फ़ंड</string>
+    <string name="create_goes_to">पैसा जाएगा: %1$s</string>
+    <string name="create_reason_short" formatted="false">छोटा लक्ष्य: सोने पर 3% GST लगता है और दाम गिर सकता है।</string>
+    <string name="create_reason_long">लंबा लक्ष्य: सोने का दाम फिर भी बदल सकता है।</string>
+    <string name="create_why_title">यह योजना क्यों</string>
+
+    <string name="create_start">गोल SIP शुरू करें</string>
+    <string name="create_start_with">%1$s से शुरू करें</string>
+    <string name="create_demo_note">UPI AutoPay · डेमो: कोई असली भुगतान नहीं</string>
+
+    <string name="mandate_title">UPI AutoPay सेट करें</string>
+    <string name="mandate_subtitle">आपकी %1$s गोल SIP के लिए</string>
+    <string name="mandate_amount">रक़म</string>
+    <string name="mandate_frequency">कितनी बार</string>
+    <string name="mandate_first">पहला भुगतान</string>
+    <string name="mandate_last">आख़िरी भुगतान</string>
+    <string name="mandate_destination">पैसा जाएगा</string>
+    <string name="mandate_demo">डेमो: कोई असली भुगतान नहीं</string>
+    <string name="mandate_confirm">AutoPay कन्फ़र्म करें</string>
+
+    <string name="processing_title">आपका अनुरोध प्रोसेस हो रहा है</string>
+    <string name="processing_step_plan">आपकी योजना दर्ज हो रही है</string>
+    <string name="processing_step_autopay">AutoPay सेट हो रहा है</string>
+
+    <string name="success_title">गोल SIP शुरू हो गई</string>
+    <string name="success_body">%1$s: %4$s से %3$s %2$s</string>
+    <string name="success_destination">पैसा जाएगा: %1$s</string>
+    <string name="success_done">हो गया</string>
+    <string name="success_view_goals">गोल SIP देखें</string>
+</resources>
