@@ -223,7 +223,11 @@ fun OutlinePillButton(
             Icon(leadingIcon, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
         }
-        Text(text, style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold),
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
