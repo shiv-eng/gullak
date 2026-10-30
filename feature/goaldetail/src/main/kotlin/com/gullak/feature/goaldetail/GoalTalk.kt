@@ -2,11 +2,13 @@ package com.gullak.feature.goaldetail
 
 import android.content.Context
 import androidx.annotation.ArrayRes
+import com.gullak.core.domain.ai.BargeInDetector
 import com.gullak.core.domain.ai.ConversationBrain
 import com.gullak.core.domain.ai.SpeechEvent
 import com.gullak.core.domain.ai.SpeechInput
 import com.gullak.core.domain.ai.TalkIntent
 import com.gullak.core.domain.ai.VoiceOutput
+import com.gullak.core.domain.ai.speakUnlessInterrupted
 import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.domain.usecase.GoalSummary
 import com.gullak.core.domain.usecase.TopUpAnswer
@@ -38,6 +40,7 @@ internal class GoalTalk @Inject constructor(
     private val speech: SpeechInput,
     private val settings: SettingsRepository,
     private val brain: ConversationBrain,
+    private val bargeIn: BargeInDetector,
     private val clock: Clock,
     val lines: GoalVoiceLines,
 ) {
@@ -63,7 +66,15 @@ internal class GoalTalk @Inject constructor(
         text: String,
         language: GoalLanguage,
     ) {
-        if (isOn()) withTimeoutOrNull(SPEECH_LIMIT_MS) { voice.speak(text, language) }
+        val prefs = settings.settings.first()
+        if (!prefs.voiceReplies) return
+        withTimeoutOrNull(SPEECH_LIMIT_MS) {
+            if (prefs.interruptBySpeaking) {
+                voice.speakUnlessInterrupted(text, language, bargeIn)
+            } else {
+                voice.speak(text, language)
+            }
+        }
     }
 
     /** The user's words, or null if nothing usable was heard. */

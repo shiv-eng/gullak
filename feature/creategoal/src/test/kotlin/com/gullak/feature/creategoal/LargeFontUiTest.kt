@@ -42,6 +42,7 @@ class LargeFontUiTest {
                 onEvent = {},
                 onBack = {},
                 onTypeInstead = {},
+                onOpenVoiceSettings = {},
             )
         }
 

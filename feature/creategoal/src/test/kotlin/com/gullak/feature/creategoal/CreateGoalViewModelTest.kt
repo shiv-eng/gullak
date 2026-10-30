@@ -1,5 +1,6 @@
 package com.gullak.feature.creategoal
 
+import androidx.lifecycle.SavedStateHandle
 import com.gullak.core.domain.ai.FollowUpQuestion
 import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.domain.ai.SpeechError
@@ -16,6 +17,7 @@ import com.gullak.core.model.goal.Frequency
 import com.gullak.core.model.result.AppError
 import com.gullak.core.model.result.AppResult
 import com.gullak.core.testing.MainDispatcherRule
+import com.gullak.feature.creategoal.voice.TalkIo
 import java.time.LocalDate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -34,15 +36,14 @@ class CreateGoalViewModelTest {
 
     private val env = DomainTestEnvironment()
 
-    private fun viewModel() = CreateGoalViewModel(
+    private fun viewModel(savedState: SavedStateHandle = SavedStateHandle()) = CreateGoalViewModel(
+        savedState = savedState,
         understandGoal = env.understandGoal,
         buildPlan = env.buildPlan,
         createGoal = env.createGoal,
         explainer = env.explanationService,
         analytics = env.analytics,
-        voice = env.voice,
-        speech = env.speech,
-        settings = env.settings,
+        io = TalkIo(env.voice, env.speech, env.settings, env.bargeIn, env.analytics),
         clock = env.clock,
     )
 
@@ -50,6 +51,20 @@ class CreateGoalViewModelTest {
         onEvent(CreateGoalEvent.NameChanged("Laptop"))
         onEvent(CreateGoalEvent.AmountChanged("36000"))
         onEvent(CreateGoalEvent.DateSelected(TestData.LAPTOP_DATE))
+    }
+
+    @Test
+    fun aTypedFormComesBackAfterAndroidClosesTheApp() = runTest {
+        val saved = SavedStateHandle()
+        viewModel(saved).typeLaptop()
+        advanceUntilIdle()
+
+        val state = viewModel(saved).uiState.value
+
+        assertEquals("Laptop", state.name)
+        assertEquals("36000", state.amountText)
+        assertEquals(TestData.LAPTOP_DATE, state.targetDate)
+        assertEquals(rupees(4_500), state.chosen?.amountPerDebit)
     }
 
     @Test

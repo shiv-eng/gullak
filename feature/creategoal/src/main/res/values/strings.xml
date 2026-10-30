@@ -40,7 +40,6 @@
     <string name="per_day">/ day</string>
     <string name="per_week">/ week</string>
     <string name="per_month">/ month</string>
-    <string name="create_plan_schedule">%1$d payments · %2$s to %3$s</string>
     <string name="create_plan_total">You\'ll save %1$s (rounded up)</string>
     <string name="destination_gold">Paytm Gold</string>
     <string name="destination_fund">Paytm Money · low-risk fund</string>
@@ -131,7 +130,7 @@
     <string name="bank_icici_upi">UPI ID: sun•••@okicici</string>
     <string name="create_rupee_symbol" translatable="false">₹</string>
     <string name="voice_title">Talk to Gullak</string>
-    <string name="voice_status_speaking">Gullak is speaking. Tap to interrupt.</string>
+    <string name="voice_status_speaking">Gullak is speaking. Talk or tap to interrupt.</string>
     <string name="voice_status_waiting">Tap Gullak to talk</string>
     <string name="voice_type_instead">Type instead</string>
     <string name="voice_demo">Demo: no real payment</string>
@@ -139,4 +138,9 @@
     <string name="voice_period_weekly">Every week</string>
     <string name="voice_period_monthly">Every month</string>
     <string name="voice_goes_to">Goes to</string>
+    <string name="voice_yes">Yes</string>
+    <plurals name="create_plan_schedule">
+        <item quantity="one">%1$d payment · %2$s to %3$s</item>
+        <item quantity="other">%1$d payments · %2$s to %3$s</item>
+    </plurals>
 </resources>

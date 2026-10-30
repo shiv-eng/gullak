@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.gullak.core.designsystem.theme.GullakTheme
@@ -22,6 +23,7 @@ import com.gullak.core.domain.testing.DomainTestEnvironment
 import com.gullak.core.domain.testing.TestData
 import com.gullak.core.domain.testing.TestData.rupees
 import com.gullak.core.model.goal.Frequency
+import com.gullak.feature.creategoal.voice.TalkIo
 import java.time.Duration
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -61,15 +63,14 @@ class CreateGoalFlowUiTest {
         settle()
     }
 
-    private fun viewModel() = CreateGoalViewModel(
+    private fun viewModel(savedState: SavedStateHandle = SavedStateHandle()) = CreateGoalViewModel(
+        savedState = savedState,
         understandGoal = env.understandGoal,
         buildPlan = env.buildPlan,
         createGoal = env.createGoal,
         explainer = env.explanationService,
         analytics = env.analytics,
-        voice = env.voice,
-        speech = env.speech,
-        settings = env.settings,
+        io = TalkIo(env.voice, env.speech, env.settings, env.bargeIn, env.analytics),
         clock = env.clock,
     )
 

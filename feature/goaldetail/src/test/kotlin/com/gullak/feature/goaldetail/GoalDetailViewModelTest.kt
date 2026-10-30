@@ -47,7 +47,7 @@ class GoalDetailViewModelTest {
         applyReplan = env.applyReplan,
         explainer = env.explanationService,
         money = env.money,
-        talk = GoalTalk(env.voice, env.speech, env.settings, env.brain, env.clock, FakeGoalLines),
+        talk = GoalTalk(env.voice, env.speech, env.settings, env.brain, env.bargeIn, env.clock, FakeGoalLines),
     )
 
     private suspend fun laptopUpToFebruary(): Goal {
@@ -208,6 +208,21 @@ class GoalDetailViewModelTest {
         assertEquals(TopUpAnswer.NoGap, vm.uiState.value.topUp?.answer)
         vm.onEvent(GoalDetailEvent.TopUpDismissed)
         assertNull(vm.uiState.value.topUp)
+    }
+
+    @Test
+    fun talkingOverTheRecoveryOfferStopsItAndChoosesByVoice() = runTest {
+        val laptop = laptopUpToFebruary()
+        env.voice.neverEnding += "offer"
+        env.bargeIn.interruptions = 1
+        says("catch up karo", "nahi")
+        val vm = viewModel(laptop)
+
+        vm.onEvent(GoalDetailEvent.SimulateFailedDebit)
+        advanceUntilIdle()
+
+        assertTrue(env.voice.stops > 0)
+        assertEquals("left", env.voice.spoken.last())
     }
 
     @Test

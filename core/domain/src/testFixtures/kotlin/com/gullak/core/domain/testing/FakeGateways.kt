@@ -160,11 +160,15 @@ class FakeVoiceOutput : com.gullak.core.domain.ai.VoiceOutput {
     var stops = 0
     var voiceAvailable = true
 
+    /** Lines that keep speaking until interrupted, as a long line would. */
+    val neverEnding = mutableSetOf<String>()
+
     override suspend fun speak(
         text: String,
         language: GoalLanguage,
     ) {
         spoken += text
+        if (text in neverEnding) kotlinx.coroutines.awaitCancellation()
     }
 
     override fun stop() {
@@ -186,6 +190,21 @@ class FakeConversationBrain : com.gullak.core.domain.ai.ConversationBrain {
     ): AppResult<com.gullak.core.domain.ai.BrainAnswer> {
         situations += situation
         return answers.removeFirstOrNull()?.let { AppResult.Success(it) } ?: AppResult.Failure(AppError.NotConfigured)
+    }
+}
+
+class FakeBargeIn : com.gullak.core.domain.ai.BargeInDetector {
+    /** How many upcoming lines the user talks over. */
+    var interruptions = 0
+    var watched = 0
+
+    override suspend fun awaitSpeech() {
+        watched++
+        if (interruptions > 0) {
+            interruptions--
+            return
+        }
+        kotlinx.coroutines.awaitCancellation()
     }
 }
 

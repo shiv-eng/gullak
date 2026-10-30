@@ -48,7 +48,6 @@
     <string name="replan_catch_up_title">इसी महीने पूरा करें</string>
     <string name="replan_catch_up_body">%2$s और %3$s को %1$s के दो अतिरिक्त भुगतान</string>
     <string name="replan_spread_title">आगे बाँट दें</string>
-    <string name="replan_spread_body">अगले %2$d भुगतान %1$s के</string>
     <string name="replan_extend_title">लक्ष्य की तारीख़ बढ़ाएँ</string>
     <string name="replan_extend_body">नई तारीख़ %1$s। भुगतान वही रहेंगे।</string>
     <string name="replan_why">यह क्यों काम करेगा</string>
@@ -70,4 +69,8 @@
     <string name="detail_top_up_request">टॉप-अप के लिए पूछें</string>
     <string name="detail_top_up_sent">अनुरोध दर्ज हो गया। लेंडिंग पार्टनर शर्तें बताएगा, फ़ैसला आपका होगा।</string>
     <string name="detail_top_up_demo">डेमो: कोई असली लोन नहीं, कुछ भेजा नहीं जाता</string>
+    <plurals name="replan_spread_body">
+        <item quantity="one">अगला भुगतान %1$s का</item>
+        <item quantity="other">अगले %2$d भुगतान %1$s के</item>
+    </plurals>
 </resources>

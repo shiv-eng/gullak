@@ -48,7 +48,6 @@
     <string name="replan_catch_up_title">Catch up this month</string>
     <string name="replan_catch_up_body">Two extra payments of %1$s on %2$s and %3$s</string>
     <string name="replan_spread_title">Spread it out</string>
-    <string name="replan_spread_body">%1$s for each of the next %2$d payments</string>
     <string name="replan_extend_title">Move the goal date</string>
     <string name="replan_extend_body">New date %1$s. Payments stay the same.</string>
     <string name="replan_why">Why this works</string>
@@ -70,4 +69,8 @@
     <string name="detail_top_up_request">Ask for a top-up</string>
     <string name="detail_top_up_sent">Request noted. A lending partner would share the terms for you to decide.</string>
     <string name="detail_top_up_demo">Demo: no real loan, and nothing is sent</string>
+    <plurals name="replan_spread_body">
+        <item quantity="one">%1$s for the next payment</item>
+        <item quantity="other">%1$s for each of the next %2$d payments</item>
+    </plurals>
 </resources>

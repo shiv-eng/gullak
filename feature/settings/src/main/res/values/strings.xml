@@ -44,4 +44,6 @@
     <string name="settings_about_demo">Demo app: no real payments</string>
     <string name="settings_voice_replies">Voice replies</string>
     <string name="settings_voice_replies_body">Reads questions and plan explanations aloud after you speak a goal.</string>
+    <string name="settings_interrupt">Interrupt by speaking</string>
+    <string name="settings_interrupt_body">Talk over Gullak to stop it. Turn off in a noisy room.</string>
 </resources>

@@ -35,6 +35,8 @@ data class BrainAnswer(
     val frequency: Frequency?,
     /** A one-time payment they want to make now. */
     val oneTime: Money? = null,
+    /** They said the date cannot move. */
+    val dateFixed: Boolean = false,
 )
 
 /** Understands each turn of the spoken conversation and reacts to it like a person. */

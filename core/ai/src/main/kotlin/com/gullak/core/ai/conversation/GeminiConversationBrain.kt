@@ -7,6 +7,10 @@ import com.gullak.core.ai.understanding.GoalUnderstandingPrompt
 import com.gullak.core.domain.ai.BrainAnswer
 import com.gullak.core.domain.ai.ConversationBrain
 import com.gullak.core.domain.ai.TalkIntent
+import com.gullak.core.domain.analytics.Analytics
+import com.gullak.core.domain.analytics.AnalyticsEvent
+import com.gullak.core.domain.repository.SettingsRepository
+import com.gullak.core.model.ai.AiPath
 import com.gullak.core.model.ai.ConversationTurn
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.ai.ParsedGoal
@@ -27,6 +31,8 @@ internal class GeminiConversationBrain @Inject constructor(
     private val client: GeminiClient,
     private val config: GeminiConfig,
     private val json: Json,
+    private val settings: SettingsRepository,
+    private val analytics: Analytics,
 ) : ConversationBrain {
 
     override suspend fun hear(
@@ -41,7 +47,12 @@ internal class GeminiConversationBrain @Inject constructor(
         } else {
             talk
         }
-        return answer.flatMap { parseBrainAnswer(json, it) }
+        return answer.flatMap { parseBrainAnswer(json, it) }.also { read ->
+            if (read is AppResult.Success) {
+                settings.setLastAiPath(AiPath.GEMINI)
+                analytics.log(AnalyticsEvent.AiPathUsed(AiPath.GEMINI))
+            }
+        }
     }
 
     private suspend fun ask(
@@ -74,6 +85,7 @@ internal data class BrainJson(
     @SerialName("follow_up") val followUp: String? = null,
     val frequency: String? = null,
     @SerialName("one_time_amount") val oneTimeAmount: Long? = null,
+    @SerialName("date_is_fixed") val dateIsFixed: Boolean? = null,
 )
 
 /** Anything the model says with a number in it is dropped: numbers are for the plan engine alone. */
@@ -113,6 +125,7 @@ internal fun parseBrainAnswer(
             ),
             frequency = Frequency.entries.firstOrNull { it.name == reply.frequency },
             oneTime = reply.oneTimeAmount?.takeIf { it > 0 }?.let(Money::fromRupees),
+            dateFixed = reply.dateIsFixed == true,
         ),
     )
 }

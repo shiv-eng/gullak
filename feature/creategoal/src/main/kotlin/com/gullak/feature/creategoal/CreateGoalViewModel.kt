@@ -1,5 +1,6 @@
 package com.gullak.feature.creategoal
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gullak.core.domain.ai.FestivalMatch
@@ -31,6 +32,7 @@ import com.gullak.core.model.plan.Plan
 import com.gullak.core.model.plan.PlanOption
 import com.gullak.core.model.result.AppResult
 import com.gullak.core.model.settings.SpeechLanguage
+import com.gullak.feature.creategoal.voice.TalkIo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.LocalDate
@@ -203,19 +205,22 @@ sealed interface CreateGoalEffect {
  * the plan engine (via [BuildPlanUseCase]) and is recalculated again when the goal is created.
  */
 @HiltViewModel
-class CreateGoalViewModel @Inject constructor(
+class CreateGoalViewModel @Inject internal constructor(
+    private val savedState: SavedStateHandle,
     private val understandGoal: UnderstandGoalUseCase,
     private val buildPlan: BuildPlanUseCase,
     private val createGoal: CreateGoalUseCase,
     private val explainer: PlanExplanationService,
     private val analytics: Analytics,
-    private val voice: VoiceOutput,
-    private val speech: SpeechInput,
-    private val settings: SettingsRepository,
+    io: TalkIo,
     clock: Clock,
 ) : ViewModel() {
 
-    private val state = MutableStateFlow(CreateGoalUiState(today = LocalDate.now(clock)))
+    private val voice: VoiceOutput = io.voice
+    private val speech: SpeechInput = io.speech
+    private val settings: SettingsRepository = io.settings
+
+    private val state = MutableStateFlow(restoredForm(CreateGoalUiState(today = LocalDate.now(clock))))
     val uiState: StateFlow<CreateGoalUiState> = state.asStateFlow()
 
     private val effects = Channel<CreateGoalEffect>(Channel.BUFFERED)
@@ -234,6 +239,7 @@ class CreateGoalViewModel @Inject constructor(
     private var speakNextExplanation = false
 
     init {
+        replan()
         viewModelScope.launch {
             settings.settings.collect { prefs ->
                 voiceHintShown = prefs.voiceHintShown
@@ -258,7 +264,10 @@ class CreateGoalViewModel @Inject constructor(
 
             is CreateGoalEvent.DateSelected -> edit { it.copy(targetDate = event.date, festival = null) }
 
-            is CreateGoalEvent.DateFixedChanged -> state.update { it.copy(dateIsFixed = event.fixed) }
+            is CreateGoalEvent.DateFixedChanged -> {
+                state.update { it.copy(dateIsFixed = event.fixed) }
+                rememberForm()
+            }
 
             is CreateGoalEvent.FrequencySelected -> {
                 state.update { it.copy(frequency = event.frequency) }
@@ -329,11 +338,30 @@ class CreateGoalViewModel @Inject constructor(
         }
     }
 
+    /** The typed form comes back if Android closes the app while it is in the background. */
+    private fun rememberForm() {
+        val current = state.value
+        savedState[KEY_NAME] = current.name
+        savedState[KEY_AMOUNT] = current.amountText
+        savedState[KEY_LUMP_SUM] = current.lumpSumText
+        savedState[KEY_DATE] = current.targetDate?.toString()
+        savedState[KEY_FIXED] = current.dateIsFixed
+    }
+
+    private fun restoredForm(blank: CreateGoalUiState) = blank.copy(
+        name = savedState[KEY_NAME] ?: blank.name,
+        amountText = savedState[KEY_AMOUNT] ?: blank.amountText,
+        lumpSumText = savedState[KEY_LUMP_SUM] ?: blank.lumpSumText,
+        targetDate = savedState.get<String>(KEY_DATE)?.let(LocalDate::parse),
+        dateIsFixed = savedState[KEY_FIXED] ?: blank.dateIsFixed,
+    )
+
     private fun edit(change: (CreateGoalUiState) -> CreateGoalUiState) {
         // Typing takes over from speech.
         speakNextExplanation = false
         if (speakJob?.isActive == true || state.value.isListening) stopVoice()
         state.update { change(it).copy(createFailed = false, readback = null) }
+        rememberForm()
         replan()
     }
 
@@ -666,6 +694,11 @@ class CreateGoalViewModel @Inject constructor(
     }
 
     private companion object {
+        const val KEY_NAME = "name"
+        const val KEY_AMOUNT = "amount"
+        const val KEY_LUMP_SUM = "lump_sum"
+        const val KEY_DATE = "date"
+        const val KEY_FIXED = "date_is_fixed"
         val MIN_AMOUNT = Money.fromRupees(500)
         val MAX_AMOUNT = Money.fromRupees(50_00_000)
         const val MAX_DIGITS = 8

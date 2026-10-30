@@ -1,5 +1,9 @@
 package com.gullak.feature.goaldetail
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -62,7 +66,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -71,6 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gullak.core.designsystem.component.CardDivider
@@ -134,9 +141,23 @@ internal fun GoalDetailEntry(
             if (latestState.detail != null) snackbarHostState.showSnackbar(message)
         }
     }
+    // The mic needs permission the first time. Gullak can still say how the goal is doing without it.
+    val context = LocalContext.current
+    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        viewModel.onEvent(GoalDetailEvent.TalkClicked)
+    }
+    val onEvent: (GoalDetailEvent) -> Unit = { event ->
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+            PackageManager.PERMISSION_GRANTED
+        if (event == GoalDetailEvent.TalkClicked && !granted) {
+            micPermission.launch(Manifest.permission.RECORD_AUDIO)
+        } else {
+            viewModel.onEvent(event)
+        }
+    }
     GoalDetailScreen(
         state = state,
-        onEvent = viewModel::onEvent,
+        onEvent = onEvent,
         onBack = onBack,
         snackbarHostState = snackbarHostState,
         modifier = modifier,
@@ -772,8 +793,9 @@ private fun ChoiceCard(
             date(choice.debits.last().date),
         )
 
-        is ReplanChoice.Spread -> stringResource(R.string.replan_spread_title) to stringResource(
-            R.string.replan_spread_body,
+        is ReplanChoice.Spread -> stringResource(R.string.replan_spread_title) to pluralStringResource(
+            R.plurals.replan_spread_body,
+            choice.remainingDebits,
             money(choice.newAmountPerDebit),
             choice.remainingDebits,
         )

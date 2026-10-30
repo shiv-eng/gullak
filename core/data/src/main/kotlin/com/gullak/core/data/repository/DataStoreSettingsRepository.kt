@@ -24,6 +24,7 @@ internal class DataStoreSettingsRepository @Inject constructor(private val dataS
                 demoMode = prefs[DEMO_MODE] ?: defaults.demoMode,
                 voiceReplies = prefs[VOICE_REPLIES] ?: defaults.voiceReplies,
                 voiceHintShown = prefs[VOICE_HINT_SHOWN] ?: defaults.voiceHintShown,
+                interruptBySpeaking = prefs[INTERRUPT_BY_SPEAKING] ?: defaults.interruptBySpeaking,
                 speechLanguage = prefs[SPEECH_LANGUAGE]
                     ?.let { name -> SpeechLanguage.entries.firstOrNull { it.name == name } }
                     ?: defaults.speechLanguage,
@@ -44,6 +45,10 @@ internal class DataStoreSettingsRepository @Inject constructor(private val dataS
         dataStore.edit { it[VOICE_HINT_SHOWN] = true }
     }
 
+    override suspend fun setInterruptBySpeaking(enabled: Boolean) {
+        dataStore.edit { it[INTERRUPT_BY_SPEAKING] = enabled }
+    }
+
     override suspend fun setSpeechLanguage(language: SpeechLanguage) {
         dataStore.edit { it[SPEECH_LANGUAGE] = language.name }
     }
@@ -56,6 +61,7 @@ internal class DataStoreSettingsRepository @Inject constructor(private val dataS
         val DEMO_MODE = booleanPreferencesKey("demo_mode")
         val VOICE_REPLIES = booleanPreferencesKey("voice_replies")
         val VOICE_HINT_SHOWN = booleanPreferencesKey("voice_hint_shown")
+        val INTERRUPT_BY_SPEAKING = booleanPreferencesKey("interrupt_by_speaking")
         val SPEECH_LANGUAGE = stringPreferencesKey("speech_language")
         val LAST_AI_PATH = stringPreferencesKey("last_ai_path")
     }

@@ -44,6 +44,8 @@ data class SettingsUiState(
 sealed interface SettingsEvent {
     data class DemoModeChanged(val enabled: Boolean) : SettingsEvent
 
+    data class InterruptBySpeakingChanged(val enabled: Boolean) : SettingsEvent
+
     data class VoiceRepliesChanged(val enabled: Boolean) : SettingsEvent
 
     data class SpeechLanguageChanged(val language: SpeechLanguage) : SettingsEvent
@@ -94,6 +96,10 @@ class SettingsViewModel @Inject constructor(
     fun onEvent(event: SettingsEvent) {
         when (event) {
             is SettingsEvent.DemoModeChanged -> viewModelScope.launch { settings.setDemoMode(event.enabled) }
+
+            is SettingsEvent.InterruptBySpeakingChanged -> viewModelScope.launch {
+                settings.setInterruptBySpeaking(event.enabled)
+            }
 
             is SettingsEvent.VoiceRepliesChanged -> viewModelScope.launch { settings.setVoiceReplies(event.enabled) }
 

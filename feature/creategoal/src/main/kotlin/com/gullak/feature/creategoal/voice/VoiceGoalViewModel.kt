@@ -1,7 +1,9 @@
 package com.gullak.feature.creategoal.voice
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gullak.core.domain.ai.BargeInDetector
 import com.gullak.core.domain.ai.BrainAnswer
 import com.gullak.core.domain.ai.ConversationBrain
 import com.gullak.core.domain.ai.FollowUpQuestion
@@ -15,6 +17,9 @@ import com.gullak.core.domain.ai.TalkIntent
 import com.gullak.core.domain.ai.Understanding
 import com.gullak.core.domain.ai.VoiceOutput
 import com.gullak.core.domain.ai.readbackReply
+import com.gullak.core.domain.ai.speakUnlessInterrupted
+import com.gullak.core.domain.analytics.Analytics
+import com.gullak.core.domain.analytics.AnalyticsEvent
 import com.gullak.core.domain.plan.PlanInput
 import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.domain.usecase.BuildPlanUseCase
@@ -38,6 +43,7 @@ import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -52,11 +58,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
-/** How Gullak speaks and hears, and the settings for it. */
+/** How Gullak speaks and hears, the settings for it, and the record of it. */
 internal class TalkIo @Inject constructor(
     val voice: VoiceOutput,
     val speech: SpeechInput,
     val settings: SettingsRepository,
+    val bargeIn: BargeInDetector,
+    val analytics: Analytics,
 )
 
 /** What Gullak is doing right now, shown by the orb. */
@@ -79,6 +87,9 @@ data class VoiceGoalUiState(
     val date: LocalDate? = null,
     /** A one-time payment now; the plan covers what is left. */
     val oneTime: Money = Money.ZERO,
+    val dateIsFixed: Boolean = false,
+    /** The phone has no voice for the language being spoken. */
+    val showVoiceHint: Boolean = false,
     val plan: Plan? = null,
     val frequency: Frequency? = null,
     val bank: DemoBankAccount = DemoBankAccount.SBI_SAVINGS,
@@ -104,6 +115,8 @@ sealed interface VoiceGoalEvent {
     data object ViewGoalsClicked : VoiceGoalEvent
 
     data object DoneClicked : VoiceGoalEvent
+
+    data object VoiceHintDismissed : VoiceGoalEvent
 }
 
 sealed interface VoiceGoalEffect {
@@ -136,6 +149,18 @@ class VoiceGoalViewModel @Inject internal constructor(
     private val voice: VoiceOutput = io.voice
     private val speech: SpeechInput = io.speech
     private val settings: SettingsRepository = io.settings
+    private val bargeIn: BargeInDetector = io.bargeIn
+    private val analytics: Analytics = io.analytics
+
+    /** A failure in the conversation ends the turn, not the app: Gullak waits for a tap on the orb. */
+    private val conversationFailed = CoroutineExceptionHandler { _, error ->
+        Log.e(TAG, "Conversation stopped", error)
+        state.update { it.copy(phase = TalkPhase.WAITING, micLevel = 0f) }
+    }
+
+    /** Times the voice was stopped by a noise, not by the user. Twice, and this conversation stops listening for it. */
+    private var falseInterruptions = 0
+    private var voiceHintChecked = false
 
     private val state = MutableStateFlow(VoiceGoalUiState())
     val uiState: StateFlow<VoiceGoalUiState> = state.asStateFlow()
@@ -156,7 +181,7 @@ class VoiceGoalViewModel @Inject internal constructor(
             VoiceGoalEvent.MicReady -> if (!started) {
                 started = true
                 state.update { it.copy(micDenied = false) }
-                talk = viewModelScope.launch { converse(greeting()) }
+                talk = viewModelScope.launch(conversationFailed) { converse(greeting()) }
             }
 
             VoiceGoalEvent.MicDenied -> state.update { it.copy(micDenied = true) }
@@ -170,6 +195,8 @@ class VoiceGoalViewModel @Inject internal constructor(
             VoiceGoalEvent.ViewGoalsClicked -> stopTalking(VoiceGoalEffect.OpenGoals)
 
             VoiceGoalEvent.DoneClicked -> stopTalking(VoiceGoalEffect.Finish)
+
+            VoiceGoalEvent.VoiceHintDismissed -> state.update { it.copy(showVoiceHint = false) }
         }
     }
 
@@ -193,16 +220,26 @@ class VoiceGoalViewModel @Inject internal constructor(
     }
 
     private fun talkFrom(first: String?) {
-        talk = viewModelScope.launch { converse(first) }
+        talk = viewModelScope.launch(conversationFailed) { converse(first) }
     }
 
     /** Says a line, listens, answers, and so on until there is nothing more to ask. */
     private suspend fun converse(first: String?) {
         var line = first
         do {
-            line?.takeIf { it.isNotEmpty() }?.let { say(it) }
+            val interrupted = line?.takeIf { it.isNotEmpty() }?.let { say(it) } ?: false
             val heard = listen()
-            line = if (heard == null) afterSilence() else respond(heard)
+            line = when {
+                heard != null -> respond(heard)
+
+                // It stopped, but nobody spoke: a noise did it. Say the line again.
+                interrupted -> {
+                    falseInterruptions++
+                    line
+                }
+
+                else -> afterSilence()
+            }
         } while (line != null)
         state.update { it.copy(phase = TalkPhase.WAITING, micLevel = 0f) }
     }
@@ -217,11 +254,33 @@ class VoiceGoalViewModel @Inject internal constructor(
         }
     }
 
-    private suspend fun say(line: String) {
+    /** True if the user talked over it. */
+    private suspend fun say(
+        line: String,
+        canBeInterrupted: Boolean = true,
+    ): Boolean {
         state.update { it.copy(phase = TalkPhase.SPEAKING, gullakSaid = line, micLevel = 0f) }
-        if (settings.settings.first().voiceReplies) {
-            // A voice engine that never reports the end must not stop the conversation.
-            withTimeoutOrNull(SPEECH_LIMIT_MS) { voice.speak(line, language) }
+        val prefs = settings.settings.first()
+        if (!prefs.voiceReplies) return false
+        checkVoice(prefs.voiceHintShown)
+        // A voice engine that never reports the end must not stop the conversation.
+        return withTimeoutOrNull(SPEECH_LIMIT_MS) {
+            if (canBeInterrupted && prefs.interruptBySpeaking && falseInterruptions < MAX_FALSE_INTERRUPTIONS) {
+                voice.speakUnlessInterrupted(line, language, bargeIn)
+            } else {
+                voice.speak(line, language)
+                false
+            }
+        } ?: false
+    }
+
+    /** A missing Hindi voice is explained once, and only if the phone's own voice would be the one speaking. */
+    private suspend fun checkVoice(alreadyShown: Boolean) {
+        if (alreadyShown || voiceHintChecked || language == GoalLanguage.ENGLISH) return
+        voiceHintChecked = true
+        if (!voice.isVoiceAvailable(language)) {
+            state.update { it.copy(showVoiceHint = true) }
+            settings.setVoiceHintShown()
         }
     }
 
@@ -274,6 +333,8 @@ class VoiceGoalViewModel @Inject internal constructor(
 
     private suspend fun respond(text: String): String? {
         silences = 0
+        analytics.log(AnalyticsEvent.VoiceUsed)
+        if (saysDateIsFixed(text)) state.update { it.copy(dateIsFixed = true) }
         conversation += ConversationTurn(Speaker.USER, text.trim())
         val heard = thinking { brain.hear(conversation.toList(), situation(), LocalDate.now(clock)) }
         return when (heard) {
@@ -287,7 +348,7 @@ class VoiceGoalViewModel @Inject internal constructor(
         state.update { it.copy(phase = TalkPhase.THINKING) }
         val result: Deferred<T> = viewModelScope.async { work() }
         withTimeoutOrNull(ACK_AFTER_MS) { result.join() } ?: run {
-            say(lines.moment(language))
+            say(lines.moment(language), canBeInterrupted = false)
             state.update { it.copy(phase = TalkPhase.THINKING) }
         }
         return result.await()
@@ -314,6 +375,7 @@ class VoiceGoalViewModel @Inject internal constructor(
     ): String? {
         adoptLanguage(heard.goal.language)
         heard.oneTime?.let { oneTime -> state.update { it.copy(oneTime = oneTime) } }
+        if (heard.dateFixed) state.update { it.copy(dateIsFixed = true) }
         val next = nextLine(text, heard) ?: return null
         return listOfNotNull(heard.say, next).joinToString(" ").also { line ->
             conversation += ConversationTurn(Speaker.GULLAK, line)
@@ -420,7 +482,7 @@ class VoiceGoalViewModel @Inject internal constructor(
     }
 
     private suspend fun finish(): String? {
-        say(lines.goodbye(language))
+        say(lines.goodbye(language), canBeInterrupted = false)
         effects.trySend(VoiceGoalEffect.Finish)
         return null
     }
@@ -599,7 +661,7 @@ class VoiceGoalViewModel @Inject internal constructor(
             name = name.trim(),
             target = target,
             targetDate = date,
-            dateIsFixed = false,
+            dateIsFixed = current.dateIsFixed,
             frequency = current.frequency,
             lumpSum = current.oneTime,
             language = goalLanguage,
@@ -624,6 +686,8 @@ class VoiceGoalViewModel @Inject internal constructor(
     private companion object {
         const val SPEECH_LIMIT_MS = 45_000L
         const val ACK_AFTER_MS = 1_200L
+        const val MAX_FALSE_INTERRUPTIONS = 2
+        const val TAG = "VoiceGoal"
         const val EXPLAIN_LIMIT_MS = 6_000L
     }
 }

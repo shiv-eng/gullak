@@ -72,6 +72,7 @@ internal object ConversationPrompt {
         follow_up: if the goal is still missing a name, amount or date, ONE short friendly question for the first thing
           missing, with no numbers in it; otherwise null
         frequency: DAILY, WEEKLY or MONTHLY if they picked one, else null
+        date_is_fixed: true only if they say the date cannot move, such as a wedding date or "date nahi badal sakti"
         one_time_amount: whole rupees if they want to pay a one-time amount now towards the goal, else null
 
         Language of say and follow_up: if the user spoke Hindi or Hinglish, write in simple, everyday spoken Hindi in
@@ -110,6 +111,7 @@ internal object ConversationPrompt {
         "follow_up",
         "frequency",
         "one_time_amount",
+        "date_is_fixed",
     )
 
     val responseSchema: JsonObject = buildJsonObject {
@@ -129,6 +131,10 @@ internal object ConversationPrompt {
             choice("frequency", FREQUENCIES, nullable = true)
             putJsonObject("one_time_amount") {
                 put("type", "INTEGER")
+                put("nullable", true)
+            }
+            putJsonObject("date_is_fixed") {
+                put("type", "BOOLEAN")
                 put("nullable", true)
             }
         }

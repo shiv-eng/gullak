@@ -34,6 +34,12 @@ internal fun bankFrom(text: String): DemoBankAccount? {
 /** "Sone mein daal doon?", "paisa kahan jayega?": a question about gold, a fund or where the money sits. */
 internal fun asksWhereMoneyGoes(text: String): Boolean = words(text).any { it in MONEY_HOME_WORDS }
 
+/** "Date nahi badal sakti", "the date can't move": the plan must then never offer a later date. */
+internal fun saysDateIsFixed(text: String): Boolean {
+    val lower = text.lowercase()
+    return FIXED_DATE_PHRASES.any { it in lower }
+}
+
 /** After a Gullak has started: does the user want another one? */
 internal fun wantsAnother(text: String): Boolean = words(text).any { it in ANOTHER_WORDS }
 
@@ -41,6 +47,11 @@ private fun words(text: String): List<String> =
     text.lowercase().split(Regex("""[^\p{L}\p{M}\d]+""")).filter { it.isNotEmpty() }
 
 private const val LAST = -1
+
+private val FIXED_DATE_PHRASES = listOf(
+    "date nahi badal", "tareekh nahi badal", "tarikh nahi badal", "pakki hai", "pakki date", "fixed", "can't move",
+    "cannot move", "can not move", "तारीख़ नहीं बदल", "तारीख नहीं बदल", "पक्की",
+)
 
 private val MONEY_HOME_WORDS = setOf(
     "gold", "sona", "sone", "fund", "kahan", "kaha", "where", "सोना", "सोने", "गोल्ड", "फ़ंड", "फंड", "कहाँ", "कहां",

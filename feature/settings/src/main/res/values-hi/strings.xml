@@ -43,4 +43,6 @@
     <string name="settings_about_demo">डेमो ऐप: कोई असली भुगतान नहीं</string>
     <string name="settings_voice_replies">आवाज़ में जवाब</string>
     <string name="settings_voice_replies_body">लक्ष्य बोलने के बाद सवाल और योजना का विवरण पढ़कर सुनाता है।</string>
+    <string name="settings_interrupt">बोलकर बीच में रोकें</string>
+    <string name="settings_interrupt_body">गुल्लक के बोलते समय बोलने पर वह रुक जाती है। शोर वाली जगह पर बंद रखें।</string>
 </resources>

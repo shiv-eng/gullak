@@ -5,6 +5,7 @@ import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.domain.ai.SpeechError
 import com.gullak.core.domain.ai.SpeechEvent
 import com.gullak.core.domain.ai.TalkIntent
+import com.gullak.core.domain.analytics.AnalyticsEvent
 import com.gullak.core.domain.testing.DomainTestEnvironment
 import com.gullak.core.domain.testing.TestData
 import com.gullak.core.domain.testing.TestData.rupees
@@ -20,7 +21,9 @@ import com.gullak.core.testing.MainDispatcherRule
 import com.gullak.feature.creategoal.DemoBankAccount
 import java.time.LocalDate
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -46,7 +49,7 @@ class VoiceGoalViewModelTest {
         buildPlan = env.buildPlan,
         createGoal = env.createGoal,
         explainer = env.explanationService,
-        io = TalkIo(env.voice, env.speech, env.settings),
+        io = TalkIo(env.voice, env.speech, env.settings, env.bargeIn, env.analytics),
         lines = FakeLines,
     )
 
@@ -427,6 +430,111 @@ class VoiceGoalViewModelTest {
         advanceUntilIdle()
 
         assertEquals("why PAYTM_MONEY_FUND 7 readback Laptop", env.voice.spoken[2])
+    }
+
+    @Test
+    fun talkingOverGullakStopsItAndWhatWasSaidIsHeard() = runTest {
+        env.voice.neverEnding += "greeting"
+        env.bargeIn.interruptions = 1
+        env.understandingService.result = AppResult.Success(laptop)
+        says("laptop")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertTrue(env.voice.stops > 0)
+        assertEquals("Laptop", vm.uiState.value.name)
+    }
+
+    @Test
+    fun aNoiseThatStopsTheVoiceRepeatsTheLineAndTwiceTurnsInterruptingOff() = runTest {
+        env.voice.neverEnding += "greeting"
+        env.bargeIn.interruptions = 2
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        runCurrent()
+        // The third time no one is watching for speech, so the line is left to finish.
+        env.voice.neverEnding.clear()
+        advanceTimeBy(60_000)
+        runCurrent()
+
+        assertEquals(2, env.bargeIn.watched)
+        assertTrue(env.voice.spoken.count { it == "greeting" } >= 3)
+    }
+
+    @Test
+    fun withInterruptingOffTheMicrophoneIsNotWatched() = runTest {
+        env.settings.setInterruptBySpeaking(false)
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals(0, env.bargeIn.watched)
+    }
+
+    @Test
+    fun theMomentLineAndGoodbyeAreNotInterruptible() = runTest {
+        brainSays(TalkIntent.FINISHED)
+        says("bas")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals("bye", env.voice.spoken.last())
+        assertEquals(1, env.bargeIn.watched)
+    }
+
+    @Test
+    fun sayingTheDateCannotMoveIsKeptWithTheGoal() = runTest {
+        env.understandingService.result = AppResult.Success(laptop)
+        says("laptop, date nahi badal sakti", "haan", "mahine wala", "haan")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertTrue(env.goals.goals.single().dateIsFixed)
+    }
+
+    @Test
+    fun theModelCanAlsoSayTheDateIsFixed() = runTest {
+        env.brain.answers += BrainAnswer(TalkIntent.GOAL_DETAILS, null, laptop, null, dateFixed = true)
+        says("wedding hai")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertTrue(vm.uiState.value.dateIsFixed)
+    }
+
+    @Test
+    fun aMissingHindiVoiceIsExplainedOnce() = runTest {
+        env.voice.voiceAvailable = false
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertTrue(vm.uiState.value.showVoiceHint)
+        assertTrue(env.settings.settings.value.voiceHintShown)
+    }
+
+    @Test
+    fun speakingIsRecordedForAnalytics() = runTest {
+        env.understandingService.result = AppResult.Success(laptop)
+        says("laptop")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertTrue(AnalyticsEvent.VoiceUsed in env.analytics.events)
+        assertEquals(TalkStep.CONFIRM_GOAL, vm.uiState.value.step)
     }
 
     @Test

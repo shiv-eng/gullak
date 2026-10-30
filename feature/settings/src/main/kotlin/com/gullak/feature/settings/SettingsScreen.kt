@@ -155,6 +155,8 @@ internal fun SettingsScreen(
                     appLanguage = appLanguage,
                     speechLanguage = state.settings.speechLanguage,
                     voiceReplies = state.settings.voiceReplies,
+                    interruptBySpeaking = state.settings.interruptBySpeaking,
+                    onInterruptBySpeaking = { onEvent(SettingsEvent.InterruptBySpeakingChanged(it)) },
                     onVoiceReplies = { onEvent(SettingsEvent.VoiceRepliesChanged(it)) },
                     onAppLanguage = onAppLanguage,
                     onSpeechLanguage = { onEvent(SettingsEvent.SpeechLanguageChanged(it)) },
@@ -269,6 +271,8 @@ private fun LanguageCard(
     appLanguage: String,
     speechLanguage: SpeechLanguage,
     voiceReplies: Boolean,
+    interruptBySpeaking: Boolean,
+    onInterruptBySpeaking: (Boolean) -> Unit,
     onVoiceReplies: (Boolean) -> Unit,
     onAppLanguage: (String) -> Unit,
     onSpeechLanguage: (SpeechLanguage) -> Unit,
@@ -307,6 +311,13 @@ private fun LanguageCard(
             body = stringResource(R.string.settings_voice_replies_body),
             checked = voiceReplies,
             onChange = onVoiceReplies,
+        )
+        CardDivider()
+        SwitchRow(
+            title = stringResource(R.string.settings_interrupt),
+            body = stringResource(R.string.settings_interrupt_body),
+            checked = interruptBySpeaking,
+            onChange = onInterruptBySpeaking,
         )
     }
 }

@@ -212,7 +212,8 @@ Today is taken as 31 Oct 2026. These are saved in `DemoAiResponses`.
 - Every Paytm service is a fake, so nothing about real mandates, settlement or KYC is exercised.
 - The Gemini and Sarvam keys are in the APK (see above). A real product needs a backend.
 - Saying yes is the demo's approval. A real UPI AutoPay mandate needs the customer's UPI PIN in the bank or NPCI flow.
-- Gullak cannot yet be interrupted by speaking over it; tap the orb instead.
+- Talking over Gullak to interrupt it relies on the phone's echo cancelling, which varies by phone. In a noisy room, turn
+  it off in Settings and tap the jar instead. The first words said while interrupting can be missed by the recogniser.
 - With Gemini's voice each line takes a few seconds to arrive, and a rate-limited free key drops to the phone's voice for
   a minute. Sarvam or a paid key avoids this.
 - Speech uses the phone's speech recogniser inside the app, and falls back to the phone's own speech screen if the

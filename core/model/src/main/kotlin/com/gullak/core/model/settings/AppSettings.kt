@@ -10,6 +10,8 @@ enum class SpeechLanguage(val tag: String) {
 data class AppSettings(
     val demoMode: Boolean = true,
     val voiceReplies: Boolean = true,
+    /** Talking over Gullak interrupts it. */
+    val interruptBySpeaking: Boolean = true,
     /** The missing Hindi voice hint is shown once. */
     val voiceHintShown: Boolean = false,
     /** English (India) writes Hinglish in Latin script, which the goal reader handles best. */

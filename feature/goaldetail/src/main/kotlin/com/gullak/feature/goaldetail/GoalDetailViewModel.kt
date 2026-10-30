@@ -1,5 +1,6 @@
 package com.gullak.feature.goaldetail
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,6 +27,7 @@ import com.gullak.core.model.result.AppError
 import com.gullak.core.model.result.AppResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -148,6 +150,9 @@ class GoalDetailViewModel @Inject internal constructor(
 
     private var explainJob: Job? = null
     private var talkJob: Job? = null
+
+    /** A failure while talking ends the talk, not the app. The page and its buttons still work. */
+    private val talkFailed = CoroutineExceptionHandler { _, error -> Log.e(TAG, "Talk stopped", error) }
 
     init {
         viewModelScope.launch {
@@ -356,7 +361,7 @@ class GoalDetailViewModel @Inject internal constructor(
         val summary = current.detail?.summary ?: return
         val failure = current.unresolvedFailure
         stopTalking()
-        talkJob = viewModelScope.launch {
+        talkJob = viewModelScope.launch(talkFailed) {
             val language = spokenLanguage(summary.goal.languageTag)
             talk.say(talk.lines.status(language, summary), language)
             if (failure != null && state.value.replan == null) {
@@ -441,7 +446,7 @@ class GoalDetailViewModel @Inject internal constructor(
     /** Offers the engine's choices aloud, then applies one only on a yes that code reads from the user's words. */
     private fun talkThroughReplan(offer: ReplanOffer) {
         stopTalking()
-        talkJob = viewModelScope.launch {
+        talkJob = viewModelScope.launch(talkFailed) {
             if (!talk.isOn()) return@launch
             val language = spokenLanguage(offer.goal.languageTag)
             talk.say(talk.lines.offer(language, offer.failedDebit, offer.status, offer.choices), language)
@@ -486,7 +491,7 @@ class GoalDetailViewModel @Inject internal constructor(
         val text = replan.explanation ?: return
         val language = spokenLanguage(replan.offer.goal.languageTag)
         stopTalking()
-        talkJob = viewModelScope.launch { talk.say(text, language) }
+        talkJob = viewModelScope.launch(talkFailed) { talk.say(text, language) }
     }
 
     override fun onCleared() {
@@ -501,6 +506,7 @@ class GoalDetailViewModel @Inject internal constructor(
         /** Matches the property name in [GoalDetailRoute]. */
         const val GOAL_ID_KEY = "goalId"
         private const val CHOICE_TRIES = 2
+        private const val TAG = "GoalDetail"
         private const val STATE_WAIT_MS = 500L
         private const val EXPLANATION_WAIT_MS = 10_000L
     }

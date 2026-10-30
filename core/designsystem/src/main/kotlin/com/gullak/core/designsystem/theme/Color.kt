@@ -29,7 +29,7 @@ internal val ChipSelectedText = Color(0xFF1A6FB8)
 
 internal val TextPrimary = Color(0xFF242424)
 internal val TextBody = Color(0xFF3C4043)
-internal val TextMuted = Color(0xFF6B7078)
+internal val TextMuted = Color(0xFF666B73)
 
 /** Gold values (grams, "your gold can be worth"); darkened from the screenshot's #A8862E to reach 4.9:1. */
 internal val GoldText = Color(0xFF8C6D1F)

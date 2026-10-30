@@ -49,11 +49,13 @@ class SettingsViewModelTest {
 
         vm.onEvent(SettingsEvent.DemoModeChanged(false))
         vm.onEvent(SettingsEvent.VoiceRepliesChanged(false))
+        vm.onEvent(SettingsEvent.InterruptBySpeakingChanged(false))
         vm.onEvent(SettingsEvent.SpeechLanguageChanged(SpeechLanguage.HINDI_INDIA))
         advanceUntilIdle()
 
         assertFalse(vm.uiState.value.settings.demoMode)
         assertFalse(vm.uiState.value.settings.voiceReplies)
+        assertFalse(vm.uiState.value.settings.interruptBySpeaking)
         assertEquals(SpeechLanguage.HINDI_INDIA, vm.uiState.value.settings.speechLanguage)
     }
 

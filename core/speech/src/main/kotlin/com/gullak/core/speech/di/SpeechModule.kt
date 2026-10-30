@@ -1,10 +1,12 @@
 package com.gullak.core.speech.di
 
+import com.gullak.core.domain.ai.BargeInDetector
 import com.gullak.core.domain.ai.SpeechInput
 import com.gullak.core.domain.ai.VoiceOutput
 import com.gullak.core.speech.BuildConfig
 import com.gullak.core.speech.FallbackSpeechInput
 import com.gullak.core.speech.FallbackVoiceOutput
+import com.gullak.core.speech.MicBargeInDetector
 import com.gullak.core.speech.gemini.GeminiVoiceConfig
 import com.gullak.core.speech.sarvam.SarvamConfig
 import com.gullak.core.speech.sarvam.SarvamHttp
@@ -25,6 +27,9 @@ internal abstract class SpeechModule {
 
     @Binds
     abstract fun speechInput(impl: FallbackSpeechInput): SpeechInput
+
+    @Binds
+    abstract fun bargeIn(impl: MicBargeInDetector): BargeInDetector
 }
 
 @Module

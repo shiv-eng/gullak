@@ -80,6 +80,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -218,7 +219,7 @@ private fun rememberMic(onEvent: (CreateGoalEvent) -> Unit): () -> Unit {
     }
 }
 
-private fun openTextToSpeechSettings(context: Context) {
+internal fun openTextToSpeechSettings(context: Context) {
     try {
         context.startActivity(Intent(TTS_SETTINGS_ACTION))
     } catch (e: ActivityNotFoundException) {
@@ -806,8 +807,9 @@ private fun PlanCard(
                     )
                 }
                 Text(
-                    text = stringResource(
-                        R.string.create_plan_schedule,
+                    text = pluralStringResource(
+                        R.plurals.create_plan_schedule,
+                        chosen.numberOfDebits,
                         chosen.numberOfDebits,
                         DATE.format(chosen.firstDebit),
                         DATE.format(chosen.lastDebit),

@@ -70,6 +70,7 @@ import com.gullak.core.model.money.IndianMoneyFormat
 import com.gullak.core.model.plan.PlanOption
 import com.gullak.feature.creategoal.DemoBankAccount
 import com.gullak.feature.creategoal.R
+import com.gullak.feature.creategoal.openTextToSpeechSettings
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -98,6 +99,10 @@ internal fun VoiceGoalEntry(
     }
 
     val context = LocalContext.current
+    val openVoiceSettings = {
+        openTextToSpeechSettings(context)
+        viewModel.onEvent(VoiceGoalEvent.VoiceHintDismissed)
+    }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         viewModel.onEvent(if (granted) VoiceGoalEvent.MicReady else VoiceGoalEvent.MicDenied)
     }
@@ -112,6 +117,7 @@ internal fun VoiceGoalEntry(
         onEvent = viewModel::onEvent,
         onBack = onBack,
         onTypeInstead = onTypeInstead,
+        onOpenVoiceSettings = openVoiceSettings,
         modifier = modifier,
     )
 }
@@ -149,6 +155,7 @@ internal fun VoiceGoalScreen(
     onEvent: (VoiceGoalEvent) -> Unit,
     onBack: () -> Unit,
     onTypeInstead: () -> Unit,
+    onOpenVoiceSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -189,6 +196,23 @@ internal fun VoiceGoalScreen(
             )
             Spacer(Modifier.height(16.dp))
             Captions(state)
+            if (state.showVoiceHint) {
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    stringResource(R.string.create_voice_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = GullakTheme.colors.textMuted,
+                    textAlign = TextAlign.Center,
+                )
+                Row {
+                    TextButton(onClick = { onEvent(VoiceGoalEvent.VoiceHintDismissed) }) {
+                        Text(stringResource(R.string.create_voice_hint_dismiss))
+                    }
+                    TextButton(onClick = onOpenVoiceSettings) {
+                        Text(stringResource(R.string.create_voice_hint_action))
+                    }
+                }
+            }
             GoalFacts(state)
             if (state.step == TalkStep.CONFIRM_AUTOPAY || state.step == TalkStep.DONE) {
                 Spacer(Modifier.height(8.dp))
@@ -248,7 +272,14 @@ private fun TalkOrb(
         TalkPhase.LISTENING -> voice
         TalkPhase.WAITING -> 1f
     }
-    val label = stringResource(R.string.voice_status_waiting)
+    val label = stringResource(
+        when (phase) {
+            TalkPhase.SPEAKING -> R.string.voice_status_speaking
+            TalkPhase.LISTENING -> R.string.create_stop_listening
+            TalkPhase.THINKING -> R.string.create_understanding
+            TalkPhase.WAITING -> R.string.voice_status_waiting
+        },
+    )
     Box(
         modifier = modifier
             .size(ORB_SIZE.dp)
@@ -309,6 +340,9 @@ private fun GoalFacts(
         state.name?.let { Fact(stringResource(R.string.create_name_label), it) }
         state.target?.let { Fact(stringResource(R.string.create_amount_label), IndianMoneyFormat.format(it)) }
         state.date?.let { Fact(stringResource(R.string.create_date_label), DATE.format(it)) }
+        if (state.dateIsFixed) {
+            Fact(stringResource(R.string.create_fixed_title), stringResource(R.string.voice_yes))
+        }
         if (state.oneTime.isPositive) {
             Fact(stringResource(R.string.mandate_lump), IndianMoneyFormat.format(state.oneTime))
         }

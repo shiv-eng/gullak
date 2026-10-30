@@ -40,6 +40,7 @@ class DomainTestEnvironment(
     val aiInfo = FakeAiInfo()
     val voice = FakeVoiceOutput()
     val speech = FakeSpeechInput()
+    val bargeIn = FakeBargeIn()
     val brain = FakeConversationBrain()
 
     val engine = PlanEngine(clock)
