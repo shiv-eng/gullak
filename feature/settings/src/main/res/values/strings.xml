@@ -42,4 +42,6 @@
 
     <string name="settings_about">Built for the Paytm Build for India AI Hackathon</string>
     <string name="settings_about_demo">Demo app: no real payments</string>
+    <string name="settings_voice_replies">Voice replies</string>
+    <string name="settings_voice_replies_body">Reads questions and plan explanations aloud after you speak a goal.</string>
 </resources>

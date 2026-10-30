@@ -89,4 +89,9 @@
     <string name="approval_enter">4 अंकों का डेमो कोड डालें</string>
     <string name="approval_demo_note">डेमो मंज़ूरी: कोई भी 4 अंक डालें। यह आपका UPI PIN नहीं है, और कुछ भी सेव या भेजा नहीं जाता।</string>
     <string name="approval_delete">मिटाएँ</string>
+    <string name="create_lump_label">अभी एकमुश्त भुगतान (वैकल्पिक)</string>
+    <string name="create_lump_hint">इससे SIP की रक़म घटती है</string>
+    <string name="create_problem_lump">एकमुश्त भुगतान लक्ष्य रक़म से कम होना चाहिए</string>
+    <string name="create_listen">सुनें</string>
+    <string name="mandate_lump">अभी एकमुश्त भुगतान</string>
 </resources>

@@ -154,6 +154,8 @@ internal fun SettingsScreen(
                 LanguageCard(
                     appLanguage = appLanguage,
                     speechLanguage = state.settings.speechLanguage,
+                    voiceReplies = state.settings.voiceReplies,
+                    onVoiceReplies = { onEvent(SettingsEvent.VoiceRepliesChanged(it)) },
                     onAppLanguage = onAppLanguage,
                     onSpeechLanguage = { onEvent(SettingsEvent.SpeechLanguageChanged(it)) },
                 )
@@ -266,6 +268,8 @@ private fun DemoDataCard(
 private fun LanguageCard(
     appLanguage: String,
     speechLanguage: SpeechLanguage,
+    voiceReplies: Boolean,
+    onVoiceReplies: (Boolean) -> Unit,
     onAppLanguage: (String) -> Unit,
     onSpeechLanguage: (SpeechLanguage) -> Unit,
     modifier: Modifier = Modifier,
@@ -297,6 +301,13 @@ private fun LanguageCard(
         RadioRow(stringResource(R.string.settings_speech_hindi), speechLanguage == SpeechLanguage.HINDI_INDIA) {
             onSpeechLanguage(SpeechLanguage.HINDI_INDIA)
         }
+        CardDivider()
+        SwitchRow(
+            title = stringResource(R.string.settings_voice_replies),
+            body = stringResource(R.string.settings_voice_replies_body),
+            checked = voiceReplies,
+            onChange = onVoiceReplies,
+        )
     }
 }
 

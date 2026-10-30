@@ -134,3 +134,19 @@ class FakeAiInfo(
     override val modelId: String = "gemini-test",
     override val isLiveModelConfigured: Boolean = true,
 ) : com.gullak.core.domain.ai.AiInfo
+
+class FakeVoiceOutput : com.gullak.core.domain.ai.VoiceOutput {
+    val spoken = mutableListOf<String>()
+    var stops = 0
+
+    override suspend fun speak(
+        text: String,
+        language: GoalLanguage,
+    ) {
+        spoken += text
+    }
+
+    override fun stop() {
+        stops++
+    }
+}

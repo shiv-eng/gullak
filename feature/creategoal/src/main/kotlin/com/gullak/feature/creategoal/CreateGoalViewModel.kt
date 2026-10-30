@@ -7,6 +7,7 @@ import com.gullak.core.domain.ai.FollowUpQuestion
 import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.domain.ai.PlanExplanationService
 import com.gullak.core.domain.ai.Understanding
+import com.gullak.core.domain.ai.VoiceOutput
 import com.gullak.core.domain.analytics.Analytics
 import com.gullak.core.domain.analytics.AnalyticsEvent
 import com.gullak.core.domain.plan.PlanInput
@@ -48,12 +49,14 @@ enum class Stage { EDITING, BANK, APPROVAL, PROCESSING, DONE }
 enum class DemoBankAccount { DEMO_BANK_SAVINGS, SAMPLE_BANK_SAVINGS }
 
 /** Why the form cannot make a plan yet. Shown from string resources. */
-enum class InputProblem { AMOUNT_TOO_LOW, AMOUNT_TOO_HIGH, DATE_NOT_IN_FUTURE, TOO_CLOSE_FOR_SIP }
+enum class InputProblem { AMOUNT_TOO_LOW, AMOUNT_TOO_HIGH, DATE_NOT_IN_FUTURE, TOO_CLOSE_FOR_SIP, LUMP_SUM_TOO_HIGH }
 
 data class CreateGoalUiState(
     val today: LocalDate,
     val name: String = "",
     val amountText: String = "",
+    /** Optional one-time payment now; the plan covers what is left. */
+    val lumpSumText: String = "",
     val targetDate: LocalDate? = null,
     val dateIsFixed: Boolean = false,
     /** Typed goals follow the phone's language; speech sets the language the user spoke. */
@@ -75,10 +78,13 @@ data class CreateGoalUiState(
     val approvalDigits: Int = 0,
     /** BCP 47 tag for speech input, from Settings. */
     val speechLanguageTag: String = SpeechLanguage.ENGLISH_INDIA.tag,
+    val voiceReplies: Boolean = true,
     val createFailed: Boolean = false,
     val createdGoal: Goal? = null,
 ) {
     val amount: Money? get() = amountText.toLongOrNull()?.let(Money::fromRupees)
+
+    val lumpSum: Money get() = lumpSumText.toLongOrNull()?.let(Money::fromRupees) ?: Money.ZERO
 
     /** The option the user picked; null until the form makes a recurring plan. */
     val chosen: PlanOption? get() = plan?.option(frequency)
@@ -104,6 +110,8 @@ sealed interface CreateGoalEvent {
 
     data class AmountChanged(val text: String) : CreateGoalEvent
 
+    data class LumpSumChanged(val text: String) : CreateGoalEvent
+
     data class DateSelected(val date: LocalDate) : CreateGoalEvent
 
     data class DateFixedChanged(val fixed: Boolean) : CreateGoalEvent
@@ -114,6 +122,9 @@ sealed interface CreateGoalEvent {
     data class GoalSpoken(val text: String) : CreateGoalEvent
 
     data object VoiceUnavailable : CreateGoalEvent
+
+    /** Read [text] aloud (a follow-up question or an explanation, already in the right language). */
+    data class Speak(val text: String) : CreateGoalEvent
 
     data object StartClicked : CreateGoalEvent
 
@@ -155,6 +166,7 @@ class CreateGoalViewModel @Inject constructor(
     private val createGoal: CreateGoalUseCase,
     private val explainer: PlanExplanationService,
     private val analytics: Analytics,
+    private val voice: VoiceOutput,
     settings: SettingsRepository,
     clock: Clock,
 ) : ViewModel() {
@@ -168,11 +180,14 @@ class CreateGoalViewModel @Inject constructor(
     /** The spoken conversation so far, so a follow-up answer is read together with the first sentence. */
     private val conversation = mutableListOf<ConversationTurn>()
     private var explainJob: Job? = null
+    private var speakJob: Job? = null
 
     init {
         viewModelScope.launch {
             settings.settings.collect { prefs ->
-                state.update { it.copy(speechLanguageTag = prefs.speechLanguage.tag) }
+                state.update {
+                    it.copy(speechLanguageTag = prefs.speechLanguage.tag, voiceReplies = prefs.voiceReplies)
+                }
             }
         }
     }
@@ -183,6 +198,10 @@ class CreateGoalViewModel @Inject constructor(
 
             is CreateGoalEvent.AmountChanged -> edit {
                 it.copy(amountText = event.text.filter(Char::isDigit).take(MAX_DIGITS))
+            }
+
+            is CreateGoalEvent.LumpSumChanged -> edit {
+                it.copy(lumpSumText = event.text.filter(Char::isDigit).take(MAX_DIGITS))
             }
 
             is CreateGoalEvent.DateSelected -> edit { it.copy(targetDate = event.date, festival = null) }
@@ -198,6 +217,8 @@ class CreateGoalViewModel @Inject constructor(
 
             CreateGoalEvent.VoiceUnavailable -> state.update { it.copy(voiceFailed = true) }
 
+            is CreateGoalEvent.Speak -> speak(event.text)
+
             CreateGoalEvent.DoneClicked -> send(CreateGoalEffect.Finish)
 
             CreateGoalEvent.ViewGoalsClicked -> send(CreateGoalEffect.OpenGoals)
@@ -209,7 +230,10 @@ class CreateGoalViewModel @Inject constructor(
     /** The AutoPay steps: sheet, bank account, demo approval. */
     private fun onPaymentEvent(event: CreateGoalEvent) {
         when (event) {
-            CreateGoalEvent.StartClicked -> if (state.value.canStart) state.update { it.copy(showMandate = true) }
+            CreateGoalEvent.StartClicked -> if (state.value.canStart) {
+                voice.stop()
+                state.update { it.copy(showMandate = true) }
+            }
 
             CreateGoalEvent.MandateDismissed -> state.update { it.copy(showMandate = false) }
 
@@ -304,7 +328,7 @@ class CreateGoalViewModel @Inject constructor(
             clearPlan(problem)
             return
         }
-        when (val result = buildPlan(PlanInput(target = amount, targetDate = date))) {
+        when (val result = buildPlan(PlanInput(target = amount, targetDate = date, lumpSum = current.lumpSum))) {
             is AppResult.Success -> {
                 val plan = result.value
                 val frequency = current.frequency.takeIf { plan.option(it) != null }
@@ -336,6 +360,7 @@ class CreateGoalViewModel @Inject constructor(
         return when {
             amount < MIN_AMOUNT -> InputProblem.AMOUNT_TOO_LOW
             amount > MAX_AMOUNT -> InputProblem.AMOUNT_TOO_HIGH
+            current.lumpSum >= amount -> InputProblem.LUMP_SUM_TOO_HIGH
             date <= current.today -> InputProblem.DATE_NOT_IN_FUTURE
             else -> null
         }
@@ -387,6 +412,7 @@ class CreateGoalViewModel @Inject constructor(
                 targetDate = date,
                 dateIsFixed = current.dateIsFixed,
                 frequency = current.frequency,
+                lumpSum = current.lumpSum,
                 language = current.language,
             )
             when (val result = createGoal(request)) {
@@ -404,6 +430,15 @@ class CreateGoalViewModel @Inject constructor(
         FollowUpReason.AMOUNT_OUT_OF_RANGE -> "Please give an amount between 500 and 50 lakh rupees."
         FollowUpReason.DATE_NOT_IN_FUTURE -> "Please give a date after today."
         FollowUpReason.DATE_TOO_FAR -> "Please give a date within 10 years."
+    }
+
+    private fun speak(text: String) {
+        speakJob?.cancel()
+        speakJob = viewModelScope.launch { voice.speak(text, state.value.language) }
+    }
+
+    override fun onCleared() {
+        voice.stop()
     }
 
     private fun send(effect: CreateGoalEffect) {

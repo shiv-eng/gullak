@@ -41,4 +41,6 @@
 
     <string name="settings_about">Paytm Build for India AI Hackathon के लिए बनाया गया</string>
     <string name="settings_about_demo">डेमो ऐप: कोई असली भुगतान नहीं</string>
+    <string name="settings_voice_replies">आवाज़ में जवाब</string>
+    <string name="settings_voice_replies_body">लक्ष्य बोलने के बाद सवाल और योजना का विवरण पढ़कर सुनाता है।</string>
 </resources>

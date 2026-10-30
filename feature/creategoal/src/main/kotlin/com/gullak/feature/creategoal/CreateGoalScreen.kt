@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.outlined.AccountBalance
@@ -150,6 +151,18 @@ internal fun CreateGoalEntry(
         if (startWithVoice && !voiceStarted) {
             voiceStarted = true
             listen()
+        }
+    }
+
+    // Voice replies: read follow-up questions, and the explanation of a goal that was spoken.
+    val followUp = state.followUp?.let { followUpText(it) }
+    LaunchedEffect(followUp) {
+        if (followUp != null && state.voiceReplies) viewModel.onEvent(CreateGoalEvent.Speak(followUp))
+    }
+    LaunchedEffect(state.explanation) {
+        val explanation = state.explanation
+        if (explanation != null && state.voiceReplies && state.transcript != null) {
+            viewModel.onEvent(CreateGoalEvent.Speak(explanation))
         }
     }
 
@@ -413,6 +426,24 @@ private fun GoalDetailsCard(
             }
         }
         Spacer(Modifier.height(14.dp))
+        FieldLabel(stringResource(R.string.create_lump_label))
+        OutlinedTextField(
+            value = state.lumpSumText,
+            onValueChange = { onEvent(CreateGoalEvent.LumpSumChanged(it)) },
+            leadingIcon = {
+                Text("₹", style = MaterialTheme.typography.titleLarge, color = GullakTheme.colors.textPrimary)
+            },
+            placeholder = {
+                Text(stringResource(R.string.create_lump_hint), style = MaterialTheme.typography.bodyMedium)
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            shape = CircleShape,
+            colors = fieldColors(),
+            textStyle = GullakTheme.typography.amountSmall,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(14.dp))
         FieldLabel(stringResource(R.string.create_date_label))
         Row(
             modifier = Modifier
@@ -520,6 +551,7 @@ private fun problemText(problem: InputProblem): Int = when (problem) {
     InputProblem.AMOUNT_TOO_HIGH -> R.string.create_problem_amount_range
     InputProblem.DATE_NOT_IN_FUTURE -> R.string.create_problem_date
     InputProblem.TOO_CLOSE_FOR_SIP -> R.string.create_problem_too_close
+    InputProblem.LUMP_SUM_TOO_HIGH -> R.string.create_problem_lump
 }
 
 /** Paytm Gold's SIP card: Daily / Weekly / Monthly radios, the amount, and where the money goes. */
@@ -631,12 +663,23 @@ private fun PlanCard(
                 .background(GullakTheme.colors.chipSelected, MaterialTheme.shapes.small)
                 .padding(12.dp),
         ) {
-            Text(
-                stringResource(R.string.create_why_title),
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = GullakTheme.colors.iconNavy,
-            )
-            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.create_why_title),
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    color = GullakTheme.colors.iconNavy,
+                    modifier = Modifier.weight(1f),
+                )
+                state.explanation?.let { explanation ->
+                    IconButton(onClick = { onEvent(CreateGoalEvent.Speak(explanation)) }) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.VolumeUp,
+                            contentDescription = stringResource(R.string.create_listen),
+                            tint = GullakTheme.colors.iconNavy,
+                        )
+                    }
+                }
+            }
             if (state.isExplaining || state.explanation == null) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
@@ -712,6 +755,9 @@ private fun MandateSheet(
             )
             Spacer(Modifier.height(12.dp))
             MandateRow(stringResource(R.string.mandate_amount), IndianMoneyFormat.format(chosen.amountPerDebit))
+            if (state.lumpSum.isPositive) {
+                MandateRow(stringResource(R.string.mandate_lump), IndianMoneyFormat.format(state.lumpSum))
+            }
             MandateRow(stringResource(R.string.mandate_frequency), stringResource(frequencyLabel(chosen.frequency)))
             MandateRow(stringResource(R.string.mandate_first), DATE.format(chosen.firstDebit))
             MandateRow(stringResource(R.string.mandate_last), DATE.format(chosen.lastDebit))

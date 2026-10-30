@@ -35,6 +35,7 @@ class CreateGoalViewModelTest {
         createGoal = env.createGoal,
         explainer = env.explanationService,
         analytics = env.analytics,
+        voice = env.voice,
         settings = env.settings,
         clock = env.clock,
     )
@@ -217,5 +218,49 @@ class CreateGoalViewModelTest {
         vm.onEvent(CreateGoalEvent.StepBack)
         assertEquals(Stage.EDITING, vm.uiState.value.stage)
         assertTrue(env.goals.goals.isEmpty())
+    }
+
+    @Test
+    fun lumpSumLowersTheSipAndIsRecordedWithTheGoal() = runTest {
+        val vm = viewModel()
+        vm.typeLaptop()
+
+        vm.onEvent(CreateGoalEvent.LumpSumChanged("6000"))
+        advanceUntilIdle()
+        assertEquals(rupees(3_750), vm.uiState.value.chosen?.amountPerDebit)
+
+        vm.onEvent(CreateGoalEvent.StartClicked)
+        vm.onEvent(CreateGoalEvent.MandateConfirmed)
+        vm.onEvent(CreateGoalEvent.BankProceed)
+        repeat(CreateGoalUiState.APPROVAL_LENGTH) { vm.onEvent(CreateGoalEvent.ApprovalDigit) }
+        advanceUntilIdle()
+
+        assertEquals(rupees(3_750), env.goals.goals.single().schedule?.amountPerDebit)
+        assertEquals(rupees(6_000), env.debits.debits.single().amount)
+    }
+
+    @Test
+    fun lumpSumCoveringTheWholeGoalIsRejected() = runTest {
+        val vm = viewModel()
+        vm.typeLaptop()
+
+        vm.onEvent(CreateGoalEvent.LumpSumChanged("36000"))
+
+        assertEquals(InputProblem.LUMP_SUM_TOO_HIGH, vm.uiState.value.problem)
+        assertFalse(vm.uiState.value.canStart)
+    }
+
+    @Test
+    fun speakReadsTextAloudAndStartingAutoPayStopsIt() = runTest {
+        val vm = viewModel()
+        vm.typeLaptop()
+        advanceUntilIdle()
+
+        vm.onEvent(CreateGoalEvent.Speak("Why this plan"))
+        advanceUntilIdle()
+        assertEquals(listOf("Why this plan"), env.voice.spoken)
+
+        vm.onEvent(CreateGoalEvent.StartClicked)
+        assertEquals(1, env.voice.stops)
     }
 }

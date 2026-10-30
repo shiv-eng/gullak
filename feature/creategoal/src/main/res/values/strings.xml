@@ -89,4 +89,9 @@
     <string name="approval_enter">Enter 4-digit demo approval code</string>
     <string name="approval_demo_note">Demo approval: enter any 4 digits. This is not your UPI PIN, and nothing is saved or sent.</string>
     <string name="approval_delete">Delete</string>
+    <string name="create_lump_label">One-time payment now (optional)</string>
+    <string name="create_lump_hint">Lowers your SIP amount</string>
+    <string name="create_problem_lump">One-time payment must be less than the goal amount</string>
+    <string name="create_listen">Listen</string>
+    <string name="mandate_lump">One-time payment now</string>
 </resources>

@@ -39,6 +39,7 @@ class GoalDetailViewModelTest {
         getReplanOptions = env.getReplanOptions,
         applyReplan = env.applyReplan,
         explainer = env.explanationService,
+        voice = env.voice,
     )
 
     private suspend fun laptopUpToFebruary(): Goal {

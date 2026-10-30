@@ -28,6 +28,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -547,12 +548,23 @@ private fun ReplanSheet(
                     .background(GullakTheme.colors.chipSelected, MaterialTheme.shapes.small)
                     .padding(12.dp),
             ) {
-                Text(
-                    stringResource(R.string.replan_why),
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = GullakTheme.colors.iconNavy,
-                )
-                Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.replan_why),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = GullakTheme.colors.iconNavy,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (replan.explanation != null) {
+                        IconButton(onClick = { onEvent(GoalDetailEvent.SpeakExplanation) }) {
+                            Icon(
+                                Icons.AutoMirrored.Outlined.VolumeUp,
+                                contentDescription = stringResource(R.string.replan_listen),
+                                tint = GullakTheme.colors.iconNavy,
+                            )
+                        }
+                    }
+                }
                 if (replan.isExplaining || replan.explanation == null) {
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gullak.core.domain.ai.PlanExplanationService
+import com.gullak.core.domain.ai.VoiceOutput
 import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.domain.usecase.ApplyReplanUseCase
 import com.gullak.core.domain.usecase.GetReplanOptionsUseCase
@@ -67,6 +68,8 @@ sealed interface GoalDetailEvent {
     data object ApplyReplan : GoalDetailEvent
 
     data object DismissReplan : GoalDetailEvent
+
+    data object SpeakExplanation : GoalDetailEvent
 }
 
 sealed interface GoalDetailEffect {
@@ -92,6 +95,7 @@ class GoalDetailViewModel @Inject constructor(
     private val getReplanOptions: GetReplanOptionsUseCase,
     private val applyReplan: ApplyReplanUseCase,
     private val explainer: PlanExplanationService,
+    private val voice: VoiceOutput,
 ) : ViewModel() {
 
     private val goalId: String = checkNotNull(savedStateHandle[GOAL_ID_KEY]) { "goalId argument missing" }
@@ -124,6 +128,8 @@ class GoalDetailViewModel @Inject constructor(
             is GoalDetailEvent.ChoiceSelected -> select(event.index)
 
             GoalDetailEvent.ApplyReplan -> apply()
+
+            GoalDetailEvent.SpeakExplanation -> speakExplanation()
 
             GoalDetailEvent.DismissReplan -> {
                 explainJob?.cancel()
@@ -209,6 +215,17 @@ class GoalDetailViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun speakExplanation() {
+        val replan = state.value.replan ?: return
+        val text = replan.explanation ?: return
+        val language = GoalLanguage.fromTag(replan.offer.goal.languageTag) ?: GoalLanguage.ENGLISH
+        viewModelScope.launch { voice.speak(text, language) }
+    }
+
+    override fun onCleared() {
+        voice.stop()
     }
 
     private fun send(effect: GoalDetailEffect) {
