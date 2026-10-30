@@ -129,4 +129,12 @@
     <string name="bank_icici_name">ICICI बैंक · बचत खाता</string>
     <string name="bank_icici_number">खाता ••2056</string>
     <string name="bank_icici_upi">UPI ID: sun•••@okicici</string>
+    <string name="voice_title">गुल्लक से बात करें</string>
+    <string name="voice_status_speaking">गुल्लक बोल रही है। बीच में बोलने के लिए टैप करें।</string>
+    <string name="voice_status_waiting">बात करने के लिए गुल्लक पर टैप करें</string>
+    <string name="voice_type_instead">टाइप करें</string>
+    <string name="voice_demo">डेमो: कोई असली भुगतान नहीं</string>
+    <string name="voice_period_daily">हर दिन</string>
+    <string name="voice_period_weekly">हर हफ़्ते</string>
+    <string name="voice_period_monthly">हर महीने</string>
 </resources>

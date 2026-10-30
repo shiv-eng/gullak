@@ -130,4 +130,12 @@
     <string name="bank_icici_number">A/c ••2056</string>
     <string name="bank_icici_upi">UPI ID: sun•••@okicici</string>
     <string name="create_rupee_symbol" translatable="false">₹</string>
+    <string name="voice_title">Talk to Gullak</string>
+    <string name="voice_status_speaking">Gullak is speaking. Tap to interrupt.</string>
+    <string name="voice_status_waiting">Tap Gullak to talk</string>
+    <string name="voice_type_instead">Type instead</string>
+    <string name="voice_demo">Demo: no real payment</string>
+    <string name="voice_period_daily">Every day</string>
+    <string name="voice_period_weekly">Every week</string>
+    <string name="voice_period_monthly">Every month</string>
 </resources>

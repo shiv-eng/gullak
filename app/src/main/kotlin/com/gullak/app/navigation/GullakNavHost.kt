@@ -6,7 +6,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.gullak.feature.creategoal.CreateGoalRoute
+import com.gullak.feature.creategoal.VoiceGoalRoute
 import com.gullak.feature.creategoal.createGoalScreen
+import com.gullak.feature.creategoal.voiceGoalScreen
 import com.gullak.feature.goaldetail.GoalDetailRoute
 import com.gullak.feature.goaldetail.goalDetailScreen
 import com.gullak.feature.home.HomeRoute
@@ -32,18 +34,33 @@ fun GullakNavHost(
     ) {
         paytmHomeScreen(
             onOpenGullak = { navController.navigate(HomeRoute) },
-            onNewGoal = { navController.navigate(CreateGoalRoute()) },
+            onNewGoal = { navController.navigate(VoiceGoalRoute) },
             onOpenGoal = { goalId -> navController.navigate(GoalDetailRoute(goalId)) },
             onOpenSettings = { navController.navigate(SettingsRoute) },
         )
         homeScreen(
             onBack = { navController.popBackStack() },
-            onNewGoal = { withVoice -> navController.navigate(CreateGoalRoute(startWithVoice = withVoice)) },
+            onNewGoal = { _ -> navController.navigate(VoiceGoalRoute) },
             onOpenGoal = { goalId -> navController.navigate(GoalDetailRoute(goalId)) },
             onOpenSettings = { navController.navigate(SettingsRoute) },
         )
         settingsScreen(onBack = { navController.popBackStack() })
         goalDetailScreen(onBack = { navController.popBackStack() })
+        voiceGoalScreen(
+            onBack = { navController.popBackStack() },
+            onTypeInstead = {
+                navController.navigate(CreateGoalRoute()) {
+                    popUpTo(VoiceGoalRoute) { inclusive = true }
+                }
+            },
+            onFinish = { navController.popBackStack(PaytmHomeRoute, inclusive = false) },
+            onOpenGoals = {
+                navController.navigate(HomeRoute) {
+                    popUpTo(PaytmHomeRoute)
+                    launchSingleTop = true
+                }
+            },
+        )
         createGoalScreen(
             onBack = { navController.popBackStack() },
             onFinish = { navController.popBackStack(PaytmHomeRoute, inclusive = false) },

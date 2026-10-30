@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Everything Gullak says aloud. Named per language because the language follows what the user speaks. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string name="voice_bank_sbi" translatable="false">SBI</string>
+    <string name="voice_bank_hdfc" translatable="false">HDFC</string>
+    <string name="voice_bank_icici" translatable="false">ICICI</string>
+
+    <string-array name="voice_greeting_en" translatable="false">
+        <item>Hi, I am Gullak. Tell me, what are you saving for?</item>
+        <item>Hello! What would you like to save for today?</item>
+    </string-array>
+    <string-array name="voice_greeting_hinglish" translatable="false">
+        <item>Namaste! Main Gullak. Bataiye, kis cheez ke liye paise jodne hain?</item>
+        <item>Namaste! Aaj kis cheez ke liye bachat shuru karein?</item>
+    </string-array>
+    <string-array name="voice_greeting_hi" translatable="false">
+        <item>नमस्ते! मैं गुल्लक। बताइए, किस चीज़ के लिए पैसे जोड़ने हैं?</item>
+        <item>नमस्ते! आज किस चीज़ के लिए बचत शुरू करें?</item>
+    </string-array>
+
+    <string-array name="voice_again_en" translatable="false">
+        <item>Sure. What is the next one for?</item>
+    </string-array>
+    <string-array name="voice_again_hinglish" translatable="false">
+        <item>Zaroor. Agli gullak kis cheez ke liye?</item>
+    </string-array>
+    <string-array name="voice_again_hi" translatable="false">
+        <item>ज़रूर। अगली गुल्लक किस चीज़ के लिए?</item>
+    </string-array>
+
+    <string-array name="voice_moment_en" translatable="false">
+        <item>One moment.</item>
+        <item>Okay, let me see.</item>
+    </string-array>
+    <string-array name="voice_moment_hinglish" translatable="false">
+        <item>Ek second.</item>
+        <item>Achha, dekhte hain.</item>
+    </string-array>
+    <string-array name="voice_moment_hi" translatable="false">
+        <item>एक सेकंड।</item>
+        <item>अच्छा, देखते हैं।</item>
+    </string-array>
+
+    <string-array name="voice_not_heard_en" translatable="false">
+        <item>Sorry, I did not hear anything. Could you say that again?</item>
+    </string-array>
+    <string-array name="voice_not_heard_hinglish" translatable="false">
+        <item>Maaf kijiye, kuch sunai nahi diya. Ek baar phir boliye?</item>
+    </string-array>
+    <string-array name="voice_not_heard_hi" translatable="false">
+        <item>माफ़ कीजिए, कुछ सुनाई नहीं दिया। एक बार फिर बोलिए?</item>
+    </string-array>
+
+    <string-array name="voice_not_understood_en" translatable="false">
+        <item>Sorry, I could not follow that. What are you saving for, how much, and by when?</item>
+    </string-array>
+    <string-array name="voice_not_understood_hinglish" translatable="false">
+        <item>Maaf kijiye, samajh nahi aaya. Kis cheez ke liye, kitne paise, aur kab tak?</item>
+    </string-array>
+    <string-array name="voice_not_understood_hi" translatable="false">
+        <item>माफ़ कीजिए, समझ नहीं आया। किस चीज़ के लिए, कितने पैसे, और कब तक?</item>
+    </string-array>
+
+    <string-array name="voice_which_en" translatable="false">
+        <item>Which one suits you: daily, weekly or monthly?</item>
+    </string-array>
+    <string-array name="voice_which_hinglish" translatable="false">
+        <item>Kaunsa theek rahega: roz, hafte, ya mahine?</item>
+    </string-array>
+    <string-array name="voice_which_hi" translatable="false">
+        <item>कौन सा ठीक रहेगा: रोज़, हफ़्ते, या महीने?</item>
+    </string-array>
+
+    <string-array name="voice_yes_or_no_en" translatable="false">
+        <item>Shall I start it? Just say yes or no.</item>
+    </string-array>
+    <string-array name="voice_yes_or_no_hinglish" translatable="false">
+        <item>Shuru kar doon? Bas haan ya nahi boliye.</item>
+    </string-array>
+    <string-array name="voice_yes_or_no_hi" translatable="false">
+        <item>शुरू कर दूँ? बस हाँ या नहीं बोलिए।</item>
+    </string-array>
+
+    <string-array name="voice_change_en" translatable="false">
+        <item>No problem. What should I change?</item>
+    </string-array>
+    <string-array name="voice_change_hinglish" translatable="false">
+        <item>Koi baat nahi. Kya badalna hai?</item>
+    </string-array>
+    <string-array name="voice_change_hi" translatable="false">
+        <item>कोई बात नहीं। क्या बदलना है?</item>
+    </string-array>
+
+    <string-array name="voice_ask_name_en" translatable="false">
+        <item>What are you saving for?</item>
+    </string-array>
+    <string-array name="voice_ask_name_hinglish" translatable="false">
+        <item>Kis cheez ke liye bachana hai?</item>
+    </string-array>
+    <string-array name="voice_ask_name_hi" translatable="false">
+        <item>किस चीज़ के लिए बचाना है?</item>
+    </string-array>
+
+    <string-array name="voice_ask_amount_en" translatable="false">
+        <item>How much will you need?</item>
+    </string-array>
+    <string-array name="voice_ask_amount_hinglish" translatable="false">
+        <item>Kitne paise chahiye honge?</item>
+    </string-array>
+    <string-array name="voice_ask_amount_hi" translatable="false">
+        <item>कितने पैसे चाहिए होंगे?</item>
+    </string-array>
+
+    <string-array name="voice_ask_date_en" translatable="false">
+        <item>And by when do you need it?</item>
+    </string-array>
+    <string-array name="voice_ask_date_hinglish" translatable="false">
+        <item>Aur kab tak chahiye?</item>
+    </string-array>
+    <string-array name="voice_ask_date_hi" translatable="false">
+        <item>और कब तक चाहिए?</item>
+    </string-array>
+
+    <string-array name="voice_amount_range_en" translatable="false">
+        <item>Gullak can plan from 500 rupees to 50 lakh rupees. What amount should I take?</item>
+    </string-array>
+    <string-array name="voice_amount_range_hinglish" translatable="false">
+        <item>Gullak 500 rupaye se 50 lakh rupaye tak ka plan bana sakti hai. Kitna rakhein?</item>
+    </string-array>
+    <string-array name="voice_amount_range_hi" translatable="false">
+        <item>गुल्लक 500 रुपये से 50 लाख रुपये तक की योजना बना सकती है। कितना रखें?</item>
+    </string-array>
+
+    <string-array name="voice_date_range_en" translatable="false">
+        <item>That date will not work. Please tell me a date after today, within 10 years.</item>
+    </string-array>
+    <string-array name="voice_date_range_hinglish" translatable="false">
+        <item>Yeh tareekh nahi chalegi. Aaj ke baad aur 10 saal ke andar ki tareekh bataiye.</item>
+    </string-array>
+    <string-array name="voice_date_range_hi" translatable="false">
+        <item>यह तारीख़ नहीं चलेगी। आज के बाद और 10 साल के अंदर की तारीख़ बताइए।</item>
+    </string-array>
+
+    <string-array name="voice_readback_en" translatable="false">
+        <item>Okay, %1$s, %2$s, by %3$s. Is that right?</item>
+        <item>So that is %1$s, %2$s by %3$s. Did I get that right?</item>
+    </string-array>
+    <string-array name="voice_readback_hinglish" translatable="false">
+        <item>Achha, toh %1$s ke liye %2$s, %3$s tak. Sahi hai?</item>
+        <item>Theek hai, %1$s, %2$s, %3$s tak. Yahi na?</item>
+    </string-array>
+    <string-array name="voice_readback_hi" translatable="false">
+        <item>अच्छा, तो %1$s के लिए %2$s, %3$s तक। सही है?</item>
+        <item>ठीक है, %1$s, %2$s, %3$s तक। यही ना?</item>
+    </string-array>
+
+    <string-array name="voice_daily_en" translatable="false"><item>%1$s a day</item></string-array>
+    <string-array name="voice_weekly_en" translatable="false"><item>%1$s a week</item></string-array>
+    <string-array name="voice_monthly_en" translatable="false"><item>%1$s a month</item></string-array>
+    <string-array name="voice_daily_hinglish" translatable="false"><item>roz %1$s</item></string-array>
+    <string-array name="voice_weekly_hinglish" translatable="false"><item>har hafte %1$s</item></string-array>
+    <string-array name="voice_monthly_hinglish" translatable="false"><item>har mahine %1$s</item></string-array>
+    <string-array name="voice_daily_hi" translatable="false"><item>रोज़ %1$s</item></string-array>
+    <string-array name="voice_weekly_hi" translatable="false"><item>हर हफ़्ते %1$s</item></string-array>
+    <string-array name="voice_monthly_hi" translatable="false"><item>हर महीने %1$s</item></string-array>
+    <string-array name="voice_or_en" translatable="false"><item>, or </item></string-array>
+    <string-array name="voice_or_hinglish" translatable="false"><item>, ya </item></string-array>
+    <string-array name="voice_or_hi" translatable="false"><item>, या </item></string-array>
+
+    <string-array name="voice_plan_en" translatable="false">
+        <item>For %1$s you could save %2$s. Which suits you best?</item>
+    </string-array>
+    <string-array name="voice_plan_hinglish" translatable="false">
+        <item>%1$s ke liye aap %2$s bacha sakte hain. Aapko kaunsa aasan lagega?</item>
+    </string-array>
+    <string-array name="voice_plan_hi" translatable="false">
+        <item>%1$s के लिए आप %2$s बचा सकते हैं। आपको कौन सा आसान लगेगा?</item>
+    </string-array>
+
+    <string-array name="voice_too_close_en" translatable="false">
+        <item>That date is very close, under a week away. Could we take a later date?</item>
+    </string-array>
+    <string-array name="voice_too_close_hinglish" translatable="false">
+        <item>Yeh tareekh bahut paas hai, ek hafte se bhi kam. Thodi aage ki tareekh le lein?</item>
+    </string-array>
+    <string-array name="voice_too_close_hi" translatable="false">
+        <item>यह तारीख़ बहुत पास है, एक हफ़्ते से भी कम। थोड़ी आगे की तारीख़ ले लें?</item>
+    </string-array>
+
+    <string-array name="voice_autopay_en" translatable="false">
+        <item>Shall I set up AutoPay from your %1$s account, %2$s, starting %3$s? This is a demo, so no real money moves.</item>
+    </string-array>
+    <string-array name="voice_autopay_hinglish" translatable="false">
+        <item>Aapke %1$s khate se %2$s ka AutoPay, %3$s se shuru kar doon? Yeh demo hai, asli paisa nahi katega.</item>
+    </string-array>
+    <string-array name="voice_autopay_hi" translatable="false">
+        <item>आपके %1$s खाते से %2$s का AutoPay, %3$s से शुरू कर दूँ? यह डेमो है, असली पैसा नहीं कटेगा।</item>
+    </string-array>
+
+    <string-array name="voice_started_en" translatable="false">
+        <item>Done! Your %1$s Gullak has started. The first payment is on %2$s. Anything else?</item>
+    </string-array>
+    <string-array name="voice_started_hinglish" translatable="false">
+        <item>Ho gaya! %1$s ki gullak shuru ho gayi. Pehli kist %2$s ko. Aur kuch?</item>
+    </string-array>
+    <string-array name="voice_started_hi" translatable="false">
+        <item>हो गया! %1$s की गुल्लक शुरू हो गई। पहली क़िस्त %2$s को। और कुछ?</item>
+    </string-array>
+
+    <string-array name="voice_failed_en" translatable="false">
+        <item>Sorry, I could not start it just now. Shall I try again?</item>
+    </string-array>
+    <string-array name="voice_failed_hinglish" translatable="false">
+        <item>Maaf kijiye, abhi shuru nahi ho paya. Phir se koshish karoon?</item>
+    </string-array>
+    <string-array name="voice_failed_hi" translatable="false">
+        <item>माफ़ कीजिए, अभी शुरू नहीं हो पाया। फिर से कोशिश करूँ?</item>
+    </string-array>
+
+    <string-array name="voice_bye_en" translatable="false">
+        <item>All right. Happy saving!</item>
+    </string-array>
+    <string-array name="voice_bye_hinglish" translatable="false">
+        <item>Theek hai. Bachat mubarak ho!</item>
+    </string-array>
+    <string-array name="voice_bye_hi" translatable="false">
+        <item>ठीक है। बचत मुबारक हो!</item>
+    </string-array>
+</resources>

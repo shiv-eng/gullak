@@ -18,6 +18,8 @@ private val YES_WORDS = setOf(
     "yes", "yeah", "yep", "ok", "okay", "right", "correct", "perfect", "confirm", "done", "is",
     "that", "it", "haan", "han", "ha", "haa", "ji", "theek", "thik", "sahi", "bilkul", "hai", "h",
     "हाँ", "हां", "जी", "ठीक", "सही", "बिल्कुल", "है",
+    "karo", "kar", "kardo", "do", "shuru", "start", "chalo", "zaroor", "please", "go", "ahead", "na",
+    "करो", "कर", "दो", "शुरू", "चलो", "ज़रूर", "जरूर",
 )
 
 private val NO_WORDS = setOf(

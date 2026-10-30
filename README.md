@@ -23,6 +23,25 @@ stand-in that shows where the feature would live.
 
 The screenshots were taken before the one-time payment field and the speaker buttons were added.
 
+## Voice first
+
+Starting a Gullak is a conversation, in Hindi, Hinglish or English:
+
+> **Gullak:** Namaste! Bataiye, kis cheez ke liye paise jodne hain?
+> **You:** Bhai ki shadi me 10 hazar dene hain, 15 March tak.
+> **Gullak:** Achha, toh Bhai ki shadi ke liye ₹10,000, 15 March 2027 tak. Sahi hai?
+> **You:** Haan.
+> **Gullak:** Aap roz ₹50, ya har hafte ₹360, ya har mahine ₹2,000 bacha sakte hain. Kaunsa aasan lagega?
+> **You:** Mahine wala.
+> **Gullak:** Aapke SBI khate se AutoPay shuru kar doon? Yeh demo hai, asli paisa nahi katega.
+> **You:** Haan, kar do.
+
+(The amounts above only show the shape of the talk; the app's come from `PlanEngine`.)
+
+[Sarvam](https://www.sarvam.ai) provides the ears and voice: Saaras over a WebSocket for speech to text, Bulbul for text
+to speech. Without a key or a connection, the phone's own speech and voice take over. With Sarvam on, microphone audio is
+sent to Sarvam; nothing else from the phone is.
+
 ## Flow
 
 1. **Paytm home:** Gold & Silver card, then "Gullak Bharo". Only Gullak works; other tiles say so.
@@ -115,6 +134,7 @@ You need JDK 17 and the Android SDK. Copy `local.properties.example` to `local.p
 sdk.dir=/path/to/Android/Sdk
 GEMINI_API_KEY=your-key
 GEMINI_MODEL_ID=gemini-3.5-flash-lite
+SARVAM_API_KEY=your-key
 ```
 
 The app runs without a key: demo mode needs none, and outside demo mode it falls back to the offline rules.
@@ -182,7 +202,9 @@ Today is taken as 31 Oct 2026. These are saved in `DemoAiResponses`.
 ## Known limitations
 
 - Every Paytm service is a fake, so nothing about real mandates, settlement or KYC is exercised.
-- The Gemini key is in the APK (see above). A real product needs a backend.
+- The Gemini and Sarvam keys are in the APK (see above). A real product needs a backend.
+- Saying yes is the demo's approval. A real UPI AutoPay mandate needs the customer's UPI PIN in the bank or NPCI flow.
+- Gullak cannot yet be interrupted by speaking over it; tap the orb instead.
 - Speech uses the phone's speech recogniser inside the app, and falls back to the phone's own speech screen if the
   recogniser is unavailable. Recognition is not forced offline, so it may need a network.
 - Spoken replies use the phone's text-to-speech engine. Without a Hindi voice the engine's current voice reads them, and

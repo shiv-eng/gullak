@@ -79,8 +79,8 @@ class DemoPathUiTest {
         compose.onAllNodesWithText("Start a Gullak").onFirst().performScrollTo().performClick()
         settle()
 
-        // On the Gullak Bharo page, then the form.
-        tap("Start a Gullak")
+        // The voice conversation is the way in; this test goes on by typing.
+        tap("Type instead")
         waitForText("Goal name")
         val fields = compose.onAllNodes(hasSetTextAction())
         fields[0].performTextInput("Laptop")
