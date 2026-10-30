@@ -4,7 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
 
-/** Gullak's own page (Goal SIPs), opened from the Paytm home. */
+/** Gullak's own page (Gullaks), opened from the Paytm home. */
 @Serializable
 data object HomeRoute
 

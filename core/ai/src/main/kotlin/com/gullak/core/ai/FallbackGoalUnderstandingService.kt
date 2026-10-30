@@ -20,9 +20,8 @@ import kotlinx.coroutines.flow.first
 
 /**
  * The understanding chain, so the demo never stalls:
- * demo mode → saved answers (700 ms simulated latency); otherwise Gemini; on any Gemini failure, or a
- * transcript with no saved answer, the offline rule-based parser. It always returns a result, and records
- * which path answered.
+ * demo mode → a saved answer for a demo sentence (700 ms simulated latency); otherwise Gemini; on any Gemini
+ * failure the offline rule-based parser. It always returns a result, and records which path answered.
  */
 internal class FallbackGoalUnderstandingService @Inject constructor(
     private val settings: SettingsRepository,
@@ -36,15 +35,14 @@ internal class FallbackGoalUnderstandingService @Inject constructor(
         conversation: List<ConversationTurn>,
         today: LocalDate,
     ): AppResult<ParsedGoal> {
-        val transcript = conversation.filter { it.speaker == Speaker.USER }.joinToString(", ") { it.text.trim() }
+        val replies = conversation.filter { it.speaker == Speaker.USER }.map { it.text.trim() }
 
         if (settings.settings.first().demoMode) {
-            val saved = demo.match(transcript)
+            val saved = demo.match(replies.joinToString(", "))
             if (saved != null) {
                 delay(DEMO_LATENCY_MS)
                 return answered(AiPath.DEMO, saved)
             }
-            return answered(AiPath.RULES, rules.parse(transcript, today))
         }
 
         return when (val result = gemini.understand(conversation, today)) {
@@ -52,7 +50,7 @@ internal class FallbackGoalUnderstandingService @Inject constructor(
 
             is AppResult.Failure -> {
                 analytics.log(AnalyticsEvent.AiFallbackUsed(result.error.reason()))
-                answered(AiPath.RULES, rules.parse(transcript, today))
+                answered(AiPath.RULES, rules.parse(replies, today))
             }
         }
     }

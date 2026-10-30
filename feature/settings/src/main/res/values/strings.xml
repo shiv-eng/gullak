@@ -14,11 +14,11 @@
     <string name="settings_date_reset">Demo date reset</string>
 
     <string name="settings_data_title">Demo data</string>
-    <string name="settings_data_body">Clears every Goal SIP and payment, and resets the demo date.</string>
+    <string name="settings_data_body">Clears every Gullak and payment, and resets the demo date.</string>
     <string name="settings_reset_seed">Reset and add Sunita\'s goals</string>
     <string name="settings_reset_empty_action">Reset to an empty home</string>
-    <string name="settings_reset_seeded">Reset done: Sunita\'s two Goal SIPs added</string>
-    <string name="settings_reset_empty">Reset done: no Goal SIPs</string>
+    <string name="settings_reset_seeded">Reset done: Sunita\'s two Gullaks added</string>
+    <string name="settings_reset_empty">Reset done: no Gullaks</string>
     <string name="settings_failed">Something went wrong. Please try again.</string>
 
     <string name="settings_language_title">Language</string>

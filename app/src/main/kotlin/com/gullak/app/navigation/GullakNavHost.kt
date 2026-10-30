@@ -18,7 +18,7 @@ import com.gullak.feature.settings.settingsScreen
 
 /**
  * Wires the feature graphs together. The app opens on a stand-in Paytm home; Gullak is entered from Gold & Silver,
- * the Goal SIP banner or its card. Features never navigate to each other directly.
+ * the Gullak banner or its card. Features never navigate to each other directly.
  */
 @Composable
 fun GullakNavHost(

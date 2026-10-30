@@ -1,6 +1,7 @@
 package com.gullak.app
 
 import android.os.Looper
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -61,7 +63,10 @@ class DemoPathUiTest {
     }
 
     private fun enterTargetDate() {
-        tap("Select date")
+        waitForText("Select date")
+        // At this size the field is behind the bottom button until the list is scrolled.
+        compose.onAllNodesWithText("Select date").onFirst().performSemanticsAction(SemanticsActions.OnClick)
+        settle()
         compose.onAllNodesWithContentDescription("text input mode", substring = true).onFirst().performClick()
         settle()
         compose.onAllNodes(hasSetTextAction()).onLast().performTextInput("06302027")
@@ -70,12 +75,12 @@ class DemoPathUiTest {
 
     @Test
     fun laptopGoalReachesGoalDetailOnTrackWithNothingSaved() {
-        waitForText("Start Goal SIP")
-        compose.onAllNodesWithText("Start Goal SIP").onFirst().performScrollTo().performClick()
+        waitForText("Start a Gullak")
+        compose.onAllNodesWithText("Start a Gullak").onFirst().performScrollTo().performClick()
         settle()
 
-        // On the Goal SIP page, then the form.
-        tap("Start Goal SIP")
+        // On the Gullak Bharo page, then the form.
+        tap("Start a Gullak")
         waitForText("Goal name")
         val fields = compose.onAllNodes(hasSetTextAction())
         fields[0].performTextInput("Laptop")
@@ -87,8 +92,8 @@ class DemoPathUiTest {
         tap("Proceed to approve")
         listOf("1", "2", "3", "4").forEach(::tap)
 
-        waitForText("Goal SIP started")
-        tap("View Goal SIPs")
+        waitForText("Gullak started")
+        tap("View Gullaks")
         tap("Laptop")
 
         waitForText("Saved so far")

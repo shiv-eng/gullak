@@ -19,7 +19,7 @@ data class HomeUiState(
     val goals: List<GoalSummary> get() = overview?.goals.orEmpty()
 }
 
-/** Gullak's own page: every Goal SIP with saved amount, status and next SIP. */
+/** Gullak's own page: every Gullak with saved amount, status and next SIP. */
 @HiltViewModel
 class HomeViewModel @Inject constructor(observeGoals: ObserveGoalsUseCase) : ViewModel() {
     val uiState: StateFlow<HomeUiState> = observeGoals()

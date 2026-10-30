@@ -5,7 +5,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 
-/** The Goal SIP flow. [startWithVoice] opens speech input straight away (the mic buttons). */
+/** The Gullak flow. [startWithVoice] opens speech input straight away (the mic buttons). */
 @Serializable
 data class CreateGoalRoute(val startWithVoice: Boolean = false)
 

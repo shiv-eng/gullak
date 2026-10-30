@@ -4,7 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
 
-/** One Goal SIP. [goalId] is read by [GoalDetailViewModel] from the saved state. */
+/** One Gullak. [goalId] is read by [GoalDetailViewModel] from the saved state. */
 @Serializable
 data class GoalDetailRoute(val goalId: String)
 

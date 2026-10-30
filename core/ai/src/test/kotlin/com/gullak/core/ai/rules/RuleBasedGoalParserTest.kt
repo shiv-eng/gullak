@@ -116,4 +116,66 @@ class RuleBasedGoalParserTest {
         assertNull(parse("3 bacchon ki fees").targetAmount)
         assertEquals(Money.fromRupees(50), parse("₹50 roz").targetAmount)
     }
+
+    private fun assertReads(
+        sentence: String,
+        name: String?,
+        rupees: Long?,
+        date: String?,
+    ) {
+        val goal = RuleBasedGoalParser().parse(sentence, LocalDate.of(2026, 10, 31))
+        assertEquals(sentence, name, goal.goalName)
+        assertEquals(sentence, rupees?.let { Money.fromRupees(it) }, goal.targetAmount)
+        assertEquals(sentence, date?.let(LocalDate::parse), goal.targetDate)
+    }
+
+    @Test
+    fun readsGoalsTheWaySpeechWritesThem() {
+        assertReads("bhai ki shadi me 10000 rs dene h 15 march ko", "Bhai ki shadi", 10_000, "2027-03-15")
+        assertReads("Bhai ki shadi mein ₹10000 dene hain 15 March ko", "Bhai ki shadi", 10_000, "2027-03-15")
+        assertReads("bhai ki shadi me 10,000 rupees dene hain 15 March tak", "Bhai ki shadi", 10_000, "2027-03-15")
+        assertReads("10000 rs bhai ki shadi me dene h 5 april ko", "Bhai ki shadi", 10_000, "2027-04-05")
+        assertReads(
+            "I need 10000 rupees for my brother's wedding on 15th March",
+            "Brother's wedding",
+            10_000,
+            "2027-03-15",
+        )
+    }
+
+    @Test
+    fun readsAmountsSaidInWords() {
+        assertReads("bhai ki shadi me das hazar dene hai december tak", "Bhai ki shadi", 10_000, "2026-12-31")
+        assertReads("goa jana hai paanch hazar rupaye me may me", "Goa", 5_000, "2027-05-31")
+        assertReads("brother's wedding 10k by 15 march 2027", "Brother's wedding", 10_000, "2027-03-15")
+        assertReads("phone cover paanch sau 15 december", "Phone cover", 500, "2026-12-15")
+        assertReads("bike do lakh 2 saal mein", "Bike", 2_00_000, "2028-10-31")
+    }
+
+    @Test
+    fun aNumberWordOnItsOwnIsNotAnAmount() {
+        assertReads("do log goa jayenge", "Do log goa jayenge", null, null)
+    }
+
+    @Test
+    fun readsDayOfMonthAndNumericDates() {
+        assertReads("shadi 10000 15 tarikh ko", "Shadi", 10_000, "2026-11-15")
+        assertReads("shadi 10000 15 tarikh ko march", "Shadi", 10_000, "2027-03-15")
+        assertReads("shadi 10000 march ki 15", "Shadi", 10_000, "2027-03-15")
+        assertReads("shadi 10000 15/03/2027 ko", "Shadi", 10_000, "2027-03-15")
+        assertReads("shadi 10000 15-3-27", "Shadi", 10_000, "2027-03-15")
+        assertReads("shadi 10000 31/02/2027", "Shadi", 10_000, null)
+    }
+
+    @Test
+    fun aLaterReplyCorrectsTheAmountOrDateAndKeepsTheName() {
+        val goal = RuleBasedGoalParser().parse(
+            listOf("bhai ki shadi 10000 15 march", "nahi 20 hazaar"),
+            LocalDate.of(2026, 10, 31),
+        )
+
+        assertEquals("Bhai ki shadi", goal.goalName)
+        assertEquals(Money.fromRupees(20_000), goal.targetAmount)
+        assertEquals(LocalDate.of(2027, 3, 15), goal.targetDate)
+    }
 }

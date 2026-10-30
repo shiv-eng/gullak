@@ -68,7 +68,7 @@ class FallbackGoalUnderstandingServiceTest {
     }
 
     @Test
-    fun demoModeFallsBackToRulesForUnknownSentencesAndCombinesTurns() = runTest {
+    fun demoModeAsksGeminiForUnknownSentencesThenFallsBackToRulesAndCombinesTurns() = runTest {
         val (service, settings) = service(demoMode = true)
 
         val goal = service.understand(
@@ -84,7 +84,7 @@ class FallbackGoalUnderstandingServiceTest {
         assertEquals(Money.fromRupees(20_000), goal?.targetAmount)
         assertEquals(LocalDate.parse("2027-03-31"), goal?.targetDate)
         assertEquals(AiPath.RULES, settings.settings.value.lastAiPath)
-        assertEquals(0, server.requestCount)
+        assertTrue(server.requestCount > 0)
     }
 
     @Test
@@ -131,5 +131,14 @@ class FallbackGoalUnderstandingServiceTest {
         assertEquals("Diwali", goal?.dateHint)
         assertEquals(0, server.requestCount)
         assertTrue(AnalyticsEvent.AiFallbackUsed("not_configured") in analytics.events)
+    }
+
+    @Test
+    fun aSentenceLikeASavedOneButWithAnotherAmountIsNotGivenTheSavedAnswer() {
+        val demo = DemoAiResponses()
+
+        assertEquals(Money.fromRupees(50_000), demo.match("Bhai ki shadi, agle December tak, 50 hazar")?.targetAmount)
+        assertEquals(null, demo.match("Bhai ki shaadi, agle December tak, 60 hazaar"))
+        assertEquals(null, demo.match("Bhai ki shaadi, agle January tak, 50 hazaar"))
     }
 }

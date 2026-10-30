@@ -160,7 +160,7 @@ internal fun PaytmHomeScreen(
                     onDemo = demo,
                 )
             }
-            item { GoalSipBanner(onClick = newGoal) }
+            item { GullakBanner(onClick = newGoal) }
             item { ServicesCard(R.string.paytm_section_upi, UPI_SERVICES, onClick = demo, filledCircles = true) }
             item { ServicesCard(R.string.paytm_section_recharge, RECHARGE_SERVICES, onClick = demo, viewAll = true) }
             item {
@@ -172,7 +172,7 @@ internal fun PaytmHomeScreen(
                 )
             }
             if (state.goals.isNotEmpty()) {
-                item { GoalSipsCard(state = state, onEvent = onEvent) }
+                item { GullakGoalsCard(state = state, onEvent = onEvent) }
             }
             item { ServicesCard(R.string.paytm_section_financial, FINANCIAL_SERVICES, onClick = demo, viewAll = true) }
             item {
@@ -259,9 +259,9 @@ private fun HomeTopBar(
     }
 }
 
-/** The promo banner slot, used for the Goal SIP launch. */
+/** The promo banner slot, used for the Gullak launch. */
 @Composable
-private fun GoalSipBanner(
+private fun GullakBanner(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -484,9 +484,9 @@ private fun GullakStrip(
     }
 }
 
-/** The user's Goal SIPs, shown once they have any, below Gold & Silver. */
+/** The user's Gullaks, shown once they have any, below Gold & Silver. */
 @Composable
-private fun GoalSipsCard(
+private fun GullakGoalsCard(
     state: PaytmHomeUiState,
     onEvent: (PaytmHomeEvent) -> Unit,
     modifier: Modifier = Modifier,

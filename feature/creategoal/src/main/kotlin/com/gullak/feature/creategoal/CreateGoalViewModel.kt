@@ -58,6 +58,13 @@ enum class VoiceProblem { FAILED, NOT_HEARD, MIC_DENIED }
 /** Why the form cannot make a plan yet. Shown from string resources. */
 enum class InputProblem { AMOUNT_TOO_LOW, AMOUNT_TOO_HIGH, DATE_NOT_IN_FUTURE, TOO_CLOSE_FOR_SIP, LUMP_SUM_TOO_HIGH }
 
+/** What Gullak understood from speech, read back for the user to confirm. All values are checked ones. */
+data class GoalReadback(
+    val name: String,
+    val target: Money,
+    val date: LocalDate,
+)
+
 data class CreateGoalUiState(
     val today: LocalDate,
     val name: String = "",
@@ -71,6 +78,8 @@ data class CreateGoalUiState(
     val isUnderstanding: Boolean = false,
     val transcript: String? = null,
     val followUp: FollowUpQuestion? = null,
+    /** Waiting for the user to confirm or correct what was understood. */
+    val readback: GoalReadback? = null,
     val festival: FestivalMatch? = null,
     val isListening: Boolean = false,
     /** What the recogniser has heard so far, while listening. */
@@ -147,6 +156,9 @@ sealed interface CreateGoalEvent {
     /** The current follow-up question, in words: read it aloud if replies are on, then listen for the answer. */
     data class FollowUpShown(val text: String) : CreateGoalEvent
 
+    /** The current read-back, in words: read it aloud if replies are on, then listen for yes, no or a correction. */
+    data class ReadbackShown(val text: String) : CreateGoalEvent
+
     data object VoiceHintDismissed : CreateGoalEvent
 
     /** Read [text] aloud (a follow-up question or an explanation, already in the right language). */
@@ -185,7 +197,7 @@ sealed interface CreateGoalEffect {
 }
 
 /**
- * The Goal SIP flow. The AI only fills the form from speech; every amount, date and destination comes from
+ * The Gullak flow. The AI only fills the form from speech; every amount, date and destination comes from
  * the plan engine (via [BuildPlanUseCase]) and is recalculated again when the goal is created.
  */
 @HiltViewModel
@@ -213,9 +225,10 @@ class CreateGoalViewModel @Inject constructor(
     private var speakJob: Job? = null
     private var listenJob: Job? = null
     private var announcedFollowUp: FollowUpQuestion? = null
+    private var announcedReadback: GoalReadback? = null
     private var voiceHintShown = false
 
-    /** Read the next explanation aloud: the one for a goal that was just spoken. */
+    /** Read the next explanation aloud: the user has just confirmed a goal by voice. */
     private var speakNextExplanation = false
 
     init {
@@ -260,7 +273,7 @@ class CreateGoalViewModel @Inject constructor(
 
     private fun onVoiceEvent(event: CreateGoalEvent) {
         when (event) {
-            is CreateGoalEvent.GoalSpoken -> understand(event.text)
+            is CreateGoalEvent.GoalSpoken -> heard(event.text)
 
             CreateGoalEvent.VoiceUnavailable -> state.update { it.copy(voiceProblem = VoiceProblem.FAILED) }
 
@@ -273,6 +286,8 @@ class CreateGoalViewModel @Inject constructor(
             CreateGoalEvent.MicDenied -> state.update { it.copy(voiceProblem = VoiceProblem.MIC_DENIED) }
 
             is CreateGoalEvent.FollowUpShown -> announceFollowUp(event.text)
+
+            is CreateGoalEvent.ReadbackShown -> announceReadback(event.text)
 
             CreateGoalEvent.VoiceHintDismissed -> state.update { it.copy(showVoiceHint = false) }
 
@@ -287,7 +302,7 @@ class CreateGoalViewModel @Inject constructor(
         when (event) {
             CreateGoalEvent.StartClicked -> if (state.value.canStart) {
                 stopVoice()
-                state.update { it.copy(showMandate = true) }
+                state.update { it.copy(showMandate = true, readback = null) }
             }
 
             CreateGoalEvent.MandateDismissed -> state.update { it.copy(showMandate = false) }
@@ -316,18 +331,27 @@ class CreateGoalViewModel @Inject constructor(
         // Typing takes over from speech.
         speakNextExplanation = false
         if (speakJob?.isActive == true || state.value.isListening) stopVoice()
-        state.update { change(it).copy(createFailed = false) }
+        state.update { change(it).copy(createFailed = false, readback = null) }
         replan()
     }
 
     private fun understand(text: String) {
         if (text.isBlank()) return
         analytics.log(AnalyticsEvent.VoiceUsed)
+        // A question is open: this reply belongs to the same goal. Otherwise it starts a new one.
+        if (state.value.followUp == null && state.value.readback == null) conversation.clear()
         conversation += ConversationTurn(Speaker.USER, text.trim())
         announcedFollowUp = null
+        announcedReadback = null
         speakNextExplanation = false
         state.update {
-            it.copy(isUnderstanding = true, transcript = text.trim(), followUp = null, voiceProblem = null)
+            it.copy(
+                isUnderstanding = true,
+                transcript = text.trim(),
+                followUp = null,
+                readback = null,
+                voiceProblem = null,
+            )
         }
         viewModelScope.launch {
             when (val result = understandGoal(conversation.toList())) {
@@ -354,10 +378,11 @@ class CreateGoalViewModel @Inject constructor(
         }
         when (understanding) {
             is Understanding.ReadyToConfirm -> {
-                conversation.clear()
-                speakNextExplanation = state.value.voiceReplies
+                val readback = GoalReadback(understanding.goalName, understanding.target, understanding.targetDate)
+                conversation += ConversationTurn(Speaker.GULLAK, modelContext(readback))
                 state.update {
                     it.copy(
+                        readback = readback,
                         name = understanding.goalName,
                         amountText = (understanding.target.paise / Money.PAISE_PER_RUPEE).toString(),
                         targetDate = understanding.targetDate,
@@ -494,12 +519,49 @@ class CreateGoalViewModel @Inject constructor(
 
     /** What Gullak asked, as context for the model's next reading (not shown to the user). */
     private fun modelContext(reason: FollowUpReason): String = when (reason) {
+        FollowUpReason.WHAT_TO_CHANGE -> "What should I change?"
         FollowUpReason.MISSING_NAME -> "What are you saving for?"
         FollowUpReason.MISSING_AMOUNT -> "How much do you need?"
         FollowUpReason.MISSING_DATE -> "By when do you need it?"
         FollowUpReason.AMOUNT_OUT_OF_RANGE -> "Please give an amount between 500 and 50 lakh rupees."
         FollowUpReason.DATE_NOT_IN_FUTURE -> "Please give a date after today."
         FollowUpReason.DATE_TOO_FAR -> "Please give a date within 10 years."
+    }
+
+    private fun modelContext(readback: GoalReadback): String =
+        "${readback.name}, ${readback.target.paise / Money.PAISE_PER_RUPEE} rupees, by ${readback.date}. Is that right?"
+
+    private fun heard(text: String) {
+        if (state.value.readback == null) understand(text) else replyToReadback(text)
+    }
+
+    private fun replyToReadback(text: String) {
+        when (readbackReply(text)) {
+            ReadbackReply.YES -> {
+                state.update { it.copy(readback = null, transcript = text.trim()) }
+                val explanation = state.value.explanation
+                when {
+                    !state.value.voiceReplies -> Unit
+                    explanation != null -> speak(explanation)
+                    else -> speakNextExplanation = true
+                }
+            }
+
+            ReadbackReply.NO -> {
+                conversation += ConversationTurn(Speaker.USER, text.trim())
+                conversation += ConversationTurn(Speaker.GULLAK, modelContext(FollowUpReason.WHAT_TO_CHANGE))
+                announcedFollowUp = null
+                state.update {
+                    it.copy(
+                        readback = null,
+                        transcript = text.trim(),
+                        followUp = FollowUpQuestion.Standard(FollowUpReason.WHAT_TO_CHANGE),
+                    )
+                }
+            }
+
+            ReadbackReply.CORRECTION -> understand(text)
+        }
     }
 
     private fun speak(text: String) {
@@ -522,6 +584,18 @@ class CreateGoalViewModel @Inject constructor(
         val question = state.value.followUp ?: return
         if (question == announcedFollowUp) return
         announcedFollowUp = question
+        askAloud(text)
+    }
+
+    /** Runs once per read-back, for the same reason. With voice replies off, the read-back is only on screen. */
+    private fun announceReadback(text: String) {
+        val readback = state.value.readback ?: return
+        if (readback == announcedReadback) return
+        announcedReadback = readback
+        if (state.value.voiceReplies) askAloud(text)
+    }
+
+    private fun askAloud(text: String) {
         speakJob?.cancel()
         speakJob = viewModelScope.launch {
             // A text-to-speech engine that never reports the end must not stop the mic from listening.
@@ -549,15 +623,21 @@ class CreateGoalViewModel @Inject constructor(
 
             is SpeechEvent.Final -> {
                 stopListeningState()
-                understand(event.text)
+                heard(event.text)
             }
 
             is SpeechEvent.Error -> {
                 stopListeningState()
                 when (event.type) {
-                    SpeechError.NO_SPEECH -> state.update { it.copy(voiceProblem = VoiceProblem.NOT_HEARD) }
+                    // Silence after a read-back just leaves the form as it is.
+                    SpeechError.NO_SPEECH -> if (state.value.readback == null) {
+                        state.update { it.copy(voiceProblem = VoiceProblem.NOT_HEARD) }
+                    }
+
                     SpeechError.PERMISSION -> state.update { it.copy(voiceProblem = VoiceProblem.MIC_DENIED) }
+
                     SpeechError.FAILED -> state.update { it.copy(voiceProblem = VoiceProblem.FAILED) }
+
                     SpeechError.UNAVAILABLE -> send(CreateGoalEffect.OpenPhoneSpeech)
                 }
             }

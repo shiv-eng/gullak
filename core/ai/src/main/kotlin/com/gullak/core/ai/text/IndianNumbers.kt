@@ -6,7 +6,7 @@ import java.math.BigDecimal
 internal data class NumberMention(
     val value: BigDecimal,
     val range: IntRange,
-    /** Followed by hazaar / lakh / crore, or a fraction word such as "dedh". */
+    /** Followed by hazaar / lakh / crore, or a number word such as "dedh". */
     val hasScaleWord: Boolean,
     /** Preceded by ₹ or "Rs". */
     val hasRupeeSign: Boolean,
@@ -22,14 +22,15 @@ internal object IndianNumbers {
     private const val DEVANAGARI_ZERO = '०'
 
     private val SCALES: Map<String, BigDecimal> = buildMap {
-        listOf("hazaar", "hazar", "hajar", "hajaar", "hazaar", "thousand", "हज़ार", "हजार")
+        listOf("hazaar", "hazar", "hajar", "hajaar", "thousand", "k", "हज़ार", "हजार")
             .forEach { put(it, BigDecimal(1_000)) }
+        listOf("sau", "hundred", "सौ").forEach { put(it, BigDecimal(100)) }
         listOf("lakh", "lakhs", "lac", "lacs", "laakh", "लाख").forEach { put(it, BigDecimal(1_00_000)) }
         listOf("crore", "crores", "करोड़", "करोड").forEach { put(it, BigDecimal(1_00_00_000)) }
     }
 
-    /** Words that stand for a number on their own, used only before a scale word ("dedh lakh"). */
-    private val FRACTION_WORDS: Map<String, BigDecimal> = mapOf(
+    /** Words that stand for a number, used only before a scale word: "dedh lakh", "das hazar", "paanch sau". */
+    private val NUMBER_WORDS: Map<String, BigDecimal> = mapOf(
         "dedh" to BigDecimal("1.5"),
         "derh" to BigDecimal("1.5"),
         "डेढ़" to BigDecimal("1.5"),
@@ -37,7 +38,7 @@ internal object IndianNumbers {
         "dhai" to BigDecimal("2.5"),
         "adhai" to BigDecimal("2.5"),
         "ढाई" to BigDecimal("2.5"),
-    )
+    ) + wholeNumberWords()
 
     /** Words that adjust the number after them: "sava 2" = 2.25, "saadhe 3" = 3.5, "paune 2" = 1.75. */
     private val MODIFIERS: Map<String, BigDecimal> = mapOf(
@@ -52,6 +53,33 @@ internal object IndianNumbers {
         "पौने" to BigDecimal("-0.25"),
     )
 
+    // A table of number words: each number is the meaning of the words beside it.
+    @Suppress("MagicNumber")
+    private fun wholeNumberWords(): Map<String, BigDecimal> = mapOf(
+        1 to "ek one एक",
+        2 to "do two दो",
+        3 to "teen three तीन",
+        4 to "char chaar four चार",
+        5 to "paanch panch five पांच पाँच",
+        6 to "chhe chhah six छह",
+        7 to "saat seven सात",
+        8 to "aath eight आठ",
+        9 to "nau nine नौ",
+        10 to "das ten दस",
+        11 to "gyarah eleven ग्यारह",
+        12 to "barah twelve बारह",
+        15 to "pandrah fifteen पंद्रह",
+        20 to "bees twenty बीस",
+        25 to "pachees pachis पच्चीस",
+        30 to "tees thirty तीस",
+        40 to "chalis chaalis forty चालीस",
+        50 to "pachas pachaas fifty पचास",
+        60 to "saath sixty साठ",
+        70 to "sattar seventy सत्तर",
+        80 to "assi eighty अस्सी",
+        90 to "nabbe ninety नब्बे",
+    ).flatMap { (value, words) -> words.split(" ").map { it to BigDecimal(value) } }.toMap()
+
     private const val NOT_WORD_BEFORE = """(?<![\p{L}\p{M}\d])"""
     private const val NOT_WORD_AFTER = """(?![\p{L}\p{M}\d])"""
 
@@ -62,7 +90,7 @@ internal object IndianNumbers {
         NOT_WORD_BEFORE +
             "(?:(?<mod>${alternation(MODIFIERS.keys)})\\s+)?" +
             "(?:(?<num>\\d{1,3}(?:,\\d{2,3})+(?:\\.\\d+)?|\\d+(?:\\.\\d+)?)|(?<frac>${alternation(
-                FRACTION_WORDS.keys,
+                NUMBER_WORDS.keys,
             )}))" +
             "(?:\\s*(?<scale>${alternation(SCALES.keys)})$NOT_WORD_AFTER)?",
         RegexOption.IGNORE_CASE,
@@ -80,8 +108,8 @@ internal object IndianNumbers {
         return NUMBER_PATTERN.findAll(normalized).mapNotNull { match ->
             val groups = match.groups
             val scale = groups["scale"]?.value?.lowercase()?.let { SCALES[it] }
-            val fraction = groups["frac"]?.value?.lowercase()?.let { FRACTION_WORDS[it] }
-            // A fraction word without a scale ("dedh saal") is not an amount.
+            val fraction = groups["frac"]?.value?.lowercase()?.let { NUMBER_WORDS[it] }
+            // A number word without a scale ("dedh saal", "do log") is not an amount.
             if (fraction != null && scale == null) return@mapNotNull null
             val base = fraction ?: groups["num"]?.value?.replace(",", "")?.let(::BigDecimal) ?: return@mapNotNull null
             val modifier = groups["mod"]?.value?.lowercase()?.let { MODIFIERS[it] } ?: BigDecimal.ZERO

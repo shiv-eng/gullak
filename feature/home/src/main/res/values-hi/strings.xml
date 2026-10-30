@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_title">गोल SIP</string>
-    <string name="home_new_goal">गोल SIP शुरू करें</string>
-    <string name="home_empty_prompt">अभी कोई गोल SIP नहीं</string>
+    <string name="home_title">गुल्लक भरो</string>
+    <string name="home_new_goal">गुल्लक शुरू करें</string>
+    <string name="home_empty_prompt">अभी कोई गुल्लक नहीं</string>
     <string name="home_empty_hint">लक्ष्य, रक़म और तारीख़ चुनें। गुल्लक रोज़, हफ़्ते या महीने की SIP बनाकर AutoPay सेट करता है।</string>
     <string name="home_mic_description">अपना लक्ष्य बोलें</string>
     <string name="home_back">वापस</string>
-    <string name="home_total_saved">गोल SIP में कुल बचत</string>
+    <string name="home_total_saved">गुल्लक में कुल बचत</string>
     <string name="home_split">Paytm Gold %1$s · Paytm Money %2$s</string>
-    <string name="home_goals_title">आपकी गोल SIP</string>
+    <string name="home_goals_title">आपकी गुल्लक</string>
     <string name="home_status_on_track">सही रास्ते पर</string>
     <string name="home_status_behind">%1$s पीछे</string>
     <string name="home_status_reached">लक्ष्य पूरा</string>

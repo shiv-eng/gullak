@@ -33,6 +33,26 @@ class RuleBasedGoalParser @Inject constructor() {
         )
     }
 
+    /**
+     * A conversation, one reply at a time: the first name stands, and a later amount or date replaces an earlier one,
+     * so "nahi, 20 hazaar" corrects the amount without touching the rest.
+     */
+    fun parse(
+        replies: List<String>,
+        today: LocalDate,
+    ): ParsedGoal {
+        val parsed = replies.map { parse(it, today) }
+        val date = parsed.asReversed().firstNotNullOfOrNull { it.targetDate }
+        return ParsedGoal(
+            goalName = parsed.firstNotNullOfOrNull { it.goalName },
+            targetAmount = parsed.asReversed().firstNotNullOfOrNull { it.targetAmount },
+            targetDate = date,
+            dateHint = parsed.asReversed().firstNotNullOfOrNull { it.dateHint }.takeIf { date == null },
+            language = detectLanguage(replies.joinToString(" ")),
+            followUp = null,
+        )
+    }
+
     /** The largest number that reads as money: has ₹ or a scale word, or is at least ₹100. */
     private fun findAmount(
         text: String,
@@ -72,11 +92,16 @@ class RuleBasedGoalParser @Inject constructor() {
     private fun trimFiller(words: List<String>): List<String> {
         var start = 0
         var end = words.size
-        while (start < end && words[start].lowercase().trim('₹') in LEADING_FILLER) start++
-        while (end > start && words[end - 1].lowercase() in TRAILING_FILLER) end--
+        while (start < end && isFiller(words[start], LEADING_FILLER)) start++
+        while (end > start && isFiller(words[end - 1], TRAILING_FILLER)) end--
         val kept = words.subList(start, end)
-        return if (kept.all { it.lowercase() in LEADING_FILLER + TRAILING_FILLER }) emptyList() else kept
+        return if (kept.all { isFiller(it, LEADING_FILLER + TRAILING_FILLER) }) emptyList() else kept
     }
+
+    private fun isFiller(
+        word: String,
+        filler: Set<String>,
+    ): Boolean = word.lowercase().trim('₹', '.', ':').let { it.isEmpty() || it in filler }
 
     private fun detectLanguage(text: String): GoalLanguage {
         if (text.any { it in DEVANAGARI }) return GoalLanguage.HINDI
@@ -102,12 +127,14 @@ class RuleBasedGoalParser @Inject constructor() {
         val LEADING_FILLER = setOf(
             "mujhe", "mujhko", "humein", "hame", "i", "want", "to", "need", "my", "for", "a", "an", "the",
             "मुझे", "हमें", "kuch", "kuchh", "paise", "paisa", "money", "save", "बचाने", "कुछ", "पैसे",
+            "rs", "rupee", "rupees", "rupaye", "rupay", "rupiya", "रुपये", "रुपए", "of", "on",
         )
 
         val TRAILING_FILLER = setOf(
             "ke", "liye", "ki", "ka", "tak", "by", "in", "on", "for", "mein", "me", "hai", "hain", "h",
             "chahiye", "lena", "leni", "lene", "jaana", "jana", "karna", "banana", "bachana", "bachane",
-            "save", "saving", "paise", "paisa", "rupees", "rupaye", "rs", "baad", "kuch",
+            "save", "saving", "paise", "paisa", "rupee", "rupees", "rupaye", "rupay", "rupiya", "rs", "baad", "kuch",
+            "dene", "dena", "deni", "ko", "and", "aur", "देने", "देना", "को", "रुपए", "और",
             "के", "लिए", "की", "का", "तक", "में", "है", "हैं", "बचाने", "बचाना", "लेना", "पैसे", "रुपये",
         )
 

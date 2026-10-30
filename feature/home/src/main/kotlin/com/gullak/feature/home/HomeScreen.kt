@@ -71,7 +71,7 @@ internal fun HomeEntry(
     )
 }
 
-/** Gullak's page as a Paytm sub-page (like Paytm Gold): summary, Goal SIPs, and Start Goal SIP. */
+/** Gullak's page as a Paytm sub-page (like Paytm Gold): summary, Gullaks, and Start a Gullak. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeScreen(

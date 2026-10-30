@@ -132,7 +132,7 @@ internal fun GoalDetailEntry(
     )
 }
 
-/** A Goal SIP in the style of Paytm Gold's "Your gold in locker" page. */
+/** A Gullak in the style of Paytm Gold's "Your gold in locker" page. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun GoalDetailScreen(

@@ -1,6 +1,7 @@
 package com.gullak.feature.creategoal
 
 import com.gullak.core.domain.ai.FollowUpQuestion
+import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.domain.ai.SpeechError
 import com.gullak.core.domain.ai.SpeechEvent
 import com.gullak.core.domain.analytics.AnalyticsEvent
@@ -9,6 +10,7 @@ import com.gullak.core.domain.testing.TestData
 import com.gullak.core.domain.testing.TestData.rupees
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.ai.ParsedGoal
+import com.gullak.core.model.ai.Speaker
 import com.gullak.core.model.goal.Destination
 import com.gullak.core.model.goal.Frequency
 import com.gullak.core.model.result.AppError
@@ -317,17 +319,84 @@ class CreateGoalViewModelTest {
     }
 
     @Test
-    fun theExplanationOfASpokenGoalIsReadOnceAndNotAfterEditing() = runTest {
+    fun aSpokenGoalIsReadBackOnceAndYesReadsTheExplanation() = runTest {
+        env.understandingService.result = AppResult.Success(spokenGoal)
+        env.speech.heard += listOf(SpeechEvent.Final("haan theek hai"))
+        val vm = viewModel()
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Laptop"))
+        advanceUntilIdle()
+        assertEquals(GoalReadback("Laptop", rupees(36_000), TestData.LAPTOP_DATE), vm.uiState.value.readback)
+
+        repeat(2) { vm.onEvent(CreateGoalEvent.ReadbackShown("Sahi hai?")) }
+        advanceUntilIdle()
+
+        assertEquals(listOf("Sahi hai?", "Explanation"), env.voice.spoken)
+        assertEquals(1, env.speech.listens)
+        assertNull(vm.uiState.value.readback)
+
+        vm.onEvent(CreateGoalEvent.AmountChanged("40000"))
+        advanceUntilIdle()
+        assertEquals(listOf("Sahi hai?", "Explanation"), env.voice.spoken)
+    }
+
+    @Test
+    fun noAfterAReadBackAsksWhatToChangeAndKeepsTheGoal() = runTest {
+        env.understandingService.result = AppResult.Success(spokenGoal)
+        env.speech.heard += listOf(SpeechEvent.Final("nahi"))
+        val vm = viewModel()
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Laptop"))
+        advanceUntilIdle()
+
+        vm.onEvent(CreateGoalEvent.ReadbackShown("Sahi hai?"))
+        advanceUntilIdle()
+
+        assertEquals(FollowUpQuestion.Standard(FollowUpReason.WHAT_TO_CHANGE), vm.uiState.value.followUp)
+        assertEquals("Laptop", vm.uiState.value.name)
+    }
+
+    @Test
+    fun aCorrectionAfterAReadBackIsUnderstoodWithTheGoalAndReadBackAgain() = runTest {
+        env.understandingService.result = AppResult.Success(spokenGoal)
+        env.speech.heard += listOf(SpeechEvent.Final("nahi 40 hazaar"))
+        val vm = viewModel()
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Laptop"))
+        advanceUntilIdle()
+
+        env.understandingService.result = AppResult.Success(spokenGoal.copy(targetAmount = rupees(40_000)))
+        vm.onEvent(CreateGoalEvent.ReadbackShown("Sahi hai?"))
+        advanceUntilIdle()
+
+        assertEquals("40000", vm.uiState.value.amountText)
+        assertEquals(rupees(40_000), vm.uiState.value.readback?.target)
+        val users = env.understandingService.requests.last().filter { it.speaker == Speaker.USER }
+        assertEquals(listOf("Laptop", "nahi 40 hazaar"), users.map { it.text })
+    }
+
+    @Test
+    fun withVoiceRepliesOffTheReadBackIsOnlyOnScreen() = runTest {
+        env.settings.setVoiceReplies(false)
         env.understandingService.result = AppResult.Success(spokenGoal)
         val vm = viewModel()
         vm.onEvent(CreateGoalEvent.GoalSpoken("Laptop"))
         advanceUntilIdle()
-        assertEquals(listOf("Explanation"), env.voice.spoken)
 
-        vm.onEvent(CreateGoalEvent.AmountChanged("40000"))
+        vm.onEvent(CreateGoalEvent.ReadbackShown("Sahi hai?"))
         advanceUntilIdle()
 
-        assertEquals(listOf("Explanation"), env.voice.spoken)
+        assertTrue(env.voice.spoken.isEmpty())
+        assertEquals(0, env.speech.listens)
+    }
+
+    @Test
+    fun aNewSpokenGoalAfterAConfirmedOneStartsAFreshConversation() = runTest {
+        env.understandingService.result = AppResult.Success(spokenGoal)
+        val vm = viewModel()
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Laptop"))
+        vm.onEvent(CreateGoalEvent.GoalSpoken("haan"))
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Goa trip"))
+        advanceUntilIdle()
+
+        assertEquals(listOf("Goa trip"), env.understandingService.requests.last().map { it.text })
     }
 
     @Test
@@ -360,6 +429,8 @@ class CreateGoalViewModelTest {
         env.understandingService.result = AppResult.Success(spokenGoal)
         val vm = viewModel()
         vm.onEvent(CreateGoalEvent.GoalSpoken("Laptop"))
+        advanceUntilIdle()
+        vm.onEvent(CreateGoalEvent.ReadbackShown("Sahi hai?"))
         advanceUntilIdle()
         assertTrue(vm.uiState.value.showVoiceHint)
         assertTrue(env.settings.settings.value.voiceHintShown)

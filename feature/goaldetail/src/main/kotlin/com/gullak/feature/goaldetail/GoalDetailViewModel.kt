@@ -83,7 +83,7 @@ sealed interface GoalDetailEffect {
 }
 
 /**
- * One Goal SIP: saved amount, status and history, the demo controls that post the next debit, and the replan
+ * One Gullak: saved amount, status and history, the demo controls that post the next debit, and the replan
  * sheet after a failure. Every amount and date comes from the plan engine through the use cases.
  */
 @HiltViewModel

@@ -12,7 +12,8 @@ import javax.inject.Inject
 /**
  * Saved answers for the brief's 12 test sentences and the demo script, as Gemini would give them on
  * 31 Oct 2026 (the demo clock's start date). Matching tolerates punctuation, case and common Hinglish
- * spellings ("hazar", "shadi"), so a slightly different transcript still matches.
+ * spellings ("hazar", "shadi"), so a slightly different transcript still matches, but never one with a different
+ * amount or date: a sentence that says other numbers or months gets a real reading instead.
  */
 class DemoAiResponses @Inject constructor() {
 
@@ -21,7 +22,7 @@ class DemoAiResponses @Inject constructor() {
         if (tokens.isEmpty()) return null
         return entries
             .map { it to similarity(tokens, it.tokens) }
-            .filter { (_, score) -> score >= MIN_SIMILARITY }
+            .filter { (entry, score) -> score >= MIN_SIMILARITY && facts(tokens) == facts(entry.tokens) }
             .maxByOrNull { (_, score) -> score }
             ?.first
             ?.goal
@@ -129,6 +130,15 @@ class DemoAiResponses @Inject constructor() {
             "दिसम्बर" to "december", "तक" to "tak", "हज़ार" to "hazaar", "हजार" to "hazaar", "लैपटॉप" to "laptop",
             "के" to "ke", "लिए" to "liye", "जून" to "june",
         )
+
+        val FACT_WORDS = setOf(
+            "january", "february", "march", "april", "may", "june", "july", "august", "september", "october",
+            "november", "december", "hazaar", "lakh", "dedh", "mahine", "saal",
+        )
+
+        /** The words that change what the goal is: numbers, months and scale words. */
+        fun facts(tokens: Set<String>): Set<String> =
+            tokens.filter { word -> word in FACT_WORDS || word.any(Char::isDigit) }.toSet()
 
         fun tokens(text: String): Set<String> = text.lowercase()
             .replace(Regex("""(?<=\d),(?=\d)"""), "")

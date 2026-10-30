@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="detail_title">Goal SIP</string>
+    <string name="detail_title">Your Gullak</string>
     <string name="detail_back">Back</string>
 
     <string name="detail_saved_label">Saved so far</string>

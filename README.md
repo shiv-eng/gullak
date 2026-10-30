@@ -25,7 +25,7 @@ The screenshots were taken before the one-time payment field and the speaker but
 
 ## Flow
 
-1. **Paytm home:** Gold & Silver card, then "Goal SIP by Gullak". Only Gullak works; other tiles say so.
+1. **Paytm home:** Gold & Silver card, then "Gullak Bharo". Only Gullak works; other tiles say so.
 2. **Goal form:** name, amount, optional one-time payment, date. The mic fills the form through the AI.
 3. **Plan:** Daily, Weekly or Monthly with the amount, where the money goes, and why.
 4. **AutoPay:** mandate summary, demo bank account, demo approval code, processing, success.
@@ -82,8 +82,11 @@ flowchart TD
 | Explaining a plan | Gemini | `NumberGuard`: any number not in the plan input discards the reply for a string template |
 | Moving money | Nobody: AI has no access to it | Gateways are only called by use cases after the user approves |
 
-Understanding chain: demo mode uses `DemoAiResponses` (rules if no saved answer); otherwise Gemini, then
-`RuleBasedGoalParser` on any failure. Settings shows which path read the last goal.
+Understanding chain: demo mode uses a saved answer from `DemoAiResponses` if the sentence matches with the same numbers
+and months; otherwise Gemini, then `RuleBasedGoalParser` on any failure. Settings shows which path read the last goal.
+
+After reading a spoken goal, Gullak reads it back from checked values and listens: yes reads the explanation, no asks
+what to change, and anything else is taken as a correction.
 
 Explanations come in the language the user spoke: English, Hinglish or Hindi. Voice replies read follow-up questions
 and explanations aloud with Android text-to-speech, and can be turned off in Settings. After a follow-up question the

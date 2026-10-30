@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="create_title">गोल SIP शुरू करें</string>
+    <string name="create_title">गुल्लक शुरू करें</string>
     <string name="create_back">वापस</string>
 
     <string name="create_voice_title">अपना लक्ष्य बोलें</string>
@@ -49,12 +49,12 @@
     <string name="create_reason_long">लंबा लक्ष्य: सोने का दाम फिर भी बदल सकता है।</string>
     <string name="create_why_title">यह योजना क्यों</string>
 
-    <string name="create_start">गोल SIP शुरू करें</string>
+    <string name="create_start">गुल्लक शुरू करें</string>
     <string name="create_start_with">%1$s से शुरू करें</string>
     <string name="create_demo_note">UPI AutoPay · डेमो: कोई असली भुगतान नहीं</string>
 
     <string name="mandate_title">UPI AutoPay सेट करें</string>
-    <string name="mandate_subtitle">आपकी %1$s गोल SIP के लिए</string>
+    <string name="mandate_subtitle">आपकी %1$s गुल्लक के लिए</string>
     <string name="mandate_amount">रक़म</string>
     <string name="mandate_frequency">कितनी बार</string>
     <string name="mandate_first">पहला भुगतान</string>
@@ -67,14 +67,14 @@
     <string name="processing_step_plan">आपकी योजना दर्ज हो रही है</string>
     <string name="processing_step_autopay">AutoPay सेट हो रहा है</string>
 
-    <string name="success_title">गोल SIP शुरू हो गई</string>
+    <string name="success_title">गुल्लक शुरू हो गई</string>
     <string name="success_body">%1$s: %4$s से %3$s %2$s</string>
     <string name="success_destination">पैसा जाएगा: %1$s</string>
     <string name="success_done">हो गया</string>
-    <string name="success_view_goals">गोल SIP देखें</string>
+    <string name="success_view_goals">गुल्लक देखें</string>
     <string name="bank_title">AutoPay सेट करें</string>
     <string name="bank_paying">आप सेट कर रहे हैं</string>
-    <string name="bank_payee">%1$s गोल SIP के लिए UPI AutoPay</string>
+    <string name="bank_payee">%1$s गुल्लक के लिए UPI AutoPay</string>
     <string name="bank_section">इस खाते से भुगतान</string>
     <string name="bank_demo_name">डेमो बैंक · बचत खाता</string>
     <string name="bank_demo_number">खाता ••4321</string>
@@ -84,7 +84,7 @@
     <string name="bank_sample_upi">UPI ID: sunita@samplebank</string>
     <string name="bank_proceed">मंज़ूरी के लिए आगे बढ़ें</string>
     <string name="approval_title">AutoPay को मंज़ूरी दें</string>
-    <string name="approval_payee">गुल्लक गोल SIP</string>
+    <string name="approval_payee">गुल्लक भरो</string>
     <string name="approval_details">%1$s AutoPay · %2$s %3$s</string>
     <string name="approval_enter">4 अंकों का डेमो कोड डालें</string>
     <string name="approval_demo_note">डेमो मंज़ूरी: कोई भी 4 अंक डालें। यह आपका UPI PIN नहीं है, और कुछ भी सेव या भेजा नहीं जाता।</string>
@@ -101,4 +101,28 @@
     <string name="create_voice_hint">इस फ़ोन में हिंदी आवाज़ इंस्टॉल नहीं है। हिंदी में जवाब सुनने के लिए इसे टेक्स्ट-टू-स्पीच सेटिंग में इंस्टॉल करें।</string>
     <string name="create_voice_hint_action">सेटिंग खोलें</string>
     <string name="create_voice_hint_dismiss">अभी नहीं</string>
+    <string name="create_ask_change">क्या बदलना है? नई रक़म या तारीख़ बोलें।</string>
+    <string name="create_readback_en">Got it: %1$s, %2$s by %3$s. Is that right?</string>
+    <string name="create_readback_hinglish">Samajh gaya: %1$s, %2$s, %3$s tak. Sahi hai?</string>
+    <string name="create_readback_hi">समझ गया: %1$s, %2$s, %3$s तक। सही है?</string>
+    <string-array name="create_goal_suggestions">
+        <item>लैपटॉप</item>
+        <item>नया फ़ोन</item>
+        <item>भाई की शादी</item>
+        <item>गोवा ट्रिप</item>
+        <item>बेटे के लिए लैपटॉप</item>
+        <item>कॉलेज के लिए लैपटॉप</item>
+        <item>बाइक</item>
+        <item>कार की डाउन पेमेंट</item>
+        <item>शादी</item>
+        <item>परिवार की छुट्टी</item>
+        <item>स्कूल की फ़ीस</item>
+        <item>कॉलेज की फ़ीस</item>
+        <item>जन्मदिन का तोहफ़ा</item>
+        <item>दिवाली की ख़रीदारी</item>
+        <item>इमरजेंसी फ़ंड</item>
+        <item>नया फ़्रिज</item>
+        <item>नया टीवी</item>
+        <item>घर की मरम्मत</item>
+    </string-array>
 </resources>

@@ -14,11 +14,11 @@
     <string name="settings_date_reset">डेमो तारीख़ रीसेट हो गई</string>
 
     <string name="settings_data_title">डेमो डेटा</string>
-    <string name="settings_data_body">सभी गोल SIP और भुगतान हटाता है और डेमो तारीख़ रीसेट करता है।</string>
+    <string name="settings_data_body">सभी गुल्लक और भुगतान हटाता है और डेमो तारीख़ रीसेट करता है।</string>
     <string name="settings_reset_seed">रीसेट करें और सुनीता के लक्ष्य जोड़ें</string>
     <string name="settings_reset_empty_action">ख़ाली होम पर रीसेट करें</string>
-    <string name="settings_reset_seeded">रीसेट हो गया: सुनीता की दो गोल SIP जुड़ गईं</string>
-    <string name="settings_reset_empty">रीसेट हो गया: कोई गोल SIP नहीं</string>
+    <string name="settings_reset_seeded">रीसेट हो गया: सुनीता की दो गुल्लक जुड़ गईं</string>
+    <string name="settings_reset_empty">रीसेट हो गया: कोई गुल्लक नहीं</string>
     <string name="settings_failed">कुछ गड़बड़ हुई। फिर से कोशिश करें।</string>
 
     <string name="settings_language_title">भाषा</string>

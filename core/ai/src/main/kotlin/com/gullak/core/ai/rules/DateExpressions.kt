@@ -12,7 +12,8 @@ internal data class DateMention(
 /**
  * Target dates in English, Hinglish and Devanagari, relative to [today]:
  * "6 mahine baad", "2 saal mein", "agle mahine", "agle saal", "agle December", "15 January",
- * "June 2027", "March". A month on its own is the last day of the next such month after today.
+ * "June 2027", "March", "15 tarikh", "15/03/2027". A month on its own is the last day of the next such month
+ * after today.
  */
 internal class DateExpressions(private val today: LocalDate) {
 
@@ -30,6 +31,20 @@ internal class DateExpressions(private val today: LocalDate) {
     }
 
     private val matchers: List<Pair<Regex, (MatchResult) -> LocalDate?>> = listOf(
+        // "15/03/2027", "15-3-27", "15/03": day first, as written in India.
+        regex("(\\d{1,2})[/-](\\d{1,2})(?:[/-](\\d{4}|\\d{2}))?") to { m ->
+            val (day, month, year) = m.destructured
+            numericDate(day.toInt(), month.toInt(), year)
+        },
+        // "March ki 15" / "मार्च की 15"
+        regex("($MONTH_NAMES)\\s+(?:ki|की)\\s+(\\d{1,2})(?:\\s*(?:$DATE_WORDS))?") to { m ->
+            dayOfMonth(m.groupValues[2].toInt(), m.groupValues[1], "")
+        },
+        // "15 tarikh", "15 tarikh ko March"
+        regex("(\\d{1,2})\\s*(?:$DATE_WORDS)(?:\\s+(?:ko\\s+|को\\s+)?($MONTH_NAMES))?") to { m ->
+            val (day, month) = m.destructured
+            if (month.isNotEmpty()) dayOfMonth(day.toInt(), month, "") else nextDayOfMonth(day.toInt())
+        },
         regex("($COUNT)\\s*(?:$MONTH_UNITS)(?:\\s*(?:$AFTER))?") to { m ->
             count(m.groupValues[1])?.let { today.plusMonths(it) }
         },
@@ -72,6 +87,30 @@ internal class DateExpressions(private val today: LocalDate) {
         val date = ym.atDay(day)
         return if (year.isEmpty() && date <= today) date.plusYears(1) else date
     }
+
+    private fun numericDate(
+        day: Int,
+        month: Int,
+        year: String,
+    ): LocalDate? {
+        if (month !in 1..MONTHS_IN_YEAR) return null
+        val fullYear = when (year.length) {
+            0 -> today.year
+            SHORT_YEAR_LENGTH -> CENTURY + year.toInt()
+            else -> year.toInt()
+        }
+        val ym = YearMonth.of(fullYear, month)
+        if (!ym.isValidDay(day)) return null
+        val date = ym.atDay(day)
+        return if (year.isEmpty() && date <= today) date.plusYears(1) else date
+    }
+
+    /** The next time this day of the month comes round after today. */
+    private fun nextDayOfMonth(day: Int): LocalDate? = generateSequence(YearMonth.from(today)) { it.plusMonths(1) }
+        .take(MONTHS_IN_YEAR)
+        .filter { it.isValidDay(day) }
+        .map { it.atDay(day) }
+        .firstOrNull { it > today }
 
     /** Last day of the next such month after today. */
     private fun nextMonthEnd(month: Int): LocalDate {
@@ -126,5 +165,9 @@ internal class DateExpressions(private val today: LocalDate) {
         const val YEAR_WORDS = "saal|sal|year|साल"
         const val AFTER = "baad|mein|me|later|बाद|में"
         const val NEXT = "agle|agla|next|अगले|अगला"
+        const val DATE_WORDS = "tarikh|tareekh|tarik|तारीख़|तारीख"
+        const val MONTHS_IN_YEAR = 12
+        const val SHORT_YEAR_LENGTH = 2
+        const val CENTURY = 2000
     }
 }

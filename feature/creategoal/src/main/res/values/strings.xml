@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="create_title">Start Goal SIP</string>
+    <string name="create_title">Start a Gullak</string>
     <string name="create_back">Back</string>
 
     <string name="create_voice_title">Speak your goal</string>
@@ -49,12 +49,12 @@
     <string name="create_reason_long">Long goal: gold\'s price can still move.</string>
     <string name="create_why_title">Why this plan</string>
 
-    <string name="create_start">Start Goal SIP</string>
+    <string name="create_start">Start a Gullak</string>
     <string name="create_start_with">Start with %1$s</string>
     <string name="create_demo_note">AutoPay via UPI · Demo: no real payment</string>
 
     <string name="mandate_title">Set up UPI AutoPay</string>
-    <string name="mandate_subtitle">For your %1$s Goal SIP</string>
+    <string name="mandate_subtitle">For your %1$s Gullak</string>
     <string name="mandate_amount">Amount</string>
     <string name="mandate_frequency">Frequency</string>
     <string name="mandate_first">First payment</string>
@@ -67,14 +67,14 @@
     <string name="processing_step_plan">Registering your plan</string>
     <string name="processing_step_autopay">Setting up AutoPay</string>
 
-    <string name="success_title">Goal SIP started</string>
+    <string name="success_title">Gullak started</string>
     <string name="success_body">%1$s: %2$s %3$s from %4$s</string>
     <string name="success_destination">Goes to %1$s</string>
     <string name="success_done">Done</string>
-    <string name="success_view_goals">View Goal SIPs</string>
+    <string name="success_view_goals">View Gullaks</string>
     <string name="bank_title">Set up AutoPay</string>
     <string name="bank_paying">You are setting up</string>
-    <string name="bank_payee">UPI AutoPay to %1$s Goal SIP</string>
+    <string name="bank_payee">UPI AutoPay to %1$s Gullak</string>
     <string name="bank_section">Pay from</string>
     <string name="bank_demo_name">Demo Bank · Savings</string>
     <string name="bank_demo_number">A/c ••4321</string>
@@ -84,7 +84,7 @@
     <string name="bank_sample_upi">UPI ID: sunita@samplebank</string>
     <string name="bank_proceed">Proceed to approve</string>
     <string name="approval_title">Approve AutoPay</string>
-    <string name="approval_payee">Gullak Goal SIP</string>
+    <string name="approval_payee">Gullak Bharo</string>
     <string name="approval_details">%1$s AutoPay · %2$s %3$s</string>
     <string name="approval_enter">Enter 4-digit demo approval code</string>
     <string name="approval_demo_note">Demo approval: enter any 4 digits. This is not your UPI PIN, and nothing is saved or sent.</string>
@@ -101,4 +101,28 @@
     <string name="create_voice_hint">Hindi voice is not installed on this phone. Install it in text-to-speech settings to hear replies in Hindi.</string>
     <string name="create_voice_hint_action">Open settings</string>
     <string name="create_voice_hint_dismiss">Not now</string>
+    <string name="create_ask_change">What should I change? Say the new amount or date.</string>
+    <string name="create_readback_en">Got it: %1$s, %2$s by %3$s. Is that right?</string>
+    <string name="create_readback_hinglish">Samajh gaya: %1$s, %2$s, %3$s tak. Sahi hai?</string>
+    <string name="create_readback_hi">समझ गया: %1$s, %2$s, %3$s तक। सही है?</string>
+    <string-array name="create_goal_suggestions">
+        <item>Laptop</item>
+        <item>New phone</item>
+        <item>Bhai ki shaadi</item>
+        <item>Goa trip</item>
+        <item>Laptop for my son</item>
+        <item>Laptop for college</item>
+        <item>Bike</item>
+        <item>Car down payment</item>
+        <item>Wedding</item>
+        <item>Family holiday</item>
+        <item>School fees</item>
+        <item>College fees</item>
+        <item>Birthday gift</item>
+        <item>Diwali shopping</item>
+        <item>Emergency fund</item>
+        <item>New fridge</item>
+        <item>New TV</item>
+        <item>Home repair</item>
+    </string-array>
 </resources>

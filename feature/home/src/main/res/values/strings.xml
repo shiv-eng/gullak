@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_title">Goal SIP</string>
-    <string name="home_new_goal">Start Goal SIP</string>
-    <string name="home_empty_prompt">No Goal SIPs yet</string>
+    <string name="home_title">Gullak Bharo</string>
+    <string name="home_new_goal">Start a Gullak</string>
+    <string name="home_empty_prompt">No Gullaks yet</string>
     <string name="home_empty_hint">Set a goal, an amount and a date. Gullak plans a Daily, Weekly or Monthly SIP and sets up AutoPay.</string>
     <string name="home_mic_description">Speak your goal</string>
     <string name="home_back">Back</string>
-    <string name="home_total_saved">Total saved in Goal SIPs</string>
+    <string name="home_total_saved">Total saved in Gullaks</string>
     <string name="home_split">Paytm Gold %1$s · Paytm Money %2$s</string>
-    <string name="home_goals_title">Your Goal SIPs</string>
+    <string name="home_goals_title">Your Gullaks</string>
     <string name="home_status_on_track">On track</string>
     <string name="home_status_behind">Behind by %1$s</string>
     <string name="home_status_reached">Goal reached</string>

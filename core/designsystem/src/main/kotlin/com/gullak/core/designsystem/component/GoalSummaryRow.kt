@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gullak.core.designsystem.theme.GullakTheme
 
-/** One Goal SIP in a list: gullak, name and status, saved of target, progress and the next SIP. */
+/** One Gullak in a list: gullak, name and status, saved of target, progress and the next SIP. */
 @Composable
 fun GoalSummaryRow(
     name: String,

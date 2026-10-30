@@ -2,12 +2,16 @@ package com.gullak.feature.creategoal
 
 import android.os.Looper
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.test.core.app.ApplicationProvider
@@ -17,6 +21,7 @@ import com.gullak.core.domain.testing.TestData
 import com.gullak.core.domain.testing.TestData.rupees
 import com.gullak.core.model.goal.Frequency
 import java.time.Duration
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -54,19 +59,19 @@ class CreateGoalFlowUiTest {
         settle()
     }
 
-    @Test
-    fun aTypedGoalGoesFromFormThroughApprovalToASavedGoalSip() {
-        val viewModel = CreateGoalViewModel(
-            understandGoal = env.understandGoal,
-            buildPlan = env.buildPlan,
-            createGoal = env.createGoal,
-            explainer = env.explanationService,
-            analytics = env.analytics,
-            voice = env.voice,
-            speech = env.speech,
-            settings = env.settings,
-            clock = env.clock,
-        )
+    private fun viewModel() = CreateGoalViewModel(
+        understandGoal = env.understandGoal,
+        buildPlan = env.buildPlan,
+        createGoal = env.createGoal,
+        explainer = env.explanationService,
+        analytics = env.analytics,
+        voice = env.voice,
+        speech = env.speech,
+        settings = env.settings,
+        clock = env.clock,
+    )
+
+    private fun show(viewModel: CreateGoalViewModel) {
         compose.setContent {
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             GullakTheme(darkTheme = false) {
@@ -74,6 +79,41 @@ class CreateGoalFlowUiTest {
                 }, onSpeak = {}, onOpenVoiceSettings = {})
             }
         }
+    }
+
+    /** Dates up to the demo date cannot be picked, so the calendar must open on a month that has dates to pick. */
+    @Test
+    fun theCalendarOpensOnAMonthWithDatesAndADayCanBePicked() {
+        val viewModel = viewModel()
+        show(viewModel)
+
+        // At this size the field is behind the bottom button until the list is scrolled.
+        compose.onNodeWithText(text(R.string.create_date_hint)).performSemanticsAction(SemanticsActions.OnClick)
+        settle()
+        val day = "November 30, 2026"
+        compose.onAllNodes(hasText(day, substring = true) or hasContentDescription(day, substring = true))
+            .onFirst()
+            .performClick()
+        tap(text(R.string.create_date_ok))
+
+        assertEquals(LocalDate.of(2026, 11, 30), viewModel.uiState.value.targetDate)
+    }
+
+    @Test
+    fun typingANameSuggestsGoalsAndATapFillsIt() {
+        val viewModel = viewModel()
+        show(viewModel)
+
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("lap")
+        tap("Laptop for college")
+
+        assertEquals("Laptop for college", viewModel.uiState.value.name)
+    }
+
+    @Test
+    fun aTypedGoalGoesFromFormThroughApprovalToASavedGullak() {
+        val viewModel = viewModel()
+        show(viewModel)
 
         val fields = compose.onAllNodes(hasSetTextAction())
         fields[0].performTextInput("Laptop")

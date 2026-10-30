@@ -36,6 +36,8 @@ sealed interface FollowUpQuestion {
 }
 
 enum class FollowUpReason {
+    /** The user said Gullak's read-back was wrong. */
+    WHAT_TO_CHANGE,
     MISSING_NAME,
     MISSING_AMOUNT,
     MISSING_DATE,

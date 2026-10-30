@@ -3,6 +3,7 @@ package com.gullak.feature.creategoal
 import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.speech.RecognizerIntent
@@ -79,6 +80,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
@@ -100,6 +102,7 @@ import com.gullak.core.designsystem.component.SectionHeader
 import com.gullak.core.designsystem.theme.GullakTheme
 import com.gullak.core.domain.ai.FollowUpQuestion
 import com.gullak.core.domain.ai.FollowUpReason
+import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.goal.Destination
 import com.gullak.core.model.goal.Frequency
 import com.gullak.core.model.money.IndianMoneyFormat
@@ -112,8 +115,6 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// No speech or settings screen on the phone is an expected case: it is handled, not lost.
-@Suppress("SwallowedException")
 @Composable
 internal fun CreateGoalEntry(
     startWithVoice: Boolean,
@@ -127,26 +128,7 @@ internal fun CreateGoalEntry(
     val finish by rememberUpdatedState(onFinish)
     val openGoals by rememberUpdatedState(onOpenGoals)
 
-    // Speech is recognised inside the app; phones that cannot do that use their own speech screen.
-    val speechPrompt = stringResource(R.string.create_voice_prompt)
-    val speech = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val text = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
-        if (result.resultCode == Activity.RESULT_OK && !text.isNullOrBlank()) {
-            viewModel.onEvent(CreateGoalEvent.GoalSpoken(text))
-        }
-    }
-    val phoneSpeech = {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-            .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            .putExtra(RecognizerIntent.EXTRA_LANGUAGE, state.speechLanguageTag)
-            .putExtra(RecognizerIntent.EXTRA_PROMPT, speechPrompt)
-        try {
-            speech.launch(intent)
-        } catch (e: ActivityNotFoundException) {
-            viewModel.onEvent(CreateGoalEvent.VoiceUnavailable)
-        }
-    }
-    val openPhoneSpeech by rememberUpdatedState(phoneSpeech)
+    val openPhoneSpeech by rememberUpdatedState(rememberPhoneSpeech(state.speechLanguageTag, viewModel::onEvent))
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
@@ -158,26 +140,9 @@ internal fun CreateGoalEntry(
     }
 
     val context = LocalContext.current
-    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        viewModel.onEvent(if (granted) CreateGoalEvent.ListenClicked else CreateGoalEvent.MicDenied)
-    }
-    val listen = {
-        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
-            PackageManager.PERMISSION_GRANTED
-        if (granted) {
-            viewModel.onEvent(
-                CreateGoalEvent.ListenClicked,
-            )
-        } else {
-            micPermission.launch(Manifest.permission.RECORD_AUDIO)
-        }
-    }
+    val listen = rememberMic(viewModel::onEvent)
     val openVoiceSettings = {
-        try {
-            context.startActivity(Intent(TTS_SETTINGS_ACTION))
-        } catch (e: ActivityNotFoundException) {
-            Log.w(TAG, "No text-to-speech settings screen", e)
-        }
+        openTextToSpeechSettings(context)
         viewModel.onEvent(CreateGoalEvent.VoiceHintDismissed)
     }
     var voiceStarted by rememberSaveable { mutableStateOf(false) }
@@ -193,6 +158,10 @@ internal fun CreateGoalEntry(
     LaunchedEffect(followUp) {
         if (followUp != null) viewModel.onEvent(CreateGoalEvent.FollowUpShown(followUp))
     }
+    val readback = state.readback?.let { readbackText(it, state.language) }
+    LaunchedEffect(readback) {
+        if (readback != null) viewModel.onEvent(CreateGoalEvent.ReadbackShown(readback))
+    }
 
     CreateGoalScreen(
         state = state,
@@ -202,6 +171,56 @@ internal fun CreateGoalEntry(
         onOpenVoiceSettings = openVoiceSettings,
         modifier = modifier,
     )
+}
+
+/** The phone's own speech screen, for phones that cannot recognise speech inside the app. */
+// No speech screen on the phone is an expected case: it is shown as a message, not lost.
+@Suppress("SwallowedException")
+@Composable
+private fun rememberPhoneSpeech(
+    languageTag: String,
+    onEvent: (CreateGoalEvent) -> Unit,
+): () -> Unit {
+    val prompt = stringResource(R.string.create_voice_prompt)
+    val speech = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val text = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+        if (result.resultCode == Activity.RESULT_OK && !text.isNullOrBlank()) {
+            onEvent(CreateGoalEvent.GoalSpoken(text))
+        }
+    }
+    return {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            .putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
+            .putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
+        try {
+            speech.launch(intent)
+        } catch (e: ActivityNotFoundException) {
+            onEvent(CreateGoalEvent.VoiceUnavailable)
+        }
+    }
+}
+
+/** The mic button's action: asks for the microphone permission if needed, then starts or stops listening. */
+@Composable
+private fun rememberMic(onEvent: (CreateGoalEvent) -> Unit): () -> Unit {
+    val context = LocalContext.current
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        onEvent(if (granted) CreateGoalEvent.ListenClicked else CreateGoalEvent.MicDenied)
+    }
+    return {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+            PackageManager.PERMISSION_GRANTED
+        if (granted) onEvent(CreateGoalEvent.ListenClicked) else permission.launch(Manifest.permission.RECORD_AUDIO)
+    }
+}
+
+private fun openTextToSpeechSettings(context: Context) {
+    try {
+        context.startActivity(Intent(TTS_SETTINGS_ACTION))
+    } catch (e: ActivityNotFoundException) {
+        Log.w(TAG, "No text-to-speech settings screen", e)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -345,23 +364,11 @@ private fun VoiceCard(
                 color = GullakTheme.colors.textMuted,
             )
         }
-        val note = when {
-            state.voiceProblem == VoiceProblem.FAILED -> stringResource(R.string.create_voice_failed)
-
-            state.voiceProblem == VoiceProblem.NOT_HEARD -> stringResource(R.string.create_voice_not_heard)
-
-            state.voiceProblem == VoiceProblem.MIC_DENIED -> stringResource(R.string.create_mic_denied)
-
-            state.followUp != null -> followUpText(state.followUp)
-
-            state.festival != null -> stringResource(
-                R.string.create_festival_note,
-                state.festival.name,
-                DATE.format(state.festival.date),
-            )
-
-            else -> null
+        state.readback?.let {
+            Spacer(Modifier.height(10.dp))
+            InfoBox(text = readbackText(it, state.language))
         }
+        val note = voiceNote(state)
         if (note != null) {
             Spacer(Modifier.height(10.dp))
             InfoBox(text = note)
@@ -375,6 +382,26 @@ private fun VoiceCard(
             }
         }
     }
+}
+
+/** A problem with speech, the open question, or the festival date that was looked up. */
+@Composable
+private fun voiceNote(state: CreateGoalUiState): String? = when {
+    state.voiceProblem == VoiceProblem.FAILED -> stringResource(R.string.create_voice_failed)
+
+    state.voiceProblem == VoiceProblem.NOT_HEARD -> stringResource(R.string.create_voice_not_heard)
+
+    state.voiceProblem == VoiceProblem.MIC_DENIED -> stringResource(R.string.create_mic_denied)
+
+    state.followUp != null -> followUpText(state.followUp)
+
+    state.festival != null -> stringResource(
+        R.string.create_festival_note,
+        state.festival.name,
+        DATE.format(state.festival.date),
+    )
+
+    else -> null
 }
 
 /** The mic, with a ring that grows with the speaker's voice while listening. */
@@ -425,11 +452,27 @@ private const val TTS_SETTINGS_ACTION = "com.android.settings.TTS_SETTINGS"
 private const val TAG = "CreateGoal"
 
 @Composable
+private fun readbackText(
+    readback: GoalReadback,
+    language: GoalLanguage,
+): String = stringResource(
+    when (language) {
+        GoalLanguage.ENGLISH -> R.string.create_readback_en
+        GoalLanguage.HINGLISH -> R.string.create_readback_hinglish
+        GoalLanguage.HINDI -> R.string.create_readback_hi
+    },
+    readback.name,
+    IndianMoneyFormat.format(readback.target),
+    DATE.format(readback.date),
+)
+
+@Composable
 private fun followUpText(question: FollowUpQuestion): String = when (question) {
     is FollowUpQuestion.FromModel -> question.text
 
     is FollowUpQuestion.Standard -> stringResource(
         when (question.reason) {
+            FollowUpReason.WHAT_TO_CHANGE -> R.string.create_ask_change
             FollowUpReason.MISSING_NAME -> R.string.create_ask_name
             FollowUpReason.MISSING_AMOUNT -> R.string.create_ask_amount
             FollowUpReason.MISSING_DATE -> R.string.create_ask_date
@@ -486,6 +529,22 @@ private fun GoalDetailsCard(
             textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp),
             modifier = Modifier.fillMaxWidth(),
         )
+        val suggestions = goalSuggestions(state.name, stringArrayResource(R.array.create_goal_suggestions).asList())
+        if (suggestions.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                suggestions.forEach { suggestion ->
+                    AmountChip(
+                        label = suggestion,
+                        selected = false,
+                        onClick = { onEvent(CreateGoalEvent.NameChanged(suggestion)) },
+                    )
+                }
+            }
+        }
         Spacer(Modifier.height(14.dp))
         FieldLabel(stringResource(R.string.create_amount_label))
         OutlinedTextField(
@@ -596,6 +655,9 @@ private fun GoalDetailsCard(
         val today = state.today
         val pickerState = rememberDatePickerState(
             initialSelectedDateMillis = state.targetDate?.toUtcMillis(),
+            // Open where a date can be picked: the demo date can be months away from the phone's real date.
+            initialDisplayedMonthMillis = (state.targetDate ?: today.plusDays(1)).toUtcMillis(),
+            yearRange = today.year..today.year + MAX_YEARS,
             selectableDates = object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis.toLocalDate() > today
 
@@ -605,10 +667,13 @@ private fun GoalDetailsCard(
         DatePickerDialog(
             onDismissRequest = { pickingDate = false },
             confirmButton = {
-                TextButton(onClick = {
-                    pickerState.selectedDateMillis?.let { onEvent(CreateGoalEvent.DateSelected(it.toLocalDate())) }
-                    pickingDate = false
-                }) { Text(stringResource(R.string.create_date_ok)) }
+                TextButton(
+                    enabled = pickerState.selectedDateMillis != null,
+                    onClick = {
+                        pickerState.selectedDateMillis?.let { onEvent(CreateGoalEvent.DateSelected(it.toLocalDate())) }
+                        pickingDate = false
+                    },
+                ) { Text(stringResource(R.string.create_date_ok)) }
             },
             dismissButton = {
                 TextButton(onClick = { pickingDate = false }) { Text(stringResource(R.string.create_date_cancel)) }
