@@ -55,7 +55,6 @@ dependencies {
     implementation(projects.feature.paytmhome)
     implementation(projects.feature.home)
     implementation(projects.feature.creategoal)
-    implementation(projects.feature.plan)
     implementation(projects.feature.goaldetail)
     implementation(projects.feature.settings)
 
