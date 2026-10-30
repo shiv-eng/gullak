@@ -25,9 +25,21 @@ internal class TextToSpeechVoiceOutput @Inject constructor(@ApplicationContext p
     private val ready = CompletableDeferred<Boolean>()
     private var engine: TextToSpeech? = null
 
-    private fun engine(): TextToSpeech = engine ?: TextToSpeech(context) { status ->
-        ready.complete(status == TextToSpeech.SUCCESS)
-    }.also { engine = it }
+    /** Google's engine when the phone has it, which sounds far better than most makers' defaults. */
+    private fun engine(): TextToSpeech = engine ?: TextToSpeech(
+        context,
+        { status -> ready.complete(status == TextToSpeech.SUCCESS) },
+        GOOGLE_ENGINE,
+    ).also { engine = it }
+
+    private fun TextToSpeech.useBestVoice(locale: Locale) {
+        if (isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) language = locale
+        voices.orEmpty()
+            .filter { it.locale.language == locale.language && !it.isNetworkConnectionRequired }
+            .filterNot { it.features.orEmpty().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED) }
+            .maxByOrNull { it.quality }
+            ?.let { voice = it }
+    }
 
     private fun locale(language: GoalLanguage): Locale =
         Locale.forLanguageTag(if (language == GoalLanguage.ENGLISH) ENGLISH_INDIA else HINDI_INDIA)
@@ -44,8 +56,7 @@ internal class TextToSpeechVoiceOutput @Inject constructor(@ApplicationContext p
         val tts = engine()
         if (!ready.await()) return
 
-        val locale = locale(language)
-        if (tts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) tts.language = locale
+        tts.useBestVoice(locale(language))
 
         suspendCancellableCoroutine { continuation ->
             tts.setOnUtteranceProgressListener(
@@ -78,6 +89,7 @@ internal class TextToSpeechVoiceOutput @Inject constructor(@ApplicationContext p
     }
 
     private companion object {
+        const val GOOGLE_ENGINE = "com.google.android.tts"
         const val ENGLISH_INDIA = "en-IN"
         const val HINDI_INDIA = "hi-IN"
     }

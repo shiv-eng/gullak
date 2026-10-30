@@ -24,6 +24,7 @@ internal class GeminiClient @Inject constructor(
         contents: List<Content>,
         temperature: Double,
         responseSchema: JsonObject? = null,
+        model: String = config.modelId,
     ): AppResult<String> {
         if (!config.isConfigured) return AppResult.Failure(AppError.NotConfigured)
         val request = GenerateContentRequest(
@@ -31,8 +32,8 @@ internal class GeminiClient @Inject constructor(
             systemInstruction = Content(parts = listOf(Part(text = systemInstruction))),
             generationConfig = generationConfig(temperature, responseSchema),
         )
-        val first = attempt(request)
-        return if (first is AppResult.Failure && first.error.isRetryable()) attempt(request) else first
+        val first = attempt(model, request)
+        return if (first is AppResult.Failure && first.error.isRetryable()) attempt(model, request) else first
     }
 
     private fun generationConfig(
@@ -48,8 +49,11 @@ internal class GeminiClient @Inject constructor(
     // Each exception becomes a typed AppError the caller acts on (retry, fallback, analytics reason);
     // the error type is the information kept.
     @Suppress("SwallowedException")
-    private suspend fun attempt(request: GenerateContentRequest): AppResult<String> = try {
-        answerText(api.generateContent(config.modelId, request))
+    private suspend fun attempt(
+        model: String,
+        request: GenerateContentRequest,
+    ): AppResult<String> = try {
+        answerText(api.generateContent(model, request))
     } catch (e: HttpException) {
         AppResult.Failure(AppError.Http(e.code()))
     } catch (e: InterruptedIOException) {

@@ -2,12 +2,15 @@ package com.gullak.feature.creategoal.voice
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gullak.core.domain.ai.BrainAnswer
+import com.gullak.core.domain.ai.ConversationBrain
 import com.gullak.core.domain.ai.FollowUpQuestion
 import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.domain.ai.PlanExplanationService
 import com.gullak.core.domain.ai.SpeechError
 import com.gullak.core.domain.ai.SpeechEvent
 import com.gullak.core.domain.ai.SpeechInput
+import com.gullak.core.domain.ai.TalkIntent
 import com.gullak.core.domain.ai.Understanding
 import com.gullak.core.domain.ai.VoiceOutput
 import com.gullak.core.domain.plan.PlanInput
@@ -15,9 +18,11 @@ import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.domain.usecase.BuildPlanUseCase
 import com.gullak.core.domain.usecase.CreateGoalUseCase
 import com.gullak.core.domain.usecase.NewGoalRequest
+import com.gullak.core.domain.usecase.ObserveGoalsUseCase
 import com.gullak.core.domain.usecase.UnderstandGoalUseCase
 import com.gullak.core.model.ai.ConversationTurn
 import com.gullak.core.model.ai.GoalLanguage
+import com.gullak.core.model.ai.ParsedGoal
 import com.gullak.core.model.ai.Speaker
 import com.gullak.core.model.goal.Frequency
 import com.gullak.core.model.goal.Goal
@@ -29,9 +34,11 @@ import com.gullak.feature.creategoal.DemoBankAccount
 import com.gullak.feature.creategoal.ReadbackReply
 import com.gullak.feature.creategoal.readbackReply
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -44,6 +51,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+
+/** How Gullak speaks and hears, and the settings for it. */
+internal class TalkIo @Inject constructor(
+    val voice: VoiceOutput,
+    val speech: SpeechInput,
+    val settings: SettingsRepository,
+)
 
 /** What Gullak is doing right now, shown by the orb. */
 enum class TalkPhase { WAITING, SPEAKING, LISTENING, THINKING }
@@ -99,21 +113,27 @@ sealed interface VoiceGoalEffect {
 }
 
 /**
- * The whole Gullak flow as a conversation. The AI only hears and reads what was said; every amount, date and
- * option comes from the plan engine, the lines from string resources, and yes, no and plan choices are read by
- * code. Saying yes to AutoPay is the demo's approval, and Gullak says aloud that no real money moves.
+ * The whole Gullak flow as a conversation. Each turn the model reads what was said and reacts like a friend, but never
+ * with a number: every amount, date and option comes from the plan engine and the lines from string resources. If the
+ * model cannot be reached, plain rules read the turn instead. Starting a Gullak needs a yes that code itself reads
+ * from the user's words, and Gullak says aloud that no real money moves in this demo.
  */
 @HiltViewModel
 class VoiceGoalViewModel @Inject internal constructor(
     private val understandGoal: UnderstandGoalUseCase,
+    private val brain: ConversationBrain,
+    private val observeGoals: ObserveGoalsUseCase,
+    private val clock: Clock,
     private val buildPlan: BuildPlanUseCase,
     private val createGoal: CreateGoalUseCase,
     private val explainer: PlanExplanationService,
-    private val voice: VoiceOutput,
-    private val speech: SpeechInput,
-    private val settings: SettingsRepository,
+    io: TalkIo,
     private val lines: VoiceLines,
 ) : ViewModel() {
+
+    private val voice: VoiceOutput = io.voice
+    private val speech: SpeechInput = io.speech
+    private val settings: SettingsRepository = io.settings
 
     private val state = MutableStateFlow(VoiceGoalUiState())
     val uiState: StateFlow<VoiceGoalUiState> = state.asStateFlow()
@@ -123,6 +143,7 @@ class VoiceGoalViewModel @Inject internal constructor(
 
     private val conversation = mutableListOf<ConversationTurn>()
     private var language: GoalLanguage = lines.defaultLanguage()
+    private var goalLanguage: GoalLanguage = language
     private var talk: Job? = null
     private var started = false
     private var phoneReply: CompletableDeferred<String?>? = null
@@ -133,7 +154,7 @@ class VoiceGoalViewModel @Inject internal constructor(
             VoiceGoalEvent.MicReady -> if (!started) {
                 started = true
                 state.update { it.copy(micDenied = false) }
-                talkFrom(lines.greeting(language))
+                talk = viewModelScope.launch { converse(greeting()) }
             }
 
             VoiceGoalEvent.MicDenied -> state.update { it.copy(micDenied = true) }
@@ -169,16 +190,28 @@ class VoiceGoalViewModel @Inject internal constructor(
         effects.trySend(effect)
     }
 
-    /** Says a line, listens, answers, and so on until there is nothing more to ask. */
     private fun talkFrom(first: String?) {
-        talk = viewModelScope.launch {
-            var line = first
-            do {
-                line?.let { say(it) }
-                val heard = listen()
-                line = if (heard == null) afterSilence() else respond(heard)
-            } while (line != null)
-            state.update { it.copy(phase = TalkPhase.WAITING, micLevel = 0f) }
+        talk = viewModelScope.launch { converse(first) }
+    }
+
+    /** Says a line, listens, answers, and so on until there is nothing more to ask. */
+    private suspend fun converse(first: String?) {
+        var line = first
+        do {
+            line?.let { say(it) }
+            val heard = listen()
+            line = if (heard == null) afterSilence() else respond(heard)
+        } while (line != null)
+        state.update { it.copy(phase = TalkPhase.WAITING, micLevel = 0f) }
+    }
+
+    /** Greets a returning saver with how far they have come. */
+    private suspend fun greeting(): String {
+        val best = observeGoals().first().goals.filter { it.saved.isPositive }.maxByOrNull { it.saved.paise }
+        return if (best == null) {
+            lines.greeting(language)
+        } else {
+            lines.greetingWithProgress(language, best.goal.name, best.saved)
         }
     }
 
@@ -231,33 +264,153 @@ class VoiceGoalViewModel @Inject internal constructor(
 
     private suspend fun respond(text: String): String? {
         silences = 0
-        return when (state.value.step) {
-            TalkStep.GOAL -> understand(text)
-            TalkStep.CONFIRM_GOAL -> respondToReadback(text)
-            TalkStep.CHOOSE_PLAN -> respondToPlan(text)
-            TalkStep.CONFIRM_AUTOPAY -> respondToAutoPay(text)
-            TalkStep.DONE -> respondAfterDone(text)
+        conversation += ConversationTurn(Speaker.USER, text.trim())
+        val heard = thinking { brain.hear(conversation.toList(), situation(), LocalDate.now(clock)) }
+        return when (heard) {
+            is AppResult.Success -> respondToBrain(text, heard.value)
+            is AppResult.Failure -> respondByRules(text)
         }
     }
 
-    private suspend fun understand(text: String): String {
-        conversation += ConversationTurn(Speaker.USER, text.trim())
+    /** A person says "one moment" only if it takes a moment. */
+    private suspend fun <T> thinking(work: suspend () -> T): T {
         state.update { it.copy(phase = TalkPhase.THINKING) }
-        // A person says "one moment" only if it takes a moment.
-        val understanding = viewModelScope.async { understandGoal(conversation.toList()) }
-        withTimeoutOrNull(ACK_AFTER_MS) { understanding.join() } ?: run {
+        val result: Deferred<T> = viewModelScope.async { work() }
+        withTimeoutOrNull(ACK_AFTER_MS) { result.join() } ?: run {
             say(lines.moment(language))
             state.update { it.copy(phase = TalkPhase.THINKING) }
         }
-        return when (val result = understanding.await()) {
-            is AppResult.Failure -> lines.didNotUnderstand(language)
-            is AppResult.Success -> onUnderstood(result.value)
+        return result.await()
+    }
+
+    /** Where the conversation is, in plain words for the model. */
+    private fun situation(): String {
+        val current = state.value
+        val agreed = "Goal so far: name=${current.name}, amount in rupees=" +
+            "${current.target?.let { it.paise / Money.PAISE_PER_RUPEE }}, date=${current.date}."
+        val asked = when (current.step) {
+            TalkStep.GOAL -> "You asked what they are saving for, how much, and by when."
+            TalkStep.CONFIRM_GOAL -> "You read the goal back and asked if it is right."
+            TalkStep.CHOOSE_PLAN -> "You offered saving daily, weekly or monthly and asked which they want."
+            TalkStep.CONFIRM_AUTOPAY -> "You asked if you should start AutoPay. This is a demo: no real money moves."
+            TalkStep.DONE -> "Their Gullak has started and you asked if there is anything else."
         }
+        return "$asked $agreed"
+    }
+
+    private suspend fun respondToBrain(
+        text: String,
+        heard: BrainAnswer,
+    ): String? {
+        adoptLanguage(heard.goal.language)
+        val next = nextLine(text, heard) ?: return null
+        return listOfNotNull(heard.say, next).joinToString(" ").also { line ->
+            conversation += ConversationTurn(Speaker.GULLAK, line)
+        }
+    }
+
+    /** Null means the conversation is over. */
+    private suspend fun nextLine(
+        text: String,
+        heard: BrainAnswer,
+    ): String? = when (heard.intent) {
+        TalkIntent.GOAL_DETAILS -> onUnderstood(understandGoal.check(withWhatWeKnow(heard.goal)))
+
+        TalkIntent.QUESTION -> currentQuestion()
+
+        TalkIntent.NO -> if (state.value.step == TalkStep.DONE) {
+            finish()
+        } else {
+            ask(FollowUpQuestion.Standard(FollowUpReason.WHAT_TO_CHANGE))
+        }
+
+        TalkIntent.CHOOSE_PLAN ->
+            state.value.plan?.options
+                ?.firstOrNull { it.frequency == heard.frequency }
+                ?.let { offerAutoPay(it) }
+                ?: currentQuestion()
+
+        TalkIntent.ANOTHER_GOAL -> startAnother().let { again ->
+            // "One more, for a bike": carry straight on with what they just said.
+            if (heard.goal.goalName == null) again else onUnderstood(understandGoal.check(heard.goal))
+        }
+
+        TalkIntent.FINISHED -> finish()
+
+        // Yes is decided by step, and at AutoPay by the rules alone, from the user's own words.
+        TalkIntent.YES, TalkIntent.UNCLEAR -> respondByRules(text)
+    }
+
+    private fun withWhatWeKnow(goal: ParsedGoal): ParsedGoal {
+        val current = state.value
+        return goal.copy(
+            goalName = goal.goalName ?: current.name,
+            targetAmount = goal.targetAmount ?: current.target,
+            targetDate = goal.targetDate ?: current.date,
+        )
+    }
+
+    /** After a side question, the talk goes back to what was being asked. */
+    private fun currentQuestion(): String {
+        val current = state.value
+        val name = current.name
+        val target = current.target
+        val date = current.date
+        return when (current.step) {
+            TalkStep.GOAL -> when {
+                name == null -> lines.followUp(language, FollowUpReason.MISSING_NAME)
+                target == null -> lines.followUp(language, FollowUpReason.MISSING_AMOUNT)
+                else -> lines.followUp(language, FollowUpReason.MISSING_DATE)
+            }
+
+            TalkStep.CONFIRM_GOAL -> if (name != null && target != null && date != null) {
+                lines.readback(language, name, target, date)
+            } else {
+                lines.followUp(language, FollowUpReason.WHAT_TO_CHANGE)
+            }
+
+            TalkStep.CHOOSE_PLAN -> lines.didNotCatchChoice(language)
+
+            TalkStep.CONFIRM_AUTOPAY -> lines.didNotCatchYes(language)
+
+            TalkStep.DONE -> lines.anythingElse(language)
+        }
+    }
+
+    private fun startAnother(): String {
+        conversation.clear()
+        state.value = VoiceGoalUiState()
+        return lines.greetingAgain(language)
+    }
+
+    private suspend fun finish(): String? {
+        say(lines.goodbye(language))
+        effects.trySend(VoiceGoalEffect.Finish)
+        return null
+    }
+
+    /** The conversation is held in Hindi or English: spoken Hinglish is said best in Devanagari by the voices. */
+    private fun adoptLanguage(heard: GoalLanguage) {
+        goalLanguage = heard
+        language = if (heard == GoalLanguage.ENGLISH) GoalLanguage.ENGLISH else GoalLanguage.HINDI
+    }
+
+    private suspend fun respondByRules(text: String): String? = when (state.value.step) {
+        TalkStep.GOAL -> understand()
+        TalkStep.CONFIRM_GOAL -> respondToReadback(text)
+        TalkStep.CHOOSE_PLAN -> respondToPlan(text)
+        TalkStep.CONFIRM_AUTOPAY -> respondToAutoPay(text)
+        TalkStep.DONE -> respondAfterDone(text)
+    }
+
+    private suspend fun understand(): String = when (val result = thinking { understandGoal(conversation.toList()) }) {
+        is AppResult.Failure -> lines.didNotUnderstand(language)
+        is AppResult.Success -> onUnderstood(result.value)
     }
 
     private fun onUnderstood(understanding: Understanding): String {
         val parsed = understanding.parsed
-        language = parsed.language
+        adoptLanguage(parsed.language)
         state.update {
             it.copy(
                 name = parsed.goalName ?: it.name,
@@ -296,7 +449,7 @@ class VoiceGoalViewModel @Inject internal constructor(
     private suspend fun respondToReadback(text: String): String = when (readbackReply(text)) {
         ReadbackReply.YES -> presentPlan()
         ReadbackReply.NO -> ask(FollowUpQuestion.Standard(FollowUpReason.WHAT_TO_CHANGE))
-        ReadbackReply.CORRECTION -> understand(text)
+        ReadbackReply.CORRECTION -> understand()
     }
 
     private fun presentPlan(): String {
@@ -330,7 +483,7 @@ class VoiceGoalViewModel @Inject internal constructor(
 
             reply == ReadbackReply.NO -> ask(FollowUpQuestion.Standard(FollowUpReason.WHAT_TO_CHANGE))
 
-            text.any(Char::isDigit) -> understand(text)
+            text.any(Char::isDigit) -> understand()
 
             else -> lines.didNotCatchChoice(language)
         }
@@ -357,7 +510,7 @@ class VoiceGoalViewModel @Inject internal constructor(
             otherOption != null -> offerAutoPay(otherOption)
             reply == ReadbackReply.NO -> ask(FollowUpQuestion.Standard(FollowUpReason.WHAT_TO_CHANGE))
             reply == ReadbackReply.YES || bank != null -> startGullak()
-            text.any(Char::isDigit) -> understand(text)
+            text.any(Char::isDigit) -> understand()
             else -> lines.didNotCatchYes(language)
         }
     }
@@ -375,7 +528,7 @@ class VoiceGoalViewModel @Inject internal constructor(
             targetDate = date,
             dateIsFixed = false,
             frequency = current.frequency,
-            language = language,
+            language = goalLanguage,
         )
         return when (val result = createGoal(request)) {
             is AppResult.Failure -> lines.couldNotStart(language)
@@ -388,16 +541,7 @@ class VoiceGoalViewModel @Inject internal constructor(
         }
     }
 
-    private suspend fun respondAfterDone(text: String): String? {
-        if (wantsAnother(text)) {
-            conversation.clear()
-            state.value = VoiceGoalUiState()
-            return lines.greetingAgain(language)
-        }
-        say(lines.goodbye(language))
-        effects.trySend(VoiceGoalEffect.Finish)
-        return null
-    }
+    private suspend fun respondAfterDone(text: String): String? = if (wantsAnother(text)) startAnother() else finish()
 
     override fun onCleared() {
         voice.stop()

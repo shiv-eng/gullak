@@ -6,16 +6,16 @@
     <string name="voice_bank_icici" translatable="false">ICICI</string>
 
     <string-array name="voice_greeting_en" translatable="false">
-        <item>Hi, I am Gullak. Tell me, what are you saving for?</item>
-        <item>Hello! What would you like to save for today?</item>
+        <item>Hello! I am Gullak, your savings friend. Tell me, what are you dreaming of saving for?</item>
+        <item>Hi there! I am Gullak, and I am so glad you are here. What would you like to save for?</item>
     </string-array>
     <string-array name="voice_greeting_hinglish" translatable="false">
         <item>Namaste! Main Gullak. Bataiye, kis cheez ke liye paise jodne hain?</item>
         <item>Namaste! Aaj kis cheez ke liye bachat shuru karein?</item>
     </string-array>
     <string-array name="voice_greeting_hi" translatable="false">
-        <item>नमस्ते! मैं गुल्लक। बताइए, किस चीज़ के लिए पैसे जोड़ने हैं?</item>
-        <item>नमस्ते! आज किस चीज़ के लिए बचत शुरू करें?</item>
+        <item>नमस्ते! मैं गुल्लक हूँ, आपकी बचत की साथी। बताइए, आज किस सपने के लिए पैसे जोड़ने हैं?</item>
+        <item>नमस्ते जी! मैं गुल्लक हूँ। आपसे बात करके अच्छा लगा। बताइए, किस चीज़ के लिए बचत शुरू करें?</item>
     </string-array>
 
     <string-array name="voice_again_en" translatable="false">
@@ -168,13 +168,15 @@
     <string-array name="voice_or_hi" translatable="false"><item>, या </item></string-array>
 
     <string-array name="voice_plan_en" translatable="false">
-        <item>For %1$s you could save %2$s. Which suits you best?</item>
+        <item>So for %1$s, you could save %2$s. Which feels easiest?</item>
+        <item>For %1$s, you could put away %2$s. Which one works for you?</item>
     </string-array>
     <string-array name="voice_plan_hinglish" translatable="false">
         <item>%1$s ke liye aap %2$s bacha sakte hain. Aapko kaunsa aasan lagega?</item>
     </string-array>
     <string-array name="voice_plan_hi" translatable="false">
-        <item>%1$s के लिए आप %2$s बचा सकते हैं। आपको कौन सा आसान लगेगा?</item>
+        <item>तो %1$s के लिए, आप %2$s बचा सकते हैं। आपको कौन सा आसान लगेगा?</item>
+        <item>%1$s के लिए तीन तरीके हैं: %2$s। बताइए, कौन सा ठीक रहेगा?</item>
     </string-array>
 
     <string-array name="voice_too_close_en" translatable="false">
@@ -198,13 +200,14 @@
     </string-array>
 
     <string-array name="voice_started_en" translatable="false">
-        <item>Done! Your %1$s Gullak has started. The first payment is on %2$s. Anything else?</item>
+        <item>Done, congratulations! Your %1$s Gullak has started. The first payment goes on %2$s. Anything else?</item>
     </string-array>
     <string-array name="voice_started_hinglish" translatable="false">
         <item>Ho gaya! %1$s ki gullak shuru ho gayi. Pehli kist %2$s ko. Aur kuch?</item>
     </string-array>
     <string-array name="voice_started_hi" translatable="false">
-        <item>हो गया! %1$s की गुल्लक शुरू हो गई। पहली क़िस्त %2$s को। और कुछ?</item>
+        <item>हो गया, बधाई हो! %1$s की गुल्लक शुरू हो गई। पहली क़िस्त %2$s को जाएगी। और कुछ?</item>
+        <item>बहुत बढ़िया! %1$s की गुल्लक शुरू हो गई। पहली क़िस्त %2$s को। और कुछ करना है?</item>
     </string-array>
 
     <string-array name="voice_failed_en" translatable="false">
@@ -218,12 +221,37 @@
     </string-array>
 
     <string-array name="voice_bye_en" translatable="false">
-        <item>All right. Happy saving!</item>
+        <item>All right. Take care, and happy saving!</item>
     </string-array>
     <string-array name="voice_bye_hinglish" translatable="false">
         <item>Theek hai. Bachat mubarak ho!</item>
     </string-array>
     <string-array name="voice_bye_hi" translatable="false">
-        <item>ठीक है। बचत मुबारक हो!</item>
+        <item>ठीक है जी। अपना ख़याल रखिए, बचत मुबारक हो!</item>
+        <item>धन्यवाद! जब मन करे, फिर बात करेंगे।</item>
+    </string-array>
+
+    <string-array name="voice_greeting_progress_en" translatable="false">
+        <item>Hello again! Your %1$s Gullak already has %2$s in it, well done! What shall we save for next?</item>
+    </string-array>
+
+    <string-array name="voice_greeting_progress_hinglish" translatable="false">
+        <item>Namaste! Aapki %1$s gullak mein %2$s jud chuke hain, bahut badhiya! Ab kis cheez ke liye bachat karein?</item>
+    </string-array>
+
+    <string-array name="voice_greeting_progress_hi" translatable="false">
+        <item>नमस्ते जी! आपकी %1$s गुल्लक में %2$s जुड़ चुके हैं, बहुत बढ़िया! अब किस चीज़ के लिए बचत करें?</item>
+    </string-array>
+
+    <string-array name="voice_else_en" translatable="false">
+        <item>Is there anything else?</item>
+    </string-array>
+
+    <string-array name="voice_else_hinglish" translatable="false">
+        <item>Aur kuch?</item>
+    </string-array>
+
+    <string-array name="voice_else_hi" translatable="false">
+        <item>और कुछ?</item>
     </string-array>
 </resources>

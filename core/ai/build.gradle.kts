@@ -17,6 +17,11 @@ android {
     defaultConfig {
         buildConfigField("String", "GEMINI_API_KEY", "\"${localProps.getProperty("GEMINI_API_KEY", "")}\"")
         buildConfigField("String", "GEMINI_MODEL_ID", "\"${localProps.getProperty("GEMINI_MODEL_ID", "")}\"")
+        buildConfigField(
+            "String",
+            "GEMINI_TALK_MODEL_ID",
+            "\"${localProps.getProperty("GEMINI_TALK_MODEL_ID", "gemini-3.5-flash")}\"",
+        )
     }
 }
 

@@ -33,6 +33,16 @@ internal class FallbackSpeechInput @Inject constructor(
     }
 }
 
+/** Money the way people say it: "₹4,500" is read as "4,500 रुपये", not as a symbol and a number. */
+internal fun speakable(
+    text: String,
+    language: GoalLanguage,
+): String = RUPEES.replace(text) { match ->
+    "${match.groupValues[1]} ${if (language == GoalLanguage.ENGLISH) "rupees" else "रुपये"}"
+}
+
+private val RUPEES = Regex("""₹\s*([\d,]+(?:\.\d+)?)""")
+
 /** Sarvam first; with no key, or when it cannot be reached, the phone's own text-to-speech. */
 internal class FallbackVoiceOutput @Inject constructor(
     private val config: SarvamConfig,
@@ -43,8 +53,9 @@ internal class FallbackVoiceOutput @Inject constructor(
         text: String,
         language: GoalLanguage,
     ) {
-        if (config.isConfigured && sarvam.speak(text, language)) return
-        phone.speak(text, language)
+        val spoken = speakable(text, language)
+        if (config.isConfigured && sarvam.speak(spoken, language)) return
+        phone.speak(spoken, language)
     }
 
     /** Sarvam's voices cover every language Gullak speaks; only the phone's engine can lack one. */

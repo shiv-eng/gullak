@@ -2,7 +2,6 @@ package com.gullak.feature.creategoal.voice
 
 import android.content.Context
 import androidx.annotation.ArrayRes
-import androidx.core.os.ConfigurationCompat
 import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.goal.Frequency
@@ -27,6 +26,14 @@ internal interface VoiceLines {
     fun defaultLanguage(): GoalLanguage
 
     fun greeting(language: GoalLanguage): String
+
+    fun greetingWithProgress(
+        language: GoalLanguage,
+        name: String,
+        saved: Money,
+    ): String
+
+    fun anythingElse(language: GoalLanguage): String
 
     fun greetingAgain(language: GoalLanguage): String
 
@@ -84,10 +91,8 @@ internal interface VoiceLines {
 @Suppress("TooManyFunctions") // One function for each thing Gullak can say.
 internal class ResourceVoiceLines @Inject constructor(@ApplicationContext private val context: Context) : VoiceLines {
 
-    override fun defaultLanguage(): GoalLanguage {
-        val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0]
-        return if (locale?.language == "hi") GoalLanguage.HINDI else GoalLanguage.HINGLISH
-    }
+    /** Hindi first: the people Gullak is for, and the voices speak it best. It follows the user from there. */
+    override fun defaultLanguage(): GoalLanguage = GoalLanguage.HINDI
 
     private fun GoalLanguage.pick(
         @ArrayRes english: Int,
@@ -108,6 +113,19 @@ internal class ResourceVoiceLines @Inject constructor(@ApplicationContext privat
 
     override fun greeting(language: GoalLanguage) =
         language.pick(R.array.voice_greeting_en, R.array.voice_greeting_hinglish, R.array.voice_greeting_hi)
+
+    override fun greetingWithProgress(
+        language: GoalLanguage,
+        name: String,
+        saved: Money,
+    ) = language.pick(
+        R.array.voice_greeting_progress_en,
+        R.array.voice_greeting_progress_hinglish,
+        R.array.voice_greeting_progress_hi,
+    ).format(name, IndianMoneyFormat.format(saved))
+
+    override fun anythingElse(language: GoalLanguage) =
+        language.pick(R.array.voice_else_en, R.array.voice_else_hinglish, R.array.voice_else_hi)
 
     override fun greetingAgain(language: GoalLanguage) =
         language.pick(R.array.voice_again_en, R.array.voice_again_hinglish, R.array.voice_again_hi)

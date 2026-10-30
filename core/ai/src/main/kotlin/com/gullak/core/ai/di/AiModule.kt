@@ -2,12 +2,14 @@ package com.gullak.core.ai.di
 
 import com.gullak.core.ai.BuildConfig
 import com.gullak.core.ai.FallbackGoalUnderstandingService
+import com.gullak.core.ai.conversation.GeminiConversationBrain
 import com.gullak.core.ai.explanation.GeminiPlanExplanationService
 import com.gullak.core.ai.gemini.GeminiAiInfo
 import com.gullak.core.ai.gemini.GeminiApi
 import com.gullak.core.ai.gemini.GeminiConfig
 import com.gullak.core.ai.gemini.GeminiHttp
 import com.gullak.core.domain.ai.AiInfo
+import com.gullak.core.domain.ai.ConversationBrain
 import com.gullak.core.domain.ai.GoalUnderstandingService
 import com.gullak.core.domain.ai.PlanExplanationService
 import dagger.Binds
@@ -30,6 +32,9 @@ internal abstract class AiBindingsModule {
 
     @Binds
     abstract fun aiInfo(impl: GeminiAiInfo): AiInfo
+
+    @Binds
+    abstract fun conversationBrain(impl: GeminiConversationBrain): ConversationBrain
 }
 
 @Module
@@ -40,7 +45,11 @@ internal object AiProvidersModule {
 
     /** Prototype only: a shipped app would call the model through a backend, never with a key in the APK. */
     @Provides
-    fun geminiConfig(): GeminiConfig = GeminiConfig(BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL_ID)
+    fun geminiConfig(): GeminiConfig = GeminiConfig(
+        BuildConfig.GEMINI_API_KEY,
+        BuildConfig.GEMINI_MODEL_ID,
+        BuildConfig.GEMINI_TALK_MODEL_ID,
+    )
 
     @Provides
     @Singleton

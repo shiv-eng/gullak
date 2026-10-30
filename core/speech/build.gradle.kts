@@ -17,7 +17,11 @@ android {
         buildConfigField("String", "SARVAM_API_KEY", "\"${localProps.getProperty("SARVAM_API_KEY", "")}\"")
         buildConfigField("String", "SARVAM_STT_MODEL", "\"${localProps.getProperty("SARVAM_STT_MODEL", "saaras:v4")}\"")
         buildConfigField("String", "SARVAM_TTS_MODEL", "\"${localProps.getProperty("SARVAM_TTS_MODEL", "bulbul:v3")}\"")
-        buildConfigField("String", "SARVAM_TTS_SPEAKER", "\"${localProps.getProperty("SARVAM_TTS_SPEAKER", "priya")}\"")
+        buildConfigField(
+            "String",
+            "SARVAM_TTS_SPEAKER",
+            "\"${localProps.getProperty("SARVAM_TTS_SPEAKER", "simran")}\"",
+        )
     }
 }
 

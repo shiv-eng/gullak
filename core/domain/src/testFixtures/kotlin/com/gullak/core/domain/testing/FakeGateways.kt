@@ -154,6 +154,21 @@ class FakeVoiceOutput : com.gullak.core.domain.ai.VoiceOutput {
     override suspend fun isVoiceAvailable(language: GoalLanguage): Boolean = voiceAvailable
 }
 
+class FakeConversationBrain : com.gullak.core.domain.ai.ConversationBrain {
+    /** What the next turns are read as, oldest first. Empty means the brain is unavailable. */
+    val answers = ArrayDeque<com.gullak.core.domain.ai.BrainAnswer>()
+    val situations = mutableListOf<String>()
+
+    override suspend fun hear(
+        conversation: List<ConversationTurn>,
+        situation: String,
+        today: LocalDate,
+    ): AppResult<com.gullak.core.domain.ai.BrainAnswer> {
+        situations += situation
+        return answers.removeFirstOrNull()?.let { AppResult.Success(it) } ?: AppResult.Failure(AppError.NotConfigured)
+    }
+}
+
 class FakeSpeechInput : com.gullak.core.domain.ai.SpeechInput {
     /** What the next `listen` calls hear, oldest first. Nothing is heard when empty. */
     val heard = ArrayDeque<List<com.gullak.core.domain.ai.SpeechEvent>>()

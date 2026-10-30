@@ -36,6 +36,13 @@ class UnderstandGoalUseCase @Inject constructor(
         return AppResult.Success(understanding)
     }
 
+    /** The same checks, for a goal already read from the conversation. */
+    suspend fun check(parsed: ParsedGoal): Understanding {
+        val understanding = interpret(parsed, LocalDate.now(clock))
+        if (understanding is Understanding.NeedsFollowUp) analytics.log(AnalyticsEvent.FollowUpAsked)
+        return understanding
+    }
+
     private suspend fun interpret(
         parsed: ParsedGoal,
         today: LocalDate,

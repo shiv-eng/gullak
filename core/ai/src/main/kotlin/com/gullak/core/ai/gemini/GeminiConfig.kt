@@ -7,6 +7,8 @@ package com.gullak.core.ai.gemini
 data class GeminiConfig(
     val apiKey: String,
     val modelId: String,
+    /** For the spoken conversation, where the quality of the Hindi matters most. */
+    val talkModelId: String = modelId,
 ) {
     val isConfigured: Boolean get() = apiKey.isNotBlank() && modelId.isNotBlank()
 

@@ -2,10 +2,17 @@ package com.gullak.core.speech
 
 import android.speech.SpeechRecognizer
 import com.gullak.core.domain.ai.SpeechError
+import com.gullak.core.model.ai.GoalLanguage
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AndroidSpeechInputTest {
+
+    @Test
+    fun moneyIsWrittenTheWayItIsSaid() {
+        assertEquals("हर महीने 4,500 रुपये", speakable("हर महीने ₹4,500", GoalLanguage.HINDI))
+        assertEquals("1,50,000 rupees a month", speakable("₹1,50,000 a month", GoalLanguage.ENGLISH))
+    }
 
     @Test
     fun silenceIsNotAFailure() {

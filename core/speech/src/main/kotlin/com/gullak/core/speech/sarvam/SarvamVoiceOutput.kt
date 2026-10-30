@@ -83,6 +83,7 @@ internal class SarvamVoiceOutput @Inject constructor(
             put("speaker", config.ttsSpeaker)
             put("speech_sample_rate", SAMPLE_RATE)
             put("output_audio_codec", "wav")
+            put("pace", PACE)
         }.toString().toRequestBody(JSON)
         val request = Request.Builder()
             .url(TTS_URL)
@@ -144,6 +145,9 @@ internal class SarvamVoiceOutput @Inject constructor(
         const val TTS_URL = "https://api.sarvam.ai/text-to-speech"
         const val KEY_HEADER = "api-subscription-key"
         const val SAMPLE_RATE = 24_000
+
+        /** A little quicker than the default, which sounds slow in conversation. */
+        const val PACE = 1.1
         const val BYTES_PER_SAMPLE = 2
         const val WRITE_CHUNK_BYTES = 8_192
         const val DRAIN_POLL_MS = 30L
