@@ -3,6 +3,8 @@ package com.gullak.feature.creategoal
 import android.os.Looper
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -81,6 +83,9 @@ class CreateGoalFlowUiTest {
         }
     }
 
+    private fun dayNode(day: String) =
+        compose.onAllNodes(hasText(day, substring = true) or hasContentDescription(day, substring = true)).onFirst()
+
     /** Dates up to the demo date cannot be picked, so the calendar must open on a month that has dates to pick. */
     @Test
     fun theCalendarOpensOnAMonthWithDatesAndADayCanBePicked() {
@@ -90,10 +95,11 @@ class CreateGoalFlowUiTest {
         // At this size the field is behind the bottom button until the list is scrolled.
         compose.onNodeWithText(text(R.string.create_date_hint)).performSemanticsAction(SemanticsActions.OnClick)
         settle()
+        // Six days from the demo date is too close for a plan; seven is the first date offered.
+        dayNode("November 6, 2026").assertIsNotEnabled()
+        dayNode("November 7, 2026").assertIsEnabled()
         val day = "November 30, 2026"
-        compose.onAllNodes(hasText(day, substring = true) or hasContentDescription(day, substring = true))
-            .onFirst()
-            .performClick()
+        dayNode(day).performClick()
         tap(text(R.string.create_date_ok))
 
         assertEquals(LocalDate.of(2026, 11, 30), viewModel.uiState.value.targetDate)

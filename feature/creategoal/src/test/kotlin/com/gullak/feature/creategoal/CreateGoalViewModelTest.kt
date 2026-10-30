@@ -159,7 +159,7 @@ class CreateGoalViewModelTest {
         assertTrue(vm.uiState.value.showMandate)
         vm.onEvent(CreateGoalEvent.MandateConfirmed)
         assertEquals(Stage.BANK, vm.uiState.value.stage)
-        vm.onEvent(CreateGoalEvent.BankSelected(DemoBankAccount.SAMPLE_BANK_SAVINGS))
+        vm.onEvent(CreateGoalEvent.BankSelected(DemoBankAccount.HDFC_SAVINGS))
         vm.onEvent(CreateGoalEvent.BankProceed)
         assertEquals(Stage.APPROVAL, vm.uiState.value.stage)
         repeat(CreateGoalUiState.APPROVAL_LENGTH) { vm.onEvent(CreateGoalEvent.ApprovalDigit) }

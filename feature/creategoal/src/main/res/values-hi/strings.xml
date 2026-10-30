@@ -30,7 +30,7 @@
     <string name="create_problem_amount_range">लक्ष्य रक़म ₹500 से ₹50,00,000 के बीच हो</string>
     <string name="create_problem_date">आज के बाद की तारीख़ चुनें</string>
     <string name="create_problem_date_far">10 साल के अंदर की तारीख़ चुनें</string>
-    <string name="create_problem_too_close">7 दिन से कम बचे हैं: SIP के लिए बहुत कम समय। आगे की तारीख़ चुनें।</string>
+    <string name="create_problem_too_close">आज (%1$s) से 7 दिन से कम: SIP के लिए बहुत कम समय। बाद की तारीख़ चुनें।</string>
     <string name="create_failed">SIP शुरू नहीं हो सकी। फिर से कोशिश करें।</string>
 
     <string name="create_plan_title">आपकी SIP योजना</string>
@@ -76,12 +76,6 @@
     <string name="bank_paying">आप सेट कर रहे हैं</string>
     <string name="bank_payee">%1$s गुल्लक के लिए UPI AutoPay</string>
     <string name="bank_section">इस खाते से भुगतान</string>
-    <string name="bank_demo_name">डेमो बैंक · बचत खाता</string>
-    <string name="bank_demo_number">खाता ••4321</string>
-    <string name="bank_demo_upi">UPI ID: sunita@demobank</string>
-    <string name="bank_sample_name">सैंपल को-ऑप बैंक · बचत खाता</string>
-    <string name="bank_sample_number">खाता ••7788</string>
-    <string name="bank_sample_upi">UPI ID: sunita@samplebank</string>
     <string name="bank_proceed">मंज़ूरी के लिए आगे बढ़ें</string>
     <string name="approval_title">AutoPay को मंज़ूरी दें</string>
     <string name="approval_payee">गुल्लक भरो</string>
@@ -125,4 +119,14 @@
         <item>नया टीवी</item>
         <item>घर की मरम्मत</item>
     </string-array>
+    <string name="create_date_today">आज से गिनती: %1$s</string>
+    <string name="bank_sbi_name">स्टेट बैंक ऑफ़ इंडिया · बचत खाता</string>
+    <string name="bank_sbi_number">खाता ••4321</string>
+    <string name="bank_sbi_upi">UPI ID: sun•••@oksbi</string>
+    <string name="bank_hdfc_name">HDFC बैंक · बचत खाता</string>
+    <string name="bank_hdfc_number">खाता ••7788</string>
+    <string name="bank_hdfc_upi">UPI ID: sun•••@okhdfcbank</string>
+    <string name="bank_icici_name">ICICI बैंक · बचत खाता</string>
+    <string name="bank_icici_number">खाता ••2056</string>
+    <string name="bank_icici_upi">UPI ID: sun•••@okicici</string>
 </resources>

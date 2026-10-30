@@ -227,15 +227,17 @@ class PlanEngine @Inject constructor(private val clock: Clock) {
             Destination.PAYTM_GOLD to DestinationReason.LONG_GOAL
         }
 
-    private companion object {
-        const val DAILY_STEP_RUPEES = 5L
-        const val WEEKLY_STEP_RUPEES = 10L
-        const val MONTHLY_STEP_RUPEES = 50L
+    companion object {
+        /** A target date closer than this gets no recurring plan. */
         const val MIN_DAYS_FOR_RECURRING = 7L
-        const val GOLD_MIN_MONTHS = 12
-        val CATCH_UP_DAYS = listOf(15, 25)
+
+        private const val DAILY_STEP_RUPEES = 5L
+        private const val WEEKLY_STEP_RUPEES = 10L
+        private const val MONTHLY_STEP_RUPEES = 50L
+        private const val GOLD_MIN_MONTHS = 12
+        private val CATCH_UP_DAYS = listOf(15, 25)
 
         /** Paytm Gold's daily SIP minimum. */
-        val MIN_DAILY_AMOUNT = Money.fromRupees(21)
+        private val MIN_DAILY_AMOUNT = Money.fromRupees(21)
     }
 }

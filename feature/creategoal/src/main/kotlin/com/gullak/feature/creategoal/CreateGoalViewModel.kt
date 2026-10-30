@@ -50,7 +50,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 enum class Stage { EDITING, BANK, APPROVAL, PROCESSING, DONE }
 
 /** Made-up accounts for the mock UPI AutoPay step. No real bank, account or UPI ID. */
-enum class DemoBankAccount { DEMO_BANK_SAVINGS, SAMPLE_BANK_SAVINGS }
+enum class DemoBankAccount { SBI_SAVINGS, HDFC_SAVINGS, ICICI_SAVINGS }
 
 /** Why speech did not fill the form. Shown from string resources. */
 enum class VoiceProblem { FAILED, NOT_HEARD, MIC_DENIED }
@@ -96,7 +96,7 @@ data class CreateGoalUiState(
     val isExplaining: Boolean = false,
     val showMandate: Boolean = false,
     val stage: Stage = Stage.EDITING,
-    val bankAccount: DemoBankAccount = DemoBankAccount.DEMO_BANK_SAVINGS,
+    val bankAccount: DemoBankAccount = DemoBankAccount.SBI_SAVINGS,
     /** How many demo approval digits are entered. The digits themselves are never kept. */
     val approvalDigits: Int = 0,
     /** BCP 47 tag for speech input, from Settings. */

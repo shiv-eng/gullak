@@ -30,7 +30,7 @@
     <string name="create_problem_amount_range">Goal amount must be between ₹500 and ₹50,00,000</string>
     <string name="create_problem_date">Choose a date after today</string>
     <string name="create_problem_date_far">Choose a date within 10 years</string>
-    <string name="create_problem_too_close">Less than 7 days to go: too close for a SIP. Choose a later date.</string>
+    <string name="create_problem_too_close">Less than 7 days from today (%1$s): too close for a SIP. Choose a later date.</string>
     <string name="create_failed">Could not start the SIP. Please try again.</string>
 
     <string name="create_plan_title">Your SIP plan</string>
@@ -76,12 +76,6 @@
     <string name="bank_paying">You are setting up</string>
     <string name="bank_payee">UPI AutoPay to %1$s Gullak</string>
     <string name="bank_section">Pay from</string>
-    <string name="bank_demo_name">Demo Bank · Savings</string>
-    <string name="bank_demo_number">A/c ••4321</string>
-    <string name="bank_demo_upi">UPI ID: sunita@demobank</string>
-    <string name="bank_sample_name">Sample Co-op Bank · Savings</string>
-    <string name="bank_sample_number">A/c ••7788</string>
-    <string name="bank_sample_upi">UPI ID: sunita@samplebank</string>
     <string name="bank_proceed">Proceed to approve</string>
     <string name="approval_title">Approve AutoPay</string>
     <string name="approval_payee">Gullak Bharo</string>
@@ -125,4 +119,14 @@
         <item>New TV</item>
         <item>Home repair</item>
     </string-array>
+    <string name="create_date_today">Counted from today: %1$s</string>
+    <string name="bank_sbi_name">State Bank of India · Savings</string>
+    <string name="bank_sbi_number">A/c ••4321</string>
+    <string name="bank_sbi_upi">UPI ID: sun•••@oksbi</string>
+    <string name="bank_hdfc_name">HDFC Bank · Savings</string>
+    <string name="bank_hdfc_number">A/c ••7788</string>
+    <string name="bank_hdfc_upi">UPI ID: sun•••@okhdfcbank</string>
+    <string name="bank_icici_name">ICICI Bank · Savings</string>
+    <string name="bank_icici_number">A/c ••2056</string>
+    <string name="bank_icici_upi">UPI ID: sun•••@okicici</string>
 </resources>

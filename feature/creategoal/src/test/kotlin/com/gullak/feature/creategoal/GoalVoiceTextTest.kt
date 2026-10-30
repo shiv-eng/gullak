@@ -30,7 +30,7 @@ class GoalVoiceTextTest {
 
     @Test
     fun nothingTypedShowsTheCommonGoals() {
-        assertEquals(listOf("Laptop", "New phone", "Bhai ki shaadi", "Goa trip"), goalSuggestions(" ", goals))
+        assertEquals(goals, goalSuggestions(" ", goals))
     }
 
     @Test

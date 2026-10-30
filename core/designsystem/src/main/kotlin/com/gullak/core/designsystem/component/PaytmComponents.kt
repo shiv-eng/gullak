@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -254,6 +255,27 @@ fun AmountChip(
             style = MaterialTheme.typography.titleMedium,
             color = if (selected) colors.chipSelectedText else colors.textBody,
         )
+    }
+}
+
+/** A small tappable hint, such as a goal name suggestion. Small on purpose, so several fit on a line. */
+@Composable
+fun SuggestionBubble(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = GullakTheme.colors
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(colors.card)
+            .border(1.dp, colors.chipBorder, CircleShape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text = label, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp), color = colors.textBody)
     }
 }
 

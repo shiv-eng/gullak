@@ -99,9 +99,11 @@ import com.gullak.core.designsystem.component.OutlinePillButton
 import com.gullak.core.designsystem.component.PaytmCard
 import com.gullak.core.designsystem.component.PillButton
 import com.gullak.core.designsystem.component.SectionHeader
+import com.gullak.core.designsystem.component.SuggestionBubble
 import com.gullak.core.designsystem.theme.GullakTheme
 import com.gullak.core.domain.ai.FollowUpQuestion
 import com.gullak.core.domain.ai.FollowUpReason
+import com.gullak.core.domain.plan.PlanEngine
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.goal.Destination
 import com.gullak.core.model.goal.Frequency
@@ -532,16 +534,20 @@ private fun GoalDetailsCard(
         val suggestions = goalSuggestions(state.name, stringArrayResource(R.array.create_goal_suggestions).asList())
         if (suggestions.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
-            Row(
+            // Two rows that scroll sideways: many options in little height.
+            Column(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                suggestions.forEach { suggestion ->
-                    AmountChip(
-                        label = suggestion,
-                        selected = false,
-                        onClick = { onEvent(CreateGoalEvent.NameChanged(suggestion)) },
-                    )
+                listOf(0, 1).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        suggestions.filterIndexed { index, _ -> index % 2 == row }.forEach { suggestion ->
+                            SuggestionBubble(
+                                label = suggestion,
+                                onClick = { onEvent(CreateGoalEvent.NameChanged(suggestion)) },
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -613,6 +619,12 @@ private fun GoalDetailsCard(
             )
             Icon(Icons.Outlined.CalendarMonth, null, tint = GullakTheme.colors.iconNavy)
         }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.create_date_today, DATE.format(state.today)),
+            style = MaterialTheme.typography.bodySmall,
+            color = GullakTheme.colors.textMuted,
+        )
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
@@ -636,7 +648,11 @@ private fun GoalDetailsCard(
         state.problem?.let {
             Spacer(Modifier.height(8.dp))
             Text(
-                text = stringResource(problemText(it)),
+                text = if (it == InputProblem.TOO_CLOSE_FOR_SIP) {
+                    stringResource(R.string.create_problem_too_close, DATE.format(state.today))
+                } else {
+                    stringResource(problemText(it))
+                },
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                 color = GullakTheme.colors.errorText,
             )
@@ -653,13 +669,15 @@ private fun GoalDetailsCard(
 
     if (pickingDate) {
         val today = state.today
+        // Closer dates are too near for a recurring plan, so the calendar does not offer them.
+        val firstDate = today.plusDays(PlanEngine.MIN_DAYS_FOR_RECURRING)
         val pickerState = rememberDatePickerState(
             initialSelectedDateMillis = state.targetDate?.toUtcMillis(),
             // Open where a date can be picked: the demo date can be months away from the phone's real date.
-            initialDisplayedMonthMillis = (state.targetDate ?: today.plusDays(1)).toUtcMillis(),
+            initialDisplayedMonthMillis = (state.targetDate ?: firstDate).toUtcMillis(),
             yearRange = today.year..today.year + MAX_YEARS,
             selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis.toLocalDate() > today
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis.toLocalDate() >= firstDate
 
                 override fun isSelectableYear(year: Int): Boolean = year in today.year..today.year + MAX_YEARS
             },
@@ -1227,16 +1245,22 @@ private class BankLabels(
 
 @Composable
 private fun bankLabels(account: DemoBankAccount): BankLabels = when (account) {
-    DemoBankAccount.DEMO_BANK_SAVINGS -> BankLabels(
-        stringResource(R.string.bank_demo_name),
-        stringResource(R.string.bank_demo_number),
-        stringResource(R.string.bank_demo_upi),
+    DemoBankAccount.SBI_SAVINGS -> BankLabels(
+        stringResource(R.string.bank_sbi_name),
+        stringResource(R.string.bank_sbi_number),
+        stringResource(R.string.bank_sbi_upi),
     )
 
-    DemoBankAccount.SAMPLE_BANK_SAVINGS -> BankLabels(
-        stringResource(R.string.bank_sample_name),
-        stringResource(R.string.bank_sample_number),
-        stringResource(R.string.bank_sample_upi),
+    DemoBankAccount.HDFC_SAVINGS -> BankLabels(
+        stringResource(R.string.bank_hdfc_name),
+        stringResource(R.string.bank_hdfc_number),
+        stringResource(R.string.bank_hdfc_upi),
+    )
+
+    DemoBankAccount.ICICI_SAVINGS -> BankLabels(
+        stringResource(R.string.bank_icici_name),
+        stringResource(R.string.bank_icici_number),
+        stringResource(R.string.bank_icici_upi),
     )
 }
 

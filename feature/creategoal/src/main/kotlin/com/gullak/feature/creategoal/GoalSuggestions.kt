@@ -13,4 +13,4 @@ internal fun goalSuggestions(
         .take(MAX_SUGGESTIONS)
 }
 
-private const val MAX_SUGGESTIONS = 4
+private const val MAX_SUGGESTIONS = 16
