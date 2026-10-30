@@ -3,7 +3,7 @@
     <string name="home_title">गुल्लक</string>
     <string name="home_new_goal">गुल्लक शुरू करें</string>
     <string name="home_empty_prompt">अभी कोई गुल्लक नहीं</string>
-    <string name="home_empty_hint">लक्ष्य, रक़म और तारीख़ चुनें। गुल्लक रोज़, हफ़्ते या महीने की SIP बनाकर AutoPay सेट करता है।</string>
+    <string name="home_empty_hint">लक्ष्य, रक़म और तारीख़ चुनें। गुल्लक रोज़, हफ़्ते या महीने की योजना बनाकर AutoPay सेट करता है।</string>
     <string name="home_mic_description">अपना लक्ष्य बोलें</string>
     <string name="home_back">वापस</string>
     <string name="home_total_saved">गुल्लक में कुल बचत</string>
@@ -13,7 +13,7 @@
     <string name="home_status_behind">%1$s पीछे</string>
     <string name="home_status_reached">लक्ष्य पूरा</string>
     <string name="home_saved_of_target">%2$s में से %1$s · %3$s तक</string>
-    <string name="home_next_sip">अगली SIP: %2$s को %1$s · %3$s</string>
+    <string name="home_next_sip">अगली क़िस्त: %2$s को %1$s · %3$s</string>
     <string name="home_destination_gold">Paytm Gold</string>
     <string name="home_destination_fund">Paytm Money</string>
     <string name="home_settings">सेटिंग्स</string>

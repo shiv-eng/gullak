@@ -5,10 +5,10 @@
 
     <string name="settings_demo_title">Demo</string>
     <string name="settings_demo_mode">Demo mode</string>
-    <string name="settings_demo_mode_body">Saved AI answers, template explanations and the demo date. Works offline.</string>
+    <string name="settings_demo_mode_body">Saved answers for demo sentences and the demo date. Without internet, Gullak still works.</string>
     <string name="settings_demo_date">Demo date</string>
     <string name="settings_fast_forward">Fast-forward to</string>
-    <string name="settings_fast_forward_body">Moves the date to the end of the month and runs every SIP due on the way.</string>
+    <string name="settings_fast_forward_body">Moves the date to the end of the month and runs every payment due on the way.</string>
     <string name="settings_back_to_today">Back to today</string>
     <string name="settings_moved_to">Demo date moved to %1$s</string>
     <string name="settings_date_reset">Demo date reset</string>

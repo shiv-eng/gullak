@@ -7,11 +7,13 @@ import com.gullak.core.domain.testing.DomainTestEnvironment
 import com.gullak.core.domain.testing.TestData
 import com.gullak.core.domain.testing.TestData.rupees
 import com.gullak.core.domain.usecase.GoalSummary
+import com.gullak.core.domain.usecase.TopUpAnswer
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.goal.Debit
 import com.gullak.core.model.goal.DebitKind
 import com.gullak.core.model.goal.DebitStatus
 import com.gullak.core.model.goal.Goal
+import com.gullak.core.model.money.Money
 import com.gullak.core.model.plan.GoalStatus
 import com.gullak.core.model.plan.ReplanChoice
 import com.gullak.core.model.result.getOrNull
@@ -44,7 +46,8 @@ class GoalDetailViewModelTest {
         getReplanOptions = env.getReplanOptions,
         applyReplan = env.applyReplan,
         explainer = env.explanationService,
-        talk = GoalTalk(env.voice, env.speech, env.settings, FakeGoalLines),
+        money = env.money,
+        talk = GoalTalk(env.voice, env.speech, env.settings, env.brain, env.clock, FakeGoalLines),
     )
 
     private suspend fun laptopUpToFebruary(): Goal {
@@ -107,7 +110,7 @@ class GoalDetailViewModelTest {
         vm.onEvent(GoalDetailEvent.TalkClicked)
         advanceUntilIdle()
 
-        assertEquals(listOf("status"), env.voice.spoken)
+        assertEquals(listOf("status", "else"), env.voice.spoken)
     }
 
     @Test
@@ -121,6 +124,101 @@ class GoalDetailViewModelTest {
 
         assertTrue(env.voice.spoken.isEmpty())
         assertEquals(0, env.speech.listens)
+    }
+
+    @Test
+    fun moneyCanBeAddedByTappingAndStaysInTheHistory() = runTest {
+        val laptop = laptopUpToFebruary()
+        val vm = viewModel(laptop)
+
+        vm.onEvent(GoalDetailEvent.AddMoney(5_000))
+        advanceUntilIdle()
+
+        assertEquals(rupees(23_000), vm.uiState.value.detail?.summary?.saved)
+    }
+
+    @Test
+    fun moneyIsAddedByVoiceOnlyOnASpokenYes() = runTest {
+        val laptop = laptopUpToFebruary()
+        says("5 hazaar daal do", "haan")
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+
+        vm.onEvent(GoalDetailEvent.TalkClicked)
+        advanceUntilIdle()
+
+        assertEquals(rupees(23_000), vm.uiState.value.detail?.summary?.saved)
+        assertEquals("added", env.voice.spoken.last())
+    }
+
+    @Test
+    fun aSpokenAmountWithoutAYesAddsNothing() = runTest {
+        val laptop = laptopUpToFebruary()
+        says("5000 daal do", "ruko pata nahi")
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+
+        vm.onEvent(GoalDetailEvent.TalkClicked)
+        advanceUntilIdle()
+
+        assertEquals(rupees(18_000), vm.uiState.value.detail?.summary?.saved)
+    }
+
+    @Test
+    fun theLastPaymentOffersThePayOutAloud() = runTest {
+        val laptop = requireNotNull(env.createGoal(TestData.laptopRequest).getOrNull())
+        env.addMoney(laptop.id, rupees(31_500))
+        says("haan")
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+        assertFalse(vm.uiState.value.canPayOut)
+
+        vm.onEvent(GoalDetailEvent.SimulateNextDebit)
+        advanceUntilIdle()
+
+        assertEquals("paid out", env.voice.spoken.last())
+        assertTrue(vm.uiState.value.isPaidOut)
+        assertFalse(vm.uiState.value.canPayOut)
+    }
+
+    @Test
+    fun aPayOutBeforeGoalDayIsExplainedNotDone() = runTest {
+        val laptop = laptopUpToFebruary()
+        says("bank mein bhej do")
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+
+        vm.onEvent(GoalDetailEvent.TalkClicked)
+        advanceUntilIdle()
+
+        assertEquals("not yet", env.voice.spoken.last())
+        assertFalse(vm.uiState.value.isPaidOut)
+    }
+
+    @Test
+    fun aTopUpIsOnlyShownOnceAskedForAndSendsNothing() = runTest {
+        val laptop = laptopUpToFebruary()
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+        assertNull(vm.uiState.value.topUp)
+
+        vm.onEvent(GoalDetailEvent.TopUpClicked)
+        advanceUntilIdle()
+
+        assertEquals(TopUpAnswer.NoGap, vm.uiState.value.topUp?.answer)
+        vm.onEvent(GoalDetailEvent.TopUpDismissed)
+        assertNull(vm.uiState.value.topUp)
+    }
+
+    @Test
+    fun repliesNamingAGoalRequestAreRead() {
+        assertEquals(GoalRequest.AddMoney(rupees(5_000)), goalRequestFrom("5 hazaar daal do"))
+        assertEquals(GoalRequest.AddMoney(rupees(2_500)), goalRequestFrom("add 2,500"))
+        assertEquals(GoalRequest.PayOut, goalRequestFrom("paisa bank mein bhej do"))
+        assertEquals(GoalRequest.TopUp, goalRequestFrom("paise kam pad rahe hain"))
+        assertEquals(GoalRequest.TopUp, goalRequestFrom("loan mil sakta hai?"))
+        assertNull(goalRequestFrom("kuch nahi"))
+        assertNull(goalRequestFrom("paise daal do"))
     }
 
     @Test
@@ -285,4 +383,40 @@ private object FakeGoalLines : GoalVoiceLines {
     override fun applied(language: GoalLanguage) = "applied"
 
     override fun leftAsIs(language: GoalLanguage) = "left"
+
+    override fun confirmAdd(
+        language: GoalLanguage,
+        amount: Money,
+    ) = "add?"
+
+    override fun added(
+        language: GoalLanguage,
+        amount: Money,
+    ) = "added"
+
+    override fun cannotAdd(language: GoalLanguage) = "cannot add"
+
+    override fun confirmPayOut(
+        language: GoalLanguage,
+        amount: Money,
+    ) = "pay out?"
+
+    override fun paidOut(
+        language: GoalLanguage,
+        amount: Money,
+    ) = "paid out"
+
+    override fun notTimeToPayOut(
+        language: GoalLanguage,
+        date: LocalDate,
+    ) = "not yet"
+
+    override fun topUp(
+        language: GoalLanguage,
+        answer: TopUpAnswer,
+    ) = "top up"
+
+    override fun topUpRequested(language: GoalLanguage) = "requested"
+
+    override fun anythingElse(language: GoalLanguage) = "else"
 }

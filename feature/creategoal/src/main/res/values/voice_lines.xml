@@ -261,4 +261,18 @@
     <string-array name="voice_no_savings_hi" translatable="false"><item>अभी कोई बचत नहीं है, पर शुरुआत के लिए आज का दिन बढ़िया है।</item></string-array>
     <string-array name="voice_one_time_en" translatable="false"><item>Good, %1$s goes in right away.</item></string-array>
     <string-array name="voice_one_time_hi" translatable="false"><item>बढ़िया, %1$s अभी जुड़ जाएँगे।</item></string-array>
+
+    <string-array name="voice_goes_gold_en" translatable="false"><item>Your money goes to Paytm Gold.</item></string-array>
+    <string-array name="voice_goes_gold_hi" translatable="false"><item>आपका पैसा Paytm Gold में जाएगा।</item></string-array>
+    <string-array name="voice_goes_fund_en" translatable="false"><item>Your money goes to a low-risk fund on Paytm Money.</item></string-array>
+    <string-array name="voice_goes_fund_hi" translatable="false"><item>आपका पैसा Paytm Money के कम जोखिम वाले फ़ंड में जाएगा।</item></string-array>
+    <string-array name="voice_why_gold_en" translatable="false"><item>You have %1$d months, which is long enough for Paytm Gold. Just remember that gold costs 3%% GST to buy and its price can move.</item></string-array>
+    <string-array name="voice_why_gold_hi" translatable="false"><item>आपके पास %1$d महीने हैं, तो Paytm Gold ठीक रहेगा। बस ध्यान रहे, सोना लेते वक़्त 3%% GST लगता है और उसका दाम ऊपर-नीचे होता है।</item></string-array>
+    <string-array name="voice_why_fund_en" translatable="false"><item>You only have %1$d months. Gold costs 3%% GST to buy and its price can fall, so a low-risk fund on Paytm Money suits this better.</item></string-array>
+    <string-array name="voice_why_fund_hi" translatable="false"><item>आपके पास सिर्फ़ %1$d महीने हैं। सोना लेते वक़्त 3%% GST लगता है और दाम गिर भी सकता है, इसलिए Paytm Money का कम जोखिम वाला फ़ंड बेहतर रहेगा।</item></string-array>
+    <string-array name="voice_why_general_en" translatable="false"><item>It depends on your date. A year or more goes to Paytm Gold, and anything shorter to a low-risk fund on Paytm Money.</item></string-array>
+    <string-array name="voice_why_general_hi" translatable="false"><item>यह आपकी तारीख़ पर निर्भर है। एक साल या उससे ज़्यादा हो तो Paytm Gold, उससे कम हो तो Paytm Money का कम जोखिम वाला फ़ंड।</item></string-array>
+
+    <string-array name="voice_goal_page_en" translatable="false"><item>You can do that from your Gullak\'s page: open it and tap the mic.</item></string-array>
+    <string-array name="voice_goal_page_hi" translatable="false"><item>यह आप अपनी गुल्लक के पेज से कर सकते हैं: उसे खोलकर माइक दबाइए।</item></string-array>
 </resources>

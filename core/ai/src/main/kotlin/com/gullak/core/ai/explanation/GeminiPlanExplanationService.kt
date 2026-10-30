@@ -8,7 +8,6 @@ import com.gullak.core.ai.reason
 import com.gullak.core.domain.ai.PlanExplanationService
 import com.gullak.core.domain.analytics.Analytics
 import com.gullak.core.domain.analytics.AnalyticsEvent
-import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.goal.Destination
 import com.gullak.core.model.money.Money
@@ -17,7 +16,6 @@ import com.gullak.core.model.plan.PlanOption
 import com.gullak.core.model.plan.ReplanChoice
 import com.gullak.core.model.result.AppResult
 import javax.inject.Inject
-import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonObject
@@ -27,11 +25,11 @@ import kotlinx.serialization.json.putJsonObject
 
 /**
  * Task 2 (section 6.3): Gemini explains a plan the engine already made. The reply is used only if every number
- * in it is in the plan input (NumberGuard); otherwise, offline, or in demo mode, a string-resource template.
+ * in it is in the plan input (NumberGuard); otherwise, or offline, a string-resource template. Demo mode does not
+ * change this: the model explaining is the point of the product.
  */
 internal class GeminiPlanExplanationService @Inject constructor(
     private val client: GeminiClient,
-    private val settings: SettingsRepository,
     private val guard: NumberGuard,
     private val templates: ExplanationTemplates,
     private val analytics: Analytics,
@@ -44,6 +42,37 @@ internal class GeminiPlanExplanationService @Inject constructor(
         language: GoalLanguage,
     ): String = explainWithModel(planInput(goalName, plan, chosen), language) {
         templates.plan(goalName, plan, chosen, language)
+    }
+
+    override suspend fun explainDestination(
+        goalName: String,
+        plan: Plan,
+        question: String?,
+        language: GoalLanguage,
+    ): String? {
+        if (!client.isConfigured) return null
+        val input = buildJsonObject {
+            put("goal_name", goalName)
+            put("months_to_goal", plan.monthsToGoal)
+            put("destination", destinationName(plan.destination))
+            put("destination_reason", reasonText(plan.destination))
+            question?.let { put("user_asked", it) }
+        }.toString()
+        val reply = client.generate(
+            systemInstruction = DESTINATION_INSTRUCTION,
+            contents = listOf(Content(role = "user", parts = listOf(Part("Language: ${language.tag}\n$input")))),
+            temperature = EXPLANATION_TEMPERATURE,
+        )
+        return when {
+            reply !is AppResult.Success -> null
+
+            guard.isGrounded(reply.value, input) -> reply.value
+
+            else -> {
+                analytics.log(AnalyticsEvent.AiFallbackUsed(NUMBER_MISMATCH))
+                null
+            }
+        }
     }
 
     override suspend fun explainReplan(
@@ -60,7 +89,7 @@ internal class GeminiPlanExplanationService @Inject constructor(
         language: GoalLanguage,
         template: () -> String,
     ): String {
-        if (settings.settings.first().demoMode || !client.isConfigured) return template()
+        if (!client.isConfigured) return template()
 
         val inputText = input.toString()
         val reply = client.generate(
@@ -144,6 +173,17 @@ internal class GeminiPlanExplanationService @Inject constructor(
     }
 
     private companion object {
+        val DESTINATION_INSTRUCTION = """
+            You are Gullak, a warm friend who helps Indian families save. Say out loud, in at most two short sentences,
+            where this goal's money goes and why that suits its timeline, as an honest friend would. If the user asked
+            about something else, such as gold for a short goal, answer that honestly with the same facts.
+            The destination in the input is already decided and is right for this timeline: explain why it suits, and
+            never argue against it or suggest another. Use only the numbers and facts in the input, written in digits,
+            never any other number. Say months, not dates. Never call
+            anything safe or guaranteed. No markdown or lists.
+            Language: "hi" or "hinglish" means simple spoken Hindi in Devanagari script; "en" means English.
+        """.trimIndent()
+
         const val NUMBER_MISMATCH = "number_mismatch"
 
         /** Sent only to models before Gemini 3, which should stay at the default temperature. */

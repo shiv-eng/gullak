@@ -15,6 +15,13 @@ interface SavingsDestinationGateway {
         destination: Destination,
         goalId: String,
     ): AppResult<DestinationAccount>
+
+    /** Sells what the goal holds and sends the money to the user's bank. */
+    suspend fun payOut(
+        destination: Destination,
+        goalId: String,
+        amount: Money,
+    ): AppResult<Unit>
 }
 
 data class DestinationAccount(

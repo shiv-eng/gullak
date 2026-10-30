@@ -64,6 +64,7 @@ import com.gullak.core.designsystem.component.OutlinePillButton
 import com.gullak.core.designsystem.component.PaytmCard
 import com.gullak.core.designsystem.component.PillButton
 import com.gullak.core.designsystem.theme.GullakTheme
+import com.gullak.core.model.goal.Destination
 import com.gullak.core.model.goal.Frequency
 import com.gullak.core.model.money.IndianMoneyFormat
 import com.gullak.core.model.plan.PlanOption
@@ -313,6 +314,17 @@ private fun GoalFacts(
         }
         state.plan?.options?.forEach { option ->
             Fact(stringResource(periodLabel(option.frequency)), amountLine(option), bold = option == state.chosen)
+        }
+        state.plan?.let { plan ->
+            Fact(
+                stringResource(R.string.voice_goes_to),
+                stringResource(
+                    when (plan.destination) {
+                        Destination.PAYTM_GOLD -> R.string.destination_gold
+                        Destination.PAYTM_MONEY_FUND -> R.string.destination_fund
+                    },
+                ),
+            )
         }
         if (state.chosen != null) Fact(stringResource(R.string.bank_section), stringResource(bankName(state.bank)))
     }

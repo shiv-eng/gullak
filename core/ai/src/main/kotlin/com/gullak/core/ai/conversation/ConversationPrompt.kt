@@ -12,6 +12,16 @@ import kotlinx.serialization.json.putJsonObject
 /** Gullak's character, and how the model reports what it understood from each turn. */
 internal object ConversationPrompt {
 
+    private val FACTS = """
+        What is true about Gullak, the only facts you may state about it:
+        - The user chooses a goal, an amount and a date. Gullak works out daily, weekly or monthly payments by UPI AutoPay.
+        - Goals of a year or more go to Paytm Gold; shorter goals go to a low-risk fund on Paytm Money.
+        - Gold's price can fall, and a low-risk fund is low risk, not no risk. The money does not stay in a bank account.
+        - This is a demo: no real money moves.
+        If they ask anything else about where the money goes or how it works, say you can explain the plan on screen.
+        Never call anything safe, secure, sure or guaranteed. Never say which option is better: it is their choice.
+    """.trimIndent()
+
     fun systemInstruction(
         today: LocalDate,
         situation: String,
@@ -22,13 +32,7 @@ internal object ConversationPrompt {
         Where the conversation is now:
         $situation
 
-        What is true about Gullak, the only facts you may state about it:
-        - The user chooses a goal, an amount and a date. Gullak works out daily, weekly or monthly payments by UPI AutoPay.
-        - Goals of a year or more go to Paytm Gold; shorter goals go to a low-risk fund on Paytm Money.
-        - Gold's price can fall, and a low-risk fund is low risk, not no risk. The money does not stay in a bank account.
-        - This is a demo: no real money moves.
-        If they ask anything else about where the money goes or how it works, say you can explain the plan on screen.
-        Never call anything safe, secure, sure or guaranteed. Never say which option is better: it is their choice.
+        $FACTS
 
         Read what the user just said and return ONLY a JSON object.
 
@@ -38,7 +42,12 @@ internal object ConversationPrompt {
           NO: they disagree, with no new details
           CHOOSE_PLAN: they picked daily, weekly or monthly
           QUESTION: they asked you something
+          WHERE_MONEY_GOES: they asked where the money goes, or whether to use gold or a fund (the app answers with
+            the figures; use null for say)
           CHECK_SAVINGS: they asked how much they have saved so far (the app says the amounts)
+          ADD_MONEY: they want to put extra money into a goal now (put the amount in one_time_amount)
+          PAY_OUT: they want their saved money sent to their bank
+          ASK_TOP_UP: they ask about a loan or top-up because they are short of money
           ANOTHER_GOAL: they want to start another savings goal
           FINISHED: they are done talking, or want to stop
           UNCLEAR: you cannot tell
@@ -79,7 +88,11 @@ internal object ConversationPrompt {
         "NO",
         "CHOOSE_PLAN",
         "QUESTION",
+        "WHERE_MONEY_GOES",
         "CHECK_SAVINGS",
+        "ADD_MONEY",
+        "PAY_OUT",
+        "ASK_TOP_UP",
         "ANOTHER_GOAL",
         "FINISHED",
         "UNCLEAR",

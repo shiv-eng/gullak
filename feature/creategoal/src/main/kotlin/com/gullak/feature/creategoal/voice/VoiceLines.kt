@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.ArrayRes
 import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.model.ai.GoalLanguage
+import com.gullak.core.model.goal.Destination
 import com.gullak.core.model.goal.Frequency
 import com.gullak.core.model.money.IndianMoneyFormat
 import com.gullak.core.model.money.Money
@@ -43,6 +44,24 @@ internal interface VoiceLines {
     ): String
 
     fun noSavingsYet(language: GoalLanguage): String
+
+    /** Pay-outs and top-ups are for a running goal: its page has them, by voice too. */
+    fun onTheGoalPage(language: GoalLanguage): String
+
+    /** Where the money goes, in one short line, when the plan is offered. */
+    fun goesTo(
+        language: GoalLanguage,
+        destination: Destination,
+    ): String
+
+    /** The honest trade-off for this goal's timeline. */
+    fun whereMoneyGoes(
+        language: GoalLanguage,
+        destination: Destination,
+        months: Int,
+    ): String
+
+    fun whereMoneyGoesInGeneral(language: GoalLanguage): String
 
     fun oneTimeNoted(
         language: GoalLanguage,
@@ -145,6 +164,47 @@ internal class ResourceVoiceLines @Inject constructor(@ApplicationContext privat
         saved: Money,
     ) = language.pick(R.array.voice_savings_en, R.array.voice_savings_hi, R.array.voice_savings_hi)
         .format(IndianMoneyFormat.format(total), name, IndianMoneyFormat.format(saved))
+
+    override fun goesTo(
+        language: GoalLanguage,
+        destination: Destination,
+    ) = when (destination) {
+        Destination.PAYTM_GOLD -> language.pick(
+            R.array.voice_goes_gold_en,
+            R.array.voice_goes_gold_hi,
+            R.array.voice_goes_gold_hi,
+        )
+
+        Destination.PAYTM_MONEY_FUND -> language.pick(
+            R.array.voice_goes_fund_en,
+            R.array.voice_goes_fund_hi,
+            R.array.voice_goes_fund_hi,
+        )
+    }
+
+    override fun whereMoneyGoes(
+        language: GoalLanguage,
+        destination: Destination,
+        months: Int,
+    ) = when (destination) {
+        Destination.PAYTM_GOLD -> language.pick(
+            R.array.voice_why_gold_en,
+            R.array.voice_why_gold_hi,
+            R.array.voice_why_gold_hi,
+        )
+
+        Destination.PAYTM_MONEY_FUND -> language.pick(
+            R.array.voice_why_fund_en,
+            R.array.voice_why_fund_hi,
+            R.array.voice_why_fund_hi,
+        )
+    }.format(months)
+
+    override fun whereMoneyGoesInGeneral(language: GoalLanguage) =
+        language.pick(R.array.voice_why_general_en, R.array.voice_why_general_hi, R.array.voice_why_general_hi)
+
+    override fun onTheGoalPage(language: GoalLanguage) =
+        language.pick(R.array.voice_goal_page_en, R.array.voice_goal_page_hi, R.array.voice_goal_page_hi)
 
     override fun noSavingsYet(language: GoalLanguage) =
         language.pick(R.array.voice_no_savings_en, R.array.voice_no_savings_hi, R.array.voice_no_savings_hi)

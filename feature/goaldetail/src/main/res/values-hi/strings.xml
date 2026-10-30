@@ -15,7 +15,7 @@
     <string name="detail_daily">रोज़</string>
     <string name="detail_weekly">हर हफ़्ते</string>
     <string name="detail_monthly">हर महीने</string>
-    <string name="detail_next_sip">आपकी अगली SIP: %2$s को %1$s</string>
+    <string name="detail_next_sip">आपकी अगली क़िस्त: %2$s को %1$s</string>
     <string name="detail_status_on_track">सही रास्ते पर</string>
     <string name="detail_status_behind">%1$s पीछे</string>
     <string name="detail_status_reached">लक्ष्य पूरा</string>
@@ -25,12 +25,12 @@
 
     <string name="detail_demo_title">डेमो कंट्रोल</string>
     <string name="detail_demo_body">अगली AutoPay अभी चलाएँ। डेमो: कोई असली भुगतान नहीं।</string>
-    <string name="detail_simulate_next">अगली SIP चलाएँ</string>
+    <string name="detail_simulate_next">अगली क़िस्त चलाएँ</string>
     <string name="detail_simulate_failed">AutoPay फ़ेल करें</string>
 
     <string name="detail_history_title">भुगतान इतिहास</string>
-    <string name="detail_history_empty">अभी कोई भुगतान नहीं। पहली SIP ऊपर दी तारीख़ को है।</string>
-    <string name="detail_kind_sip">SIP भुगतान</string>
+    <string name="detail_history_empty">अभी कोई भुगतान नहीं। पहली क़िस्त ऊपर दी तारीख़ को है।</string>
+    <string name="detail_kind_sip">नियमित भुगतान</string>
     <string name="detail_kind_catch_up">अतिरिक्त भुगतान</string>
     <string name="detail_kind_lump_sum">एकमुश्त भुगतान</string>
     <string name="detail_success">सफल</string>
@@ -38,7 +38,7 @@
 
     <string name="detail_debit_success">%2$s को %1$s बचत</string>
     <string name="detail_debit_failed">%1$s को AutoPay नहीं हुई</string>
-    <string name="detail_nothing_due">इस लक्ष्य में कोई SIP बाक़ी नहीं</string>
+    <string name="detail_nothing_due">इस लक्ष्य में कोई क़िस्त बाक़ी नहीं</string>
     <string name="detail_plan_updated">योजना अपडेट हो गई</string>
     <string name="detail_action_failed">कुछ गड़बड़ हुई। फिर से कोशिश करें।</string>
 
@@ -55,4 +55,19 @@
     <string name="replan_apply">लागू करें</string>
     <string name="replan_listen">सुनें</string>
     <string name="detail_talk">सुनें कि यह लक्ष्य कैसा चल रहा है</string>
+    <string name="detail_kind_payout">बैंक में भेजा गया</string>
+    <string name="detail_add_money">पैसे जोड़ें</string>
+    <string name="detail_add_money_hint">रुपये में रक़म लिखें</string>
+    <string name="detail_money_added">%1$s जुड़ गए</string>
+    <string name="detail_pay_out">%1$s मेरे बैंक में भेजें</string>
+    <string name="detail_paid_out">%1$s आपके बैंक में भेजे गए</string>
+    <string name="detail_money_demo">डेमो: कोई असली भुगतान नहीं</string>
+    <string name="detail_short_of_money">पैसे कम पड़ रहे हैं?</string>
+    <string name="detail_top_up_title">टॉप-अप</string>
+    <string name="detail_top_up_no_gap">इसकी ज़रूरत नहीं है: आपकी क़िस्तें लक्ष्य तक पहुँच जाएँगी।</string>
+    <string name="detail_top_up_not_yet">आपको %1$s कम पड़ रहे हैं। कुछ और क़िस्तों के बाद टॉप-अप मिल सकता है।</string>
+    <string name="detail_top_up_offer">आपको %1$s कम पड़ रहे हैं। आपने लगातार बचत की है, तो सिर्फ़ इतने के लिए लेंडिंग पार्टनर से पूछ सकते हैं।</string>
+    <string name="detail_top_up_request">टॉप-अप के लिए पूछें</string>
+    <string name="detail_top_up_sent">अनुरोध दर्ज हो गया। लेंडिंग पार्टनर शर्तें बताएगा, फ़ैसला आपका होगा।</string>
+    <string name="detail_top_up_demo">डेमो: कोई असली लोन नहीं, कुछ भेजा नहीं जाता</string>
 </resources>

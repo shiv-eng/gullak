@@ -30,10 +30,10 @@
     <string name="create_problem_amount_range">Goal amount must be between ₹500 and ₹50,00,000</string>
     <string name="create_problem_date">Choose a date after today</string>
     <string name="create_problem_date_far">Choose a date within 10 years</string>
-    <string name="create_problem_too_close">Less than 7 days from today (%1$s): too close for a SIP. Choose a later date.</string>
-    <string name="create_failed">Could not start the SIP. Please try again.</string>
+    <string name="create_problem_too_close">Less than 7 days from today (%1$s): too close for a plan. Choose a later date.</string>
+    <string name="create_failed">Could not start your Gullak. Please try again.</string>
 
-    <string name="create_plan_title">Your SIP plan</string>
+    <string name="create_plan_title">Your plan</string>
     <string name="frequency_daily">Daily</string>
     <string name="frequency_weekly">Weekly</string>
     <string name="frequency_monthly">Monthly</string>
@@ -84,7 +84,7 @@
     <string name="approval_demo_note">Demo approval: enter any 4 digits. This is not your UPI PIN, and nothing is saved or sent.</string>
     <string name="approval_delete">Delete</string>
     <string name="create_lump_label">One-time payment now (optional)</string>
-    <string name="create_lump_hint">Lowers your SIP amount</string>
+    <string name="create_lump_hint">Lowers your regular payments</string>
     <string name="create_problem_lump">One-time payment must be less than the goal amount</string>
     <string name="create_listen">Listen</string>
     <string name="mandate_lump">One-time payment now</string>
@@ -138,4 +138,5 @@
     <string name="voice_period_daily">Every day</string>
     <string name="voice_period_weekly">Every week</string>
     <string name="voice_period_monthly">Every month</string>
+    <string name="voice_goes_to">Goes to</string>
 </resources>

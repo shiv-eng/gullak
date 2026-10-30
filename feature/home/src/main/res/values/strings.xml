@@ -3,7 +3,7 @@
     <string name="home_title">Gullak</string>
     <string name="home_new_goal">Start a Gullak</string>
     <string name="home_empty_prompt">No Gullaks yet</string>
-    <string name="home_empty_hint">Set a goal, an amount and a date. Gullak plans a Daily, Weekly or Monthly SIP and sets up AutoPay.</string>
+    <string name="home_empty_hint">Set a goal, an amount and a date. Gullak plans a Daily, Weekly or Monthly plan and sets up AutoPay.</string>
     <string name="home_mic_description">Speak your goal</string>
     <string name="home_back">Back</string>
     <string name="home_total_saved">Total saved in Gullaks</string>
@@ -13,7 +13,7 @@
     <string name="home_status_behind">Behind by %1$s</string>
     <string name="home_status_reached">Goal reached</string>
     <string name="home_saved_of_target">%1$s of %2$s · by %3$s</string>
-    <string name="home_next_sip">Next SIP: %1$s on %2$s · %3$s</string>
+    <string name="home_next_sip">Next: %1$s on %2$s · %3$s</string>
     <string name="home_destination_gold">Paytm Gold</string>
     <string name="home_destination_fund">Paytm Money</string>
     <string name="home_settings">Settings</string>

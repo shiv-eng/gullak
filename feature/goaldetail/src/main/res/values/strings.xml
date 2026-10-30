@@ -15,7 +15,7 @@
     <string name="detail_daily">daily</string>
     <string name="detail_weekly">weekly</string>
     <string name="detail_monthly">monthly</string>
-    <string name="detail_next_sip">Your Next SIP Payment: %1$s on %2$s</string>
+    <string name="detail_next_sip">Next payment: %1$s on %2$s</string>
     <string name="detail_status_on_track">On track</string>
     <string name="detail_status_behind">Behind by %1$s</string>
     <string name="detail_status_reached">Goal reached</string>
@@ -25,12 +25,12 @@
 
     <string name="detail_demo_title">Demo controls</string>
     <string name="detail_demo_body">Run the next AutoPay now. Demo: no real payment.</string>
-    <string name="detail_simulate_next">Simulate next SIP</string>
+    <string name="detail_simulate_next">Simulate next payment</string>
     <string name="detail_simulate_failed">Simulate failed AutoPay</string>
 
     <string name="detail_history_title">Payment History</string>
-    <string name="detail_history_empty">No payments yet. Your first SIP is on the date above.</string>
-    <string name="detail_kind_sip">SIP payment</string>
+    <string name="detail_history_empty">No payments yet. Your first payment is on the date above.</string>
+    <string name="detail_kind_sip">Regular payment</string>
     <string name="detail_kind_catch_up">Catch-up payment</string>
     <string name="detail_kind_lump_sum">One-time payment</string>
     <string name="detail_success">Success</string>
@@ -38,7 +38,7 @@
 
     <string name="detail_debit_success">%1$s saved on %2$s</string>
     <string name="detail_debit_failed">AutoPay failed on %1$s</string>
-    <string name="detail_nothing_due">No SIP payments left on this goal</string>
+    <string name="detail_nothing_due">No payments left on this goal</string>
     <string name="detail_plan_updated">Plan updated</string>
     <string name="detail_action_failed">Something went wrong. Please try again.</string>
 
@@ -55,4 +55,19 @@
     <string name="replan_apply">Apply</string>
     <string name="replan_listen">Listen</string>
     <string name="detail_talk">Hear how this goal is doing</string>
+    <string name="detail_kind_payout">Paid out to bank</string>
+    <string name="detail_add_money">Add money</string>
+    <string name="detail_add_money_hint">Enter amount in rupees</string>
+    <string name="detail_money_added">%1$s added</string>
+    <string name="detail_pay_out">Pay out %1$s to my bank</string>
+    <string name="detail_paid_out">%1$s paid out to your bank</string>
+    <string name="detail_money_demo">Demo: no real payment</string>
+    <string name="detail_short_of_money">Short of money?</string>
+    <string name="detail_top_up_title">Top-up</string>
+    <string name="detail_top_up_no_gap">You do not need one: your payments already reach your goal.</string>
+    <string name="detail_top_up_not_yet">You are %1$s short. A top-up opens after a few more payments.</string>
+    <string name="detail_top_up_offer">You are %1$s short. You have kept saving, so you can ask a lending partner for just this gap.</string>
+    <string name="detail_top_up_request">Ask for a top-up</string>
+    <string name="detail_top_up_sent">Request noted. A lending partner would share the terms for you to decide.</string>
+    <string name="detail_top_up_demo">Demo: no real loan, and nothing is sent</string>
 </resources>

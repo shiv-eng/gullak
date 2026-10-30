@@ -37,4 +37,27 @@
     <string-array name="voice_applied_hi" translatable="false"><item>हो गया, आपकी योजना अपडेट हो गई!</item></string-array>
     <string-array name="voice_left_en" translatable="false"><item>All right, I will leave it as it is. You can choose on screen any time.</item></string-array>
     <string-array name="voice_left_hi" translatable="false"><item>ठीक है, अभी ऐसे ही रहने देते हैं। आप स्क्रीन पर कभी भी चुन सकते हैं।</item></string-array>
+
+    <string-array name="voice_anything_en" translatable="false"><item>Would you like to add money, or anything else?</item></string-array>
+    <string-array name="voice_anything_hi" translatable="false"><item>कुछ और पैसे जोड़ने हैं, या कुछ और?</item></string-array>
+    <string-array name="voice_confirm_add_en" translatable="false"><item>Shall I add %1$s to this Gullak now? This is a demo, no real money moves.</item></string-array>
+    <string-array name="voice_confirm_add_hi" translatable="false"><item>अभी %1$s इस गुल्लक में जोड़ दूँ? यह डेमो है, असली पैसा नहीं कटेगा।</item></string-array>
+    <string-array name="voice_added_en" translatable="false"><item>Done, %1$s added. Well done!</item></string-array>
+    <string-array name="voice_added_hi" translatable="false"><item>हो गया, %1$s जुड़ गए। बहुत बढ़िया!</item></string-array>
+    <string-array name="voice_cannot_add_en" translatable="false"><item>I could not add that much: it goes past your goal, or this Gullak is closed.</item></string-array>
+    <string-array name="voice_cannot_add_hi" translatable="false"><item>इतना नहीं जोड़ पाई: यह लक्ष्य से ज़्यादा है, या यह गुल्लक बंद हो चुकी है।</item></string-array>
+    <string-array name="voice_confirm_pay_out_en" translatable="false"><item>Your goal day is here! Shall I send %1$s to your bank? This is a demo, no real money moves.</item></string-array>
+    <string-array name="voice_confirm_pay_out_hi" translatable="false"><item>बधाई हो, आपका दिन आ गया! %1$s आपके बैंक खाते में भेज दूँ? यह डेमो है, असली पैसा नहीं आएगा।</item></string-array>
+    <string-array name="voice_paid_out_en" translatable="false"><item>Done! %1$s is on its way to your bank. Enjoy it, you earned it!</item></string-array>
+    <string-array name="voice_paid_out_hi" translatable="false"><item>हो गया! %1$s आपके बैंक खाते में जा रहे हैं। यह आपकी मेहनत का फल है!</item></string-array>
+    <string-array name="voice_not_yet_en" translatable="false"><item>Not yet: your money pays out when the goal is reached, or on %1$s.</item></string-array>
+    <string-array name="voice_not_yet_hi" translatable="false"><item>अभी नहीं: पैसा लक्ष्य पूरा होने पर, या %1$s को मिलेगा।</item></string-array>
+    <string-array name="voice_top_up_no_gap_en" translatable="false"><item>You do not need one: your payments already reach your goal.</item></string-array>
+    <string-array name="voice_top_up_no_gap_hi" translatable="false"><item>इसकी ज़रूरत नहीं है: आपकी क़िस्तें लक्ष्य तक पहुँच जाएँगी।</item></string-array>
+    <string-array name="voice_top_up_not_yet_en" translatable="false"><item>You are %1$s short. A top-up opens after a few more payments, so let us save a little more first.</item></string-array>
+    <string-array name="voice_top_up_not_yet_hi" translatable="false"><item>आपको %1$s कम पड़ रहे हैं। कुछ और क़िस्तों के बाद टॉप-अप मिल सकता है, तो पहले थोड़ा और बचाते हैं।</item></string-array>
+    <string-array name="voice_top_up_offer_en" translatable="false"><item>You are %1$s short. Since you have kept saving, you can ask a lending partner for just this gap. Shall I send the request? This is a demo, no real loan.</item></string-array>
+    <string-array name="voice_top_up_offer_hi" translatable="false"><item>आपको %1$s कम पड़ रहे हैं। आपने लगातार बचत की है, तो सिर्फ़ इतने के लिए लेंडिंग पार्टनर से पूछ सकते हैं। अनुरोध भेज दूँ? यह डेमो है, असली लोन नहीं।</item></string-array>
+    <string-array name="voice_top_up_sent_en" translatable="false"><item>Request noted. In the real app, the lending partner would share the terms for you to decide.</item></string-array>
+    <string-array name="voice_top_up_sent_hi" translatable="false"><item>अनुरोध दर्ज हो गया। असली ऐप में लेंडिंग पार्टनर शर्तें बताएगा, फ़ैसला आपका होगा।</item></string-array>
 </resources>

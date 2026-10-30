@@ -64,6 +64,17 @@ class FakeAutoPayGateway : AutoPayGateway {
 class FakeSavingsDestinationGateway : SavingsDestinationGateway {
     var error: AppError? = null
     val opened = mutableListOf<Pair<Destination, String>>()
+    val paidOut = mutableListOf<Pair<String, Money>>()
+
+    override suspend fun payOut(
+        destination: Destination,
+        goalId: String,
+        amount: Money,
+    ): AppResult<Unit> {
+        error?.let { return AppResult.Failure(it) }
+        paidOut += goalId to amount
+        return AppResult.Success(Unit)
+    }
 
     override suspend fun open(
         destination: Destination,
@@ -117,6 +128,15 @@ class FakePlanExplanationService(var reply: String = "Explanation") : PlanExplan
         chosen: PlanOption,
         language: GoalLanguage,
     ): String = reply
+
+    var destinationAnswer: String? = null
+
+    override suspend fun explainDestination(
+        goalName: String,
+        plan: Plan,
+        question: String?,
+        language: GoalLanguage,
+    ): String? = destinationAnswer
 
     override suspend fun explainReplan(
         goalName: String,

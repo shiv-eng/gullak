@@ -10,12 +10,17 @@ import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.domain.usecase.ApplyReplanUseCase
 import com.gullak.core.domain.usecase.GetReplanOptionsUseCase
 import com.gullak.core.domain.usecase.GoalDetail
+import com.gullak.core.domain.usecase.GoalMoneyUseCases
 import com.gullak.core.domain.usecase.ObserveGoalDetailUseCase
 import com.gullak.core.domain.usecase.PostNextDebitUseCase
 import com.gullak.core.domain.usecase.ReplanOffer
+import com.gullak.core.domain.usecase.TopUpAnswer
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.goal.Debit
+import com.gullak.core.model.goal.DebitKind
 import com.gullak.core.model.goal.DebitStatus
+import com.gullak.core.model.goal.Goal
+import com.gullak.core.model.money.Money
 import com.gullak.core.model.plan.GoalStatus
 import com.gullak.core.model.result.AppError
 import com.gullak.core.model.result.AppResult
@@ -43,7 +48,17 @@ data class ReplanUi(
     val isApplying: Boolean = false,
 )
 
+/** The top-up answer being shown, only after the user asked. */
+data class TopUpUi(
+    val answer: TopUpAnswer,
+    val requested: Boolean = false,
+)
+
 data class GoalDetailUiState(
+    val canPayOut: Boolean = false,
+    val isPaidOut: Boolean = false,
+    val addingMoney: Boolean = false,
+    val topUp: TopUpUi? = null,
     val isLoading: Boolean = true,
     val detail: GoalDetail? = null,
     val demoControls: Boolean = false,
@@ -76,12 +91,30 @@ sealed interface GoalDetailEvent {
 
     /** The mic: Gullak says how this goal is doing, and offers to fix a failed AutoPay. */
     data object TalkClicked : GoalDetailEvent
+
+    data object AddMoneyClicked : GoalDetailEvent
+
+    data object AddMoneyDismissed : GoalDetailEvent
+
+    data class AddMoney(val rupees: Long) : GoalDetailEvent
+
+    data object PayOutClicked : GoalDetailEvent
+
+    data object TopUpClicked : GoalDetailEvent
+
+    data object TopUpRequested : GoalDetailEvent
+
+    data object TopUpDismissed : GoalDetailEvent
 }
 
 sealed interface GoalDetailEffect {
     data class DebitPosted(val debit: Debit) : GoalDetailEffect
 
     data object NothingDue : GoalDetailEffect
+
+    data class MoneyAdded(val amount: Money) : GoalDetailEffect
+
+    data class PaidOut(val amount: Money) : GoalDetailEffect
 
     data object PlanUpdated : GoalDetailEffect
 
@@ -101,6 +134,7 @@ class GoalDetailViewModel @Inject internal constructor(
     private val getReplanOptions: GetReplanOptionsUseCase,
     private val applyReplan: ApplyReplanUseCase,
     private val explainer: PlanExplanationService,
+    private val money: GoalMoneyUseCases,
     private val talk: GoalTalk,
 ) : ViewModel() {
 
@@ -119,7 +153,15 @@ class GoalDetailViewModel @Inject internal constructor(
         viewModelScope.launch {
             combine(observeDetail(goalId), settings.settings) { detail, prefs -> detail to prefs.demoMode }
                 .collect { (detail, demo) ->
-                    state.update { it.copy(isLoading = false, detail = detail, demoControls = demo) }
+                    state.update {
+                        it.copy(
+                            isLoading = false,
+                            detail = detail,
+                            demoControls = demo,
+                            canPayOut = detail?.let { d -> money.payOut.canPayOut(d.summary.goal, d.debits) } ?: false,
+                            isPaidOut = detail?.debits?.any { d -> d.kind == DebitKind.PAYOUT } ?: false,
+                        )
+                    }
                 }
         }
     }
@@ -151,6 +193,70 @@ class GoalDetailViewModel @Inject internal constructor(
                 explainJob?.cancel()
                 state.update { it.copy(replan = null) }
             }
+
+            else -> onMoneyEvent(event)
+        }
+    }
+
+    private fun onMoneyEvent(event: GoalDetailEvent) {
+        when (event) {
+            GoalDetailEvent.AddMoneyClicked -> state.update { it.copy(addingMoney = true) }
+
+            GoalDetailEvent.AddMoneyDismissed -> state.update { it.copy(addingMoney = false) }
+
+            is GoalDetailEvent.AddMoney -> viewModelScope.launch {
+                state.update { it.copy(addingMoney = false) }
+                addMoney(Money.fromRupees(event.rupees))
+            }
+
+            GoalDetailEvent.PayOutClicked -> {
+                stopTalking()
+                viewModelScope.launch { payOut() }
+            }
+
+            GoalDetailEvent.TopUpClicked -> viewModelScope.launch { askTopUp() }
+
+            GoalDetailEvent.TopUpRequested -> state.update { it.copy(topUp = it.topUp?.copy(requested = true)) }
+
+            GoalDetailEvent.TopUpDismissed -> state.update { it.copy(topUp = null) }
+
+            else -> Unit
+        }
+    }
+
+    private suspend fun addMoney(amount: Money): Boolean = when (money.addMoney(goalId, amount)) {
+        is AppResult.Success -> {
+            send(GoalDetailEffect.MoneyAdded(amount))
+            true
+        }
+
+        is AppResult.Failure -> {
+            send(GoalDetailEffect.ActionFailed)
+            false
+        }
+    }
+
+    private suspend fun payOut(): Money? = when (val result = money.payOut(goalId)) {
+        is AppResult.Success -> {
+            send(GoalDetailEffect.PaidOut(result.value.amount))
+            result.value.amount
+        }
+
+        is AppResult.Failure -> {
+            send(GoalDetailEffect.ActionFailed)
+            null
+        }
+    }
+
+    private suspend fun askTopUp(): TopUpAnswer? = when (val result = money.checkTopUp(goalId)) {
+        is AppResult.Success -> {
+            state.update { it.copy(topUp = TopUpUi(result.value)) }
+            result.value
+        }
+
+        is AppResult.Failure -> {
+            send(GoalDetailEffect.ActionFailed)
+            null
         }
     }
 
@@ -164,6 +270,7 @@ class GoalDetailViewModel @Inject internal constructor(
                 is AppResult.Success -> {
                     send(GoalDetailEffect.DebitPosted(result.value))
                     if (result.value.status == DebitStatus.FAILED) openReplan(result.value.id)
+                    offerPayOutIfDue()
                 }
 
                 is AppResult.Failure -> send(
@@ -250,11 +357,84 @@ class GoalDetailViewModel @Inject internal constructor(
         val failure = current.unresolvedFailure
         stopTalking()
         talkJob = viewModelScope.launch {
-            talk.say(
-                talk.lines.status(spokenLanguage(summary.goal.languageTag), summary),
-                spokenLanguage(summary.goal.languageTag),
-            )
-            if (failure != null && state.value.replan == null) openReplan(failure.id)
+            val language = spokenLanguage(summary.goal.languageTag)
+            talk.say(talk.lines.status(language, summary), language)
+            if (failure != null && state.value.replan == null) {
+                openReplan(failure.id)
+            } else if (talk.isOn()) {
+                talk.say(talk.lines.anythingElse(language), language)
+                talk.listen()?.let { heard -> act(heard, summary.goal, language) }
+            }
+        }
+    }
+
+    private suspend fun act(
+        heard: String,
+        goal: Goal,
+        language: GoalLanguage,
+    ) {
+        val situation = "On the page of the goal ${goal.name}. You asked if they want to add money or anything else."
+        when (val request = talk.readRequest(heard, situation)) {
+            is GoalRequest.AddMoney -> addMoneyByVoice(request.amount, language)
+            GoalRequest.PayOut -> payOutByVoice(goal, language)
+            GoalRequest.TopUp -> topUpByVoice(language)
+            null -> Unit
+        }
+    }
+
+    private suspend fun addMoneyByVoice(
+        amount: Money,
+        language: GoalLanguage,
+    ) {
+        talk.say(talk.lines.confirmAdd(language, amount), language)
+        val heard = talk.listen() ?: return
+        if (readbackReply(heard) != ReadbackReply.YES) {
+            talk.say(talk.lines.leftAsIs(language), language)
+            return
+        }
+        val line = if (addMoney(amount)) talk.lines.added(language, amount) else talk.lines.cannotAdd(language)
+        talk.say(line, language)
+    }
+
+    private suspend fun payOutByVoice(
+        goal: Goal,
+        language: GoalLanguage,
+    ) {
+        val detail = state.value.detail ?: return
+        if (!money.payOut.canPayOut(detail.summary.goal, detail.debits)) {
+            talk.say(talk.lines.notTimeToPayOut(language, goal.targetDate), language)
+            return
+        }
+        talk.say(talk.lines.confirmPayOut(language, detail.summary.saved), language)
+        val heard = talk.listen() ?: return
+        if (readbackReply(heard) == ReadbackReply.YES) {
+            payOut()?.let { talk.say(talk.lines.paidOut(language, it), language) }
+        } else {
+            talk.say(talk.lines.leftAsIs(language), language)
+        }
+    }
+
+    private suspend fun topUpByVoice(language: GoalLanguage) {
+        val answer = askTopUp() ?: return
+        talk.say(talk.lines.topUp(language, answer), language)
+        if (answer !is TopUpAnswer.Offer) return
+        val heard = talk.listen() ?: return
+        if (readbackReply(heard) == ReadbackReply.YES) {
+            state.update { it.copy(topUp = it.topUp?.copy(requested = true)) }
+            talk.say(talk.lines.topUpRequested(language), language)
+        } else {
+            talk.say(talk.lines.leftAsIs(language), language)
+        }
+    }
+
+    /** The moment the goal is reached is the moment to say so. */
+    private fun offerPayOutIfDue() {
+        val detail = state.value.detail ?: return
+        viewModelScope.launch {
+            // The new payment reaches the state through the repository's flow.
+            val current = withTimeoutOrNull(STATE_WAIT_MS) { uiState.first { it.canPayOut } } ?: return@launch
+            val goal = current.detail?.summary?.goal ?: detail.summary.goal
+            if (current.replan == null && talk.isOn()) payOutByVoice(goal, spokenLanguage(goal.languageTag))
         }
     }
 
@@ -321,6 +501,7 @@ class GoalDetailViewModel @Inject internal constructor(
         /** Matches the property name in [GoalDetailRoute]. */
         const val GOAL_ID_KEY = "goalId"
         private const val CHOICE_TRIES = 2
+        private const val STATE_WAIT_MS = 500L
         private const val EXPLANATION_WAIT_MS = 10_000L
     }
 }

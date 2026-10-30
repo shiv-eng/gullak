@@ -7,7 +7,6 @@ import com.gullak.core.ai.geminiResponse
 import com.gullak.core.ai.guard.NumberGuard
 import com.gullak.core.ai.httpError
 import com.gullak.core.domain.analytics.AnalyticsEvent
-import com.gullak.core.domain.testing.FakeSettingsRepository
 import com.gullak.core.domain.testing.RecordingAnalytics
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.goal.DebitKind
@@ -19,7 +18,6 @@ import com.gullak.core.model.plan.DestinationReason
 import com.gullak.core.model.plan.Plan
 import com.gullak.core.model.plan.PlanOption
 import com.gullak.core.model.plan.ReplanChoice
-import com.gullak.core.model.settings.AppSettings
 import java.time.LocalDate
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockWebServer
@@ -60,16 +58,13 @@ class GeminiPlanExplanationServiceTest {
     @After
     fun stop() = server.close()
 
-    private fun service(
-        demoMode: Boolean = false,
-        config: GeminiConfig = GeminiConfig("test-key", "gemini-3.8-flash"),
-    ) = GeminiPlanExplanationService(
-        client = server.geminiClient(config),
-        settings = FakeSettingsRepository(AppSettings(demoMode = demoMode)),
-        guard = NumberGuard(),
-        templates = templates,
-        analytics = analytics,
-    )
+    private fun service(config: GeminiConfig = GeminiConfig("test-key", "gemini-3.8-flash")) =
+        GeminiPlanExplanationService(
+            client = server.geminiClient(config),
+            guard = NumberGuard(),
+            templates = templates,
+            analytics = analytics,
+        )
 
     private suspend fun explainWedding(
         service: GeminiPlanExplanationService,
@@ -115,15 +110,6 @@ class GeminiPlanExplanationServiceTest {
     }
 
     @Test
-    fun demoModeUsesTheTemplateWithoutCalling() = runTest {
-        val text = explainWedding(service(demoMode = true), GoalLanguage.HINDI)
-
-        assertTrue(text, text.startsWith("हर महीने की 5 तारीख़ को ₹3,600 बचाइए"))
-        assertTrue(text.contains("सोने का दाम"))
-        assertEquals(0, server.requestCount)
-    }
-
-    @Test
     fun replanTemplatesUseTheEnginesNumbers() = runTest {
         val catchUp = ReplanChoice.CatchUp(
             listOf(
@@ -132,9 +118,9 @@ class GeminiPlanExplanationServiceTest {
             ),
         )
 
-        val text = service(
-            demoMode = true,
-        ).explainReplan("Laptop", catchUp, Money.fromRupees(4_500), GoalLanguage.ENGLISH)
+        // No key: the template answers without calling anything.
+        val text = service(config = GeminiConfig("", ""))
+            .explainReplan("Laptop", catchUp, Money.fromRupees(4_500), GoalLanguage.ENGLISH)
 
         assertEquals(
             "Your ₹4,500 AutoPay did not go through. Two extra debits of ₹2,250, on 15 Mar 2027 and 25 Mar 2027, " +

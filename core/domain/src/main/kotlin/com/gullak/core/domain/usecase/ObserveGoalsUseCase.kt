@@ -24,10 +24,12 @@ class ObserveGoalsUseCase @Inject constructor(
     ) { allGoals, allDebits, today ->
         val debitsByGoal = allDebits.groupBy { it.goalId }
         val summaries = allGoals.map { engine.summarize(it, debitsByGoal[it.id].orEmpty(), today) }
+        // Money already paid out has left Gullak.
+        val held = summaries.filterNot { engine.isPaidOut(debitsByGoal[it.goal.id].orEmpty()) }
         GoalsOverview(
             goals = summaries,
-            savedInGold = summaries.filter { it.goal.destination == Destination.PAYTM_GOLD }.map { it.saved }.sum(),
-            savedInFund = summaries
+            savedInGold = held.filter { it.goal.destination == Destination.PAYTM_GOLD }.map { it.saved }.sum(),
+            savedInFund = held
                 .filter { it.goal.destination == Destination.PAYTM_MONEY_FUND }
                 .map { it.saved }
                 .sum(),

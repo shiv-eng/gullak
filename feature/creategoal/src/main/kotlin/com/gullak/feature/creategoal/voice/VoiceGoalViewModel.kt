@@ -325,11 +325,12 @@ class VoiceGoalViewModel @Inject internal constructor(
         text: String,
         heard: BrainAnswer,
     ): String? = when (heard.intent) {
-        TalkIntent.GOAL_DETAILS -> onUnderstood(understandGoal.check(withWhatWeKnow(heard.goal)))
+        // Extra money while setting up a goal is the one-time payment, which is already noted.
+        TalkIntent.GOAL_DETAILS, TalkIntent.ADD_MONEY -> onUnderstood(understandGoal.check(withWhatWeKnow(heard.goal)))
 
-        TalkIntent.QUESTION -> currentQuestion()
-
-        TalkIntent.CHECK_SAVINGS -> "${savingsSoFar()} ${currentQuestion()}"
+        TalkIntent.QUESTION, TalkIntent.CHECK_SAVINGS, TalkIntent.WHERE_MONEY_GOES,
+        TalkIntent.PAY_OUT, TalkIntent.ASK_TOP_UP,
+        -> answerQuestion(heard.intent, text)
 
         TalkIntent.NO -> if (state.value.step == TalkStep.DONE) {
             finish()
@@ -352,6 +353,17 @@ class VoiceGoalViewModel @Inject internal constructor(
 
         // Yes is decided by step, and at AutoPay by the rules alone, from the user's own words.
         TalkIntent.YES, TalkIntent.UNCLEAR -> respondByRules(text)
+    }
+
+    /** A side question: answered, then back to what was being asked. */
+    private suspend fun answerQuestion(
+        intent: TalkIntent,
+        text: String,
+    ): String = when (intent) {
+        TalkIntent.WHERE_MONEY_GOES -> whereMoneyGoes(text)
+        TalkIntent.CHECK_SAVINGS -> "${savingsSoFar()} ${currentQuestion()}"
+        TalkIntent.PAY_OUT, TalkIntent.ASK_TOP_UP -> "${lines.onTheGoalPage(language)} ${currentQuestion()}"
+        else -> currentQuestion()
     }
 
     /** The amounts are from the plan engine, whatever the model thought. */
@@ -419,7 +431,38 @@ class VoiceGoalViewModel @Inject internal constructor(
         language = if (heard == GoalLanguage.ENGLISH) GoalLanguage.ENGLISH else GoalLanguage.HINDI
     }
 
-    private suspend fun respondByRules(text: String): String? = when (state.value.step) {
+    /** A long silence is worse than a plainer sentence: if the model is slow, the caller says its own checked line. */
+    private suspend fun explainDestination(
+        name: String,
+        plan: Plan,
+        asked: String?,
+    ): String? = withTimeoutOrNull(EXPLAIN_LIMIT_MS) { explainer.explainDestination(name, plan, asked, language) }
+
+    /** The honest answer on gold or a fund: the engine decides, the model explains it, and its numbers are checked. */
+    private suspend fun whereMoneyGoes(asked: String): String {
+        val current = state.value
+        val target = current.target
+        val date = current.date
+        val plan = current.plan ?: if (target != null && date != null) {
+            (buildPlan(PlanInput(target = target, targetDate = date)) as? AppResult.Success)?.value
+        } else {
+            null
+        }
+        val answer = if (plan == null) {
+            lines.whereMoneyGoesInGeneral(language)
+        } else {
+            thinking { explainDestination(current.name.orEmpty(), plan, asked) }
+                ?: lines.whereMoneyGoes(language, plan.destination, plan.monthsToGoal)
+        }
+        return "$answer ${currentQuestion()}"
+    }
+
+    private suspend fun respondByRules(text: String): String? {
+        if (asksWhereMoneyGoes(text) && state.value.step != TalkStep.DONE) return whereMoneyGoes(text)
+        return respondByStep(text)
+    }
+
+    private suspend fun respondByStep(text: String): String? = when (state.value.step) {
         TalkStep.GOAL -> understand()
         TalkStep.CONFIRM_GOAL -> respondToReadback(text)
         TalkStep.CHOOSE_PLAN -> respondToPlan(text)
@@ -476,7 +519,7 @@ class VoiceGoalViewModel @Inject internal constructor(
         ReadbackReply.CORRECTION -> understand()
     }
 
-    private fun presentPlan(): String {
+    private suspend fun presentPlan(): String {
         val current = state.value
         val target = current.target
         val date = current.date
@@ -490,7 +533,9 @@ class VoiceGoalViewModel @Inject internal constructor(
         }
         if (plan.oneTimeOnly || plan.options.isEmpty()) return dateTooClose()
         state.update { it.copy(step = TalkStep.CHOOSE_PLAN, plan = plan, frequency = null) }
-        val options = lines.plan(language, current.name.orEmpty(), plan.options)
+        val why = thinking { explainDestination(current.name.orEmpty(), plan, null) }
+        val options = "${why ?: lines.goesTo(language, plan.destination)} " +
+            lines.plan(language, current.name.orEmpty(), plan.options)
         return if (oneTime.isPositive) "${lines.oneTimeNoted(language, oneTime)} $options" else options
     }
 
@@ -579,5 +624,6 @@ class VoiceGoalViewModel @Inject internal constructor(
     private companion object {
         const val SPEECH_LIMIT_MS = 45_000L
         const val ACK_AFTER_MS = 1_200L
+        const val EXPLAIN_LIMIT_MS = 6_000L
     }
 }

@@ -5,10 +5,10 @@
 
     <string name="settings_demo_title">डेमो</string>
     <string name="settings_demo_mode">डेमो मोड</string>
-    <string name="settings_demo_mode_body">सेव किए AI जवाब, टेम्पलेट विवरण और डेमो तारीख़। बिना इंटरनेट भी चलता है।</string>
+    <string name="settings_demo_mode_body">डेमो वाक्यों के सेव जवाब और डेमो तारीख़। बिना इंटरनेट भी गुल्लक चलती है।</string>
     <string name="settings_demo_date">डेमो तारीख़</string>
     <string name="settings_fast_forward">आगे बढ़ाएँ</string>
-    <string name="settings_fast_forward_body">तारीख़ महीने के अंत तक ले जाता है और बीच की सभी SIP चलाता है।</string>
+    <string name="settings_fast_forward_body">तारीख़ महीने के अंत तक ले जाता है और बीच की सभी क़िस्तें चलाता है।</string>
     <string name="settings_back_to_today">आज पर वापस</string>
     <string name="settings_moved_to">डेमो तारीख़ अब %1$s</string>
     <string name="settings_date_reset">डेमो तारीख़ रीसेट हो गई</string>

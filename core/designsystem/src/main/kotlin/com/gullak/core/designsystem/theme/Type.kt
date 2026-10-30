@@ -6,22 +6,32 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.gullak.core.designsystem.R
 
-/** Inter, bundled under the SIL Open Font License (see third_party/inter). */
-val InterFontFamily = FontFamily(
-    Font(R.font.inter_regular, FontWeight.Normal),
-    Font(R.font.inter_medium, FontWeight.Medium),
-    Font(R.font.inter_semibold, FontWeight.SemiBold),
-    Font(R.font.inter_bold, FontWeight.Bold),
+/**
+ * Roboto, the typeface in the Paytm app's screens, bundled so a phone maker's own system font cannot replace it
+ * (see third_party/roboto). One variable font file gives every weight.
+ */
+val RobotoFontFamily = FontFamily(
+    roboto(FontWeight.Normal),
+    roboto(FontWeight.Medium),
+    roboto(FontWeight.SemiBold),
+    roboto(FontWeight.Bold),
+)
+
+private fun roboto(weight: FontWeight) = Font(
+    resId = R.font.roboto,
+    weight = weight,
+    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
 )
 
 private val Base = Typography()
 
-private fun TextStyle.inter(weight: FontWeight? = null) =
-    copy(fontFamily = InterFontFamily, fontWeight = weight ?: fontWeight)
+private fun TextStyle.roboto(weight: FontWeight? = null) =
+    copy(fontFamily = RobotoFontFamily, fontWeight = weight ?: fontWeight)
 
 /**
  * Paytm's compact scale (measured from the app's screens): body 13-14sp, card titles 16-18sp. Sizes are set
@@ -31,7 +41,7 @@ private fun TextStyle.sized(
     size: Int,
     line: Int,
     weight: FontWeight,
-) = inter(weight).copy(fontSize = size.sp, lineHeight = line.sp)
+) = roboto(weight).copy(fontSize = size.sp, lineHeight = line.sp)
 
 internal val GullakMaterialTypography = Typography(
     displayLarge = Base.displayLarge.sized(40, 48, FontWeight.Bold),
@@ -63,21 +73,21 @@ private const val TABULAR_FIGURES = "tnum"
 
 internal val DefaultGullakTypography = GullakTypography(
     amountLarge = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = RobotoFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 26.sp,
         lineHeight = 32.sp,
         fontFeatureSettings = TABULAR_FIGURES,
     ),
     amountMedium = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = RobotoFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 18.sp,
         lineHeight = 24.sp,
         fontFeatureSettings = TABULAR_FIGURES,
     ),
     amountSmall = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = RobotoFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
         lineHeight = 20.sp,

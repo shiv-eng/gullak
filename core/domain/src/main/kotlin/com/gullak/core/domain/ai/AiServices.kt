@@ -27,6 +27,17 @@ interface PlanExplanationService {
         language: GoalLanguage,
     ): String
 
+    /**
+     * Explains why the engine's destination suits this goal's timeline, the honest gold-or-fund answer. Null if the
+     * model cannot give a checked answer: the caller then says its own line.
+     */
+    suspend fun explainDestination(
+        goalName: String,
+        plan: Plan,
+        question: String?,
+        language: GoalLanguage,
+    ): String?
+
     /** Explains a recovery choice after [missed] failed to debit. Never fails: falls back to a template. */
     suspend fun explainReplan(
         goalName: String,

@@ -35,6 +35,15 @@ internal class DemoSavingsDestinationGateway @Inject constructor(private val ids
         return AppResult.Success(DestinationAccount("DEMO-${ids.newId()}", destination, name))
     }
 
+    override suspend fun payOut(
+        destination: Destination,
+        goalId: String,
+        amount: Money,
+    ): AppResult<Unit> {
+        delay(OPEN_LATENCY_MS)
+        return AppResult.Success(Unit)
+    }
+
     private companion object {
         const val OPEN_LATENCY_MS = 600L
     }

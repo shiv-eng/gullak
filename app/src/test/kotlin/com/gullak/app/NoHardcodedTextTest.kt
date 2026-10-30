@@ -26,4 +26,17 @@ class NoHardcodedTextTest {
         assertEquals(true, sources.size > 10)
         assertEquals(emptyList<String>(), found)
     }
+
+    @Test
+    fun gullakOwnTextNeverSaysSip() {
+        val root = File("..").canonicalFile
+        val strings = File(root, "feature").walkTopDown().filter {
+            it.name == "strings.xml" && "/src/main/res/" in it.invariantSeparatorsPath
+        }
+        val found = strings.flatMap { file ->
+            file.readLines().filter { "SIP" in it && "paytm_badge" !in it }.asSequence()
+        }.toList()
+
+        assertEquals(emptyList<String>(), found)
+    }
 }

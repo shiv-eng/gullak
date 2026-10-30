@@ -11,6 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -30,16 +31,22 @@ internal class CloudSpeaker @Inject constructor(@IoDispatcher private val ioDisp
     suspend fun speak(
         text: String,
         cacheKey: String,
+        bySentence: Boolean = true,
         fetch: suspend (String) -> WavAudio,
     ): Boolean = withContext(ioDispatcher) {
         try {
-            val clips = spokenSentences(text).map { sentence ->
-                async {
-                    val key = "$cacheKey|$sentence"
-                    cache[key] ?: fetch(sentence).also { if (cache.size < MAX_CACHED) cache[key] = it }
+            // Inside its own scope, so a failed fetch ends here and is caught below. A failing async started directly
+            // in this withContext would fail the caller's scope too, past this try, and crash the app.
+            coroutineScope {
+                val parts = if (bySentence) spokenSentences(text) else listOf(text)
+                val clips = parts.map { sentence ->
+                    async {
+                        val key = "$cacheKey|$sentence"
+                        cache[key] ?: fetch(sentence).also { if (cache.size < MAX_CACHED) cache[key] = it }
+                    }
                 }
+                clips.forEach { play(it.await()) }
             }
-            clips.forEach { play(it.await()) }
             true
         } catch (e: IOException) {
             Log.w(TAG, "Voice failed", e)

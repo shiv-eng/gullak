@@ -1,0 +1,4 @@
+Roboto is copyright Google and licensed under the Apache License, Version 2.0:
+https://www.apache.org/licenses/LICENSE-2.0
+
+core/designsystem/src/main/res/font/roboto.ttf is the variable Roboto that ships with the Android platform.

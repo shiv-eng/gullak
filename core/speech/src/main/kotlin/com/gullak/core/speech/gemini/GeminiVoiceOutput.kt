@@ -32,7 +32,10 @@ internal data class GeminiVoiceConfig(
     val isConfigured: Boolean get() = apiKey.isNotBlank()
 }
 
-/** Gemini's text-to-speech, the voice used when Sarvam is not available. It says exactly the text it is given. */
+/**
+ * Gemini's text-to-speech, the voice used when Sarvam is not available. It is sent only the words to say: any style
+ * note sent with them gets read aloud on short lines.
+ */
 @Singleton
 internal class GeminiVoiceOutput @Inject constructor(
     private val config: GeminiVoiceConfig,
@@ -48,7 +51,8 @@ internal class GeminiVoiceOutput @Inject constructor(
         language: GoalLanguage,
     ): Boolean {
         if (!config.isConfigured || SystemClock.elapsedRealtime() < restUntil) return false
-        return speaker.speak(text, "gemini|${language.name}", ::fetch)
+        // One call per reply, not per sentence: a free key only allows a few a minute.
+        return speaker.speak(text, "gemini|${language.name}", bySentence = false, fetch = ::fetch)
     }
 
     private suspend fun fetch(sentence: String): WavAudio {
@@ -57,7 +61,7 @@ internal class GeminiVoiceOutput @Inject constructor(
                 add(
                     buildJsonObject {
                         putJsonArray("parts") {
-                            add(buildJsonObject { put("text", STYLE + sentence) })
+                            add(buildJsonObject { put("text", sentence) })
                         }
                     },
                 )
@@ -88,7 +92,6 @@ internal class GeminiVoiceOutput @Inject constructor(
 
     private companion object {
         const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
-        const val STYLE = "Say warmly and cheerfully, like a friendly young Indian woman chatting at a natural pace: "
         const val TOO_MANY_REQUESTS = 429
         const val REST_MS = 60_000L
         val JSON = "application/json".toMediaType()

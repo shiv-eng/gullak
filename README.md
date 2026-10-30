@@ -43,6 +43,10 @@ to speech. Without a Sarvam key, Gemini's voice speaks and the phone's recognise
 does both. With Sarvam on, microphone audio is sent to Sarvam; spoken lines go to whichever voice is used. Nothing else
 from the phone is sent.
 
+On a running Gullak you can add money any time, ask for your money on goal day, and ask about a top-up if you are short.
+The top-up only appears if you ask, only for the gap, and only after a few payments: it is a mock with no lender behind it,
+it sends nothing and it never quotes terms.
+
 The goal page talks too. When an AutoPay fails, Gullak says what happened and offers the recovery plans aloud; you pick
 one by talking and it is applied on your yes. The mic button there says how the goal is doing.
 

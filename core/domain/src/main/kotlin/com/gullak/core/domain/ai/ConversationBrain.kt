@@ -8,7 +8,21 @@ import com.gullak.core.model.result.AppResult
 import java.time.LocalDate
 
 /** What the user meant by what they just said. */
-enum class TalkIntent { GOAL_DETAILS, YES, NO, CHOOSE_PLAN, QUESTION, CHECK_SAVINGS, ANOTHER_GOAL, FINISHED, UNCLEAR }
+enum class TalkIntent {
+    GOAL_DETAILS,
+    YES,
+    NO,
+    CHOOSE_PLAN,
+    QUESTION,
+    WHERE_MONEY_GOES,
+    CHECK_SAVINGS,
+    ADD_MONEY,
+    PAY_OUT,
+    ASK_TOP_UP,
+    ANOTHER_GOAL,
+    FINISHED,
+    UNCLEAR,
+}
 
 /**
  * The model's reading of one turn. [say] is its own reaction, always free of numbers: every amount and date that is

@@ -38,7 +38,7 @@
     <string name="paytm_get_credit_card">क्रेडिट कार्ड\nपाएँ</string>
     <string name="paytm_health_insurance">स्वास्थ्य\nबीमा</string>
     <string name="gullak_banner_title">तय तारीख़ तक लक्ष्य के लिए बचत</string>
-    <string name="gullak_banner_body">लैपटॉप, शादी या यात्रा: रक़म और तारीख़ चुनें, रोज़, हफ़्ते या महीने की SIP पाएँ</string>
+    <string name="gullak_banner_body">लैपटॉप, शादी या यात्रा: रक़म और तारीख़ चुनें, रोज़, हफ़्ते या महीने की योजना पाएँ</string>
     <string name="gullak_banner_action">गुल्लक शुरू करें</string>
     <string name="gullak_card_title">आपकी गुल्लक</string>
     <string name="gullak_card_total">कुल बचत: %1$s</string>
@@ -51,9 +51,9 @@
     <string name="paytm_header_promo">अपनी गुल्लक भरना शुरू करें</string>
     <string name="gullak_banner_eyebrow">गुल्लक</string>
     <string name="gullak_strip_title">गुल्लक</string>
-    <string name="gullak_strip_body">रक़म और तारीख़ चुनें। SIP और AutoPay हम तय करेंगे।</string>
+    <string name="gullak_strip_body">रक़म और तारीख़ चुनें। योजना और AutoPay हम तय करेंगे।</string>
     <string name="gullak_strip_action">गुल्लक शुरू करें</string>
-    <string name="gullak_next_sip">अगली SIP: %2$s को %1$s</string>
+    <string name="gullak_next_sip">अगली क़िस्त: %2$s को %1$s</string>
     <plurals name="gullak_strip_summary">
         <item quantity="one">%1$d सक्रिय लक्ष्य · %2$s बचत</item>
         <item quantity="other">%1$d सक्रिय लक्ष्य · %2$s बचत</item>

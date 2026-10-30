@@ -1,15 +1,19 @@
 package com.gullak.core.domain.testing
 
 import com.gullak.core.domain.plan.PlanEngine
+import com.gullak.core.domain.usecase.AddMoneyUseCase
 import com.gullak.core.domain.usecase.ApplyReplanUseCase
 import com.gullak.core.domain.usecase.BuildPlanUseCase
+import com.gullak.core.domain.usecase.CheckTopUpUseCase
 import com.gullak.core.domain.usecase.CreateGoalUseCase
 import com.gullak.core.domain.usecase.DebitPoster
 import com.gullak.core.domain.usecase.FastForwardUseCase
 import com.gullak.core.domain.usecase.GetReplanOptionsUseCase
+import com.gullak.core.domain.usecase.GoalMoneyUseCases
 import com.gullak.core.domain.usecase.NewGoalRequest
 import com.gullak.core.domain.usecase.ObserveGoalDetailUseCase
 import com.gullak.core.domain.usecase.ObserveGoalsUseCase
+import com.gullak.core.domain.usecase.PayOutGoalUseCase
 import com.gullak.core.domain.usecase.PostNextDebitUseCase
 import com.gullak.core.domain.usecase.ResetDemoDataUseCase
 import com.gullak.core.domain.usecase.UnderstandGoalUseCase
@@ -49,6 +53,10 @@ class DomainTestEnvironment(
     val postNextDebit = PostNextDebitUseCase(engine, goals, debits, demoClock, poster)
     val getReplanOptions = GetReplanOptionsUseCase(engine, goals, debits, analytics)
     val applyReplan = ApplyReplanUseCase(engine, goals, debits, analytics)
+    val addMoney = AddMoneyUseCase(engine, goals, debits, ids, analytics)
+    val payOut = PayOutGoalUseCase(engine, goals, debits, destinations, ids, analytics)
+    val checkTopUp = CheckTopUpUseCase(engine, goals, debits, analytics)
+    val money = GoalMoneyUseCases(addMoney, payOut, checkTopUp)
     val fastForward = FastForwardUseCase(engine, demoClock, poster)
     val resetDemoData = ResetDemoDataUseCase(goals, debits, demoClock, seedSource, createGoal)
 }

@@ -10,6 +10,7 @@ import com.gullak.core.domain.testing.TestData
 import com.gullak.core.domain.testing.TestData.rupees
 import com.gullak.core.model.ai.GoalLanguage
 import com.gullak.core.model.ai.ParsedGoal
+import com.gullak.core.model.goal.Destination
 import com.gullak.core.model.goal.Frequency
 import com.gullak.core.model.money.Money
 import com.gullak.core.model.plan.PlanOption
@@ -67,7 +68,7 @@ class VoiceGoalViewModelTest {
             listOf(
                 "greeting",
                 "readback Laptop",
-                "plan DAILY, WEEKLY, MONTHLY",
+                "goes plan DAILY, WEEKLY, MONTHLY",
                 "Explanation autopay MONTHLY SBI_SAVINGS",
                 "started Laptop",
             ),
@@ -375,6 +376,60 @@ class VoiceGoalViewModelTest {
     }
 
     @Test
+    fun theHonestGoldOrFundAnswerUsesTheEnginesTimeline() = runTest {
+        brainSays(TalkIntent.GOAL_DETAILS)
+        brainSays(TalkIntent.WHERE_MONEY_GOES)
+        says("laptop", "laptop ka paisa sone mein daal doon?")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals("why PAYTM_MONEY_FUND 7 readback Laptop", env.voice.spoken[2])
+        assertTrue(env.goals.goals.isEmpty())
+    }
+
+    @Test
+    fun theModelExplainsTheGoldOrFundAnswerWhenItCan() = runTest {
+        env.explanationService.destinationAnswer = "Sirf 8 mahine hain, isliye fund."
+        brainSays(TalkIntent.GOAL_DETAILS)
+        brainSays(TalkIntent.WHERE_MONEY_GOES)
+        says("laptop", "sone mein daal doon?")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals("Sirf 8 mahine hain, isliye fund. readback Laptop", env.voice.spoken[2])
+    }
+
+    @Test
+    fun theModelExplainsWhereTheMoneyGoesWhenThePlanIsOffered() = runTest {
+        env.explanationService.destinationAnswer = "Paisa fund mein jayega."
+        brainSays(TalkIntent.GOAL_DETAILS)
+        brainSays(TalkIntent.YES)
+        says("laptop", "haan")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals("Paisa fund mein jayega. plan DAILY, WEEKLY, MONTHLY", env.voice.spoken[2])
+    }
+
+    @Test
+    fun withoutTheModelTheRulesStillAnswerAboutGold() = runTest {
+        env.understandingService.result = AppResult.Success(laptop)
+        says("laptop", "sone mein daal doon?")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals("why PAYTM_MONEY_FUND 7 readback Laptop", env.voice.spoken[2])
+    }
+
+    @Test
     fun repliesNamingAPlanOrBankAreRead() {
         val options = listOf(option(Frequency.DAILY), option(Frequency.WEEKLY), option(Frequency.MONTHLY))
 
@@ -418,6 +473,21 @@ private object FakeLines : VoiceLines {
     ) = "savings $name"
 
     override fun noSavingsYet(language: GoalLanguage) = "no savings"
+
+    override fun onTheGoalPage(language: GoalLanguage) = "goal page"
+
+    override fun goesTo(
+        language: GoalLanguage,
+        destination: Destination,
+    ) = "goes"
+
+    override fun whereMoneyGoes(
+        language: GoalLanguage,
+        destination: Destination,
+        months: Int,
+    ) = "why $destination $months"
+
+    override fun whereMoneyGoesInGeneral(language: GoalLanguage) = "why general"
 
     override fun oneTimeNoted(
         language: GoalLanguage,

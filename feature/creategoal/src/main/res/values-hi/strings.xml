@@ -30,10 +30,10 @@
     <string name="create_problem_amount_range">लक्ष्य रक़म ₹500 से ₹50,00,000 के बीच हो</string>
     <string name="create_problem_date">आज के बाद की तारीख़ चुनें</string>
     <string name="create_problem_date_far">10 साल के अंदर की तारीख़ चुनें</string>
-    <string name="create_problem_too_close">आज (%1$s) से 7 दिन से कम: SIP के लिए बहुत कम समय। बाद की तारीख़ चुनें।</string>
-    <string name="create_failed">SIP शुरू नहीं हो सकी। फिर से कोशिश करें।</string>
+    <string name="create_problem_too_close">आज (%1$s) से 7 दिन से कम: योजना के लिए बहुत कम समय। बाद की तारीख़ चुनें।</string>
+    <string name="create_failed">गुल्लक शुरू नहीं हो सकी। फिर से कोशिश करें।</string>
 
-    <string name="create_plan_title">आपकी SIP योजना</string>
+    <string name="create_plan_title">आपकी योजना</string>
     <string name="frequency_daily">रोज़</string>
     <string name="frequency_weekly">हर हफ़्ते</string>
     <string name="frequency_monthly">हर महीने</string>
@@ -84,7 +84,7 @@
     <string name="approval_demo_note">डेमो मंज़ूरी: कोई भी 4 अंक डालें। यह आपका UPI PIN नहीं है, और कुछ भी सेव या भेजा नहीं जाता।</string>
     <string name="approval_delete">मिटाएँ</string>
     <string name="create_lump_label">अभी एकमुश्त भुगतान (वैकल्पिक)</string>
-    <string name="create_lump_hint">इससे SIP की रक़म घटती है</string>
+    <string name="create_lump_hint">इससे नियमित भुगतान घटते हैं</string>
     <string name="create_problem_lump">एकमुश्त भुगतान लक्ष्य रक़म से कम होना चाहिए</string>
     <string name="create_listen">सुनें</string>
     <string name="mandate_lump">अभी एकमुश्त भुगतान</string>
@@ -137,4 +137,5 @@
     <string name="voice_period_daily">हर दिन</string>
     <string name="voice_period_weekly">हर हफ़्ते</string>
     <string name="voice_period_monthly">हर महीने</string>
+    <string name="voice_goes_to">पैसा जाएगा</string>
 </resources>

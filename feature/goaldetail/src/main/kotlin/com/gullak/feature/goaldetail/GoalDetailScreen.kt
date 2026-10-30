@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
@@ -40,6 +41,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
@@ -52,8 +54,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +68,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -79,6 +84,7 @@ import com.gullak.core.designsystem.component.StatusChip
 import com.gullak.core.designsystem.component.StatusTone
 import com.gullak.core.designsystem.theme.GullakTheme
 import com.gullak.core.domain.usecase.GoalDetail
+import com.gullak.core.domain.usecase.TopUpAnswer
 import com.gullak.core.model.goal.Debit
 import com.gullak.core.model.goal.DebitKind
 import com.gullak.core.model.goal.DebitStatus
@@ -116,6 +122,10 @@ internal fun GoalDetailEntry(
                 }
 
                 GoalDetailEffect.NothingDue -> resources.getString(R.string.detail_nothing_due)
+
+                is GoalDetailEffect.MoneyAdded -> resources.getString(R.string.detail_money_added, money(effect.amount))
+
+                is GoalDetailEffect.PaidOut -> resources.getString(R.string.detail_paid_out, money(effect.amount))
 
                 GoalDetailEffect.PlanUpdated -> resources.getString(R.string.detail_plan_updated)
 
@@ -201,6 +211,7 @@ internal fun GoalDetailScreen(
                 item { FixPlanBanner(failed = failed, onFix = { onEvent(GoalDetailEvent.OpenReplan(failed.id)) }) }
             }
             item { SavedCard(detail = detail) }
+            item { MoneyCard(state = state, onEvent = onEvent) }
             if (state.demoControls) {
                 item { DemoControlsCard(isPosting = state.isPosting, onEvent = onEvent) }
             }
@@ -210,6 +221,151 @@ internal fun GoalDetailScreen(
 
     state.replan?.let { replan ->
         ReplanSheet(replan = replan, onEvent = onEvent)
+    }
+    if (state.addingMoney) AddMoneySheet(onEvent = onEvent)
+    state.topUp?.let { topUp -> TopUpSheet(topUp = topUp, onEvent = onEvent) }
+}
+
+/** What can be done with the money: add to it any time, take it out on goal day, ask about a top-up. */
+@Composable
+private fun MoneyCard(
+    state: GoalDetailUiState,
+    onEvent: (GoalDetailEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val saved = state.detail?.summary?.saved ?: return
+    PaytmCard(modifier = modifier) {
+        when {
+            state.isPaidOut -> Text(
+                stringResource(R.string.detail_paid_out, money(saved)),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = GullakTheme.colors.textPrimary,
+            )
+
+            state.canPayOut -> PillButton(
+                text = stringResource(R.string.detail_pay_out, money(saved)),
+                onClick = { onEvent(GoalDetailEvent.PayOutClicked) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (!state.isPaidOut) {
+            if (state.canPayOut) Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinePillButton(
+                    text = stringResource(R.string.detail_add_money),
+                    onClick = { onEvent(GoalDetailEvent.AddMoneyClicked) },
+                    modifier = Modifier.weight(1f),
+                )
+                OutlinePillButton(
+                    text = stringResource(R.string.detail_short_of_money),
+                    onClick = { onEvent(GoalDetailEvent.TopUpClicked) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.detail_money_demo),
+            style = MaterialTheme.typography.bodySmall,
+            color = GullakTheme.colors.textMuted,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddMoneySheet(
+    onEvent: (GoalDetailEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var amount by rememberSaveable { mutableStateOf("") }
+    ModalBottomSheet(
+        onDismissRequest = { onEvent(GoalDetailEvent.AddMoneyDismissed) },
+        modifier = modifier,
+        containerColor = GullakTheme.colors.card,
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            SectionHeader(title = stringResource(R.string.detail_add_money))
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(
+                value = amount,
+                onValueChange = { text -> amount = text.filter(Char::isDigit).take(MAX_AMOUNT_DIGITS) },
+                placeholder = { Text(stringResource(R.string.detail_add_money_hint)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                shape = CircleShape,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(12.dp))
+            PillButton(
+                text = stringResource(R.string.detail_add_money),
+                enabled = (amount.toLongOrNull() ?: 0L) > 0L,
+                onClick = { amount.toLongOrNull()?.let { onEvent(GoalDetailEvent.AddMoney(it)) } },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.detail_money_demo),
+                style = MaterialTheme.typography.bodySmall,
+                color = GullakTheme.colors.textMuted,
+            )
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+/** Save first, borrow small: shown only when the user asks. It quotes no terms, because no lender is connected. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TopUpSheet(
+    topUp: TopUpUi,
+    onEvent: (GoalDetailEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ModalBottomSheet(
+        onDismissRequest = { onEvent(GoalDetailEvent.TopUpDismissed) },
+        modifier = modifier,
+        containerColor = GullakTheme.colors.card,
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            SectionHeader(title = stringResource(R.string.detail_top_up_title))
+            Spacer(Modifier.height(10.dp))
+            Text(
+                when (val answer = topUp.answer) {
+                    TopUpAnswer.NoGap -> stringResource(R.string.detail_top_up_no_gap)
+
+                    is TopUpAnswer.NotYetProven -> stringResource(
+                        R.string.detail_top_up_not_yet,
+                        money(answer.shortfall),
+                    )
+
+                    is TopUpAnswer.Offer -> stringResource(R.string.detail_top_up_offer, money(answer.shortfall))
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = GullakTheme.colors.textBody,
+            )
+            Spacer(Modifier.height(12.dp))
+            when {
+                topUp.requested -> Text(
+                    stringResource(R.string.detail_top_up_sent),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = GullakTheme.colors.textPrimary,
+                )
+
+                topUp.answer is TopUpAnswer.Offer -> PillButton(
+                    text = stringResource(R.string.detail_top_up_request),
+                    onClick = { onEvent(GoalDetailEvent.TopUpRequested) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.detail_top_up_demo),
+                style = MaterialTheme.typography.bodySmall,
+                color = GullakTheme.colors.textMuted,
+            )
+            Spacer(Modifier.height(16.dp))
+        }
     }
 }
 
@@ -660,6 +816,7 @@ private fun kindLabel(kind: DebitKind): Int = when (kind) {
     DebitKind.SCHEDULED -> R.string.detail_kind_sip
     DebitKind.CATCH_UP -> R.string.detail_kind_catch_up
     DebitKind.LUMP_SUM -> R.string.detail_kind_lump_sum
+    DebitKind.PAYOUT -> R.string.detail_kind_payout
 }
 
 @Composable
@@ -680,3 +837,5 @@ private val DATE: DateTimeFormatter
 private const val PERCENT = 100
 private const val COIN_DROP_MS = 700
 private const val COIN_TRAVEL_DP = 40f
+
+private const val MAX_AMOUNT_DIGITS = 7

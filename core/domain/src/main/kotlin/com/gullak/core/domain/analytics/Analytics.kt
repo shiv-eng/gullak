@@ -31,6 +31,10 @@ sealed class AnalyticsEvent(
 
     data object GoalReached : AnalyticsEvent("goal_reached")
 
+    data object GoalPaidOut : AnalyticsEvent("goal_paid_out")
+
+    data object TopUpAsked : AnalyticsEvent("top_up_asked")
+
     data object VoiceUsed : AnalyticsEvent("voice_used")
 
     data object FollowUpAsked : AnalyticsEvent("follow_up_asked")

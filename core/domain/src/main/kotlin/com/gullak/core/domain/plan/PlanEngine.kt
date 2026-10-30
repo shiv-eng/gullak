@@ -78,7 +78,10 @@ class PlanEngine @Inject constructor(private val clock: Clock) {
     }
 
     /** Sum of every successful debit: scheduled, lump sum and catch-up. */
-    fun saved(debits: List<Debit>): Money = debits.filter { it.status == DebitStatus.SUCCEEDED }.map { it.amount }.sum()
+    fun saved(debits: List<Debit>): Money = debits
+        .filter { it.status == DebitStatus.SUCCEEDED && it.kind != DebitKind.PAYOUT }.map { it.amount }.sum()
+
+    fun isPaidOut(debits: List<Debit>): Boolean = debits.any { it.kind == DebitKind.PAYOUT }
 
     /**
      * Expected = lump sum + base amount × scheduled dates on or before [today] that are not excused, capped at
@@ -110,6 +113,8 @@ class PlanEngine @Inject constructor(private val clock: Clock) {
         goal: Goal,
         debits: List<Debit>,
     ): List<ScheduledDebit> {
+        // A goal already filled, or paid out, has nothing left to collect.
+        if (saved(debits) >= goal.target || isPaidOut(debits)) return emptyList()
         val schedule = goal.schedule ?: return emptyList()
         val postedScheduled = debits.filter { it.kind == DebitKind.SCHEDULED }.map { it.date }.toSet()
         val postedCatchUps = debits.filter { it.kind == DebitKind.CATCH_UP }.map { it.date }.toSet()

@@ -9,7 +9,7 @@ enum class Destination { PAYTM_GOLD, PAYTM_MONEY_FUND }
 
 enum class DebitStatus { SUCCEEDED, FAILED }
 
-enum class DebitKind { SCHEDULED, LUMP_SUM, CATCH_UP }
+enum class DebitKind { SCHEDULED, LUMP_SUM, CATCH_UP, PAYOUT }
 
 /** A savings goal. [schedule] is null for goals funded once (too close for a recurring plan). */
 data class Goal(

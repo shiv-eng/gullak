@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 // Only these colours are used; Gullak's jar is drawn in Paytm navy and blue.
 
 /** Primary pill buttons ("Start with ₹11", "Upgrade SIP"). White text is 8.4:1. */
-internal val ActionBlue = Color(0xFF0B4AA2)
+internal val ActionBlue = Color(0xFF193E8E)
 
 /** Headings on brand surfaces, the UPI icon circles and the jar outline. */
 internal val PaytmNavy = Color(0xFF002970)
@@ -19,15 +19,15 @@ internal val PaytmCyan = Color(0xFF00BAF2)
 internal val LinkBlue = Color(0xFF1A6FD6)
 
 internal val White = Color(0xFFFFFFFF)
-internal val PageBackground = Color(0xFFF5F6F8)
+internal val PageBackground = Color(0xFFF5F5F5)
 internal val FieldBackground = Color(0xFFF2F3F5)
 internal val Divider = Color(0xFFE6E8EC)
 internal val ChipBorder = Color(0xFFDCDFE4)
-internal val ChipSelected = Color(0xFFE8F1FC)
-internal val ChipSelectedBorder = Color(0xFFB8D2F3)
-internal val ChipSelectedText = Color(0xFF1A5FC2)
+internal val ChipSelected = Color(0xFFE7F1FA)
+internal val ChipSelectedBorder = Color(0xFF2F7BBE)
+internal val ChipSelectedText = Color(0xFF1A6FB8)
 
-internal val TextPrimary = Color(0xFF1B1B1F)
+internal val TextPrimary = Color(0xFF242424)
 internal val TextBody = Color(0xFF3C4043)
 internal val TextMuted = Color(0xFF6B7078)
 

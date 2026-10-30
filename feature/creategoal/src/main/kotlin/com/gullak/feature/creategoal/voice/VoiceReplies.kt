@@ -31,6 +31,9 @@ internal fun bankFrom(text: String): DemoBankAccount? {
     }
 }
 
+/** "Sone mein daal doon?", "paisa kahan jayega?": a question about gold, a fund or where the money sits. */
+internal fun asksWhereMoneyGoes(text: String): Boolean = words(text).any { it in MONEY_HOME_WORDS }
+
 /** After a Gullak has started: does the user want another one? */
 internal fun wantsAnother(text: String): Boolean = words(text).any { it in ANOTHER_WORDS }
 
@@ -38,6 +41,10 @@ private fun words(text: String): List<String> =
     text.lowercase().split(Regex("""[^\p{L}\p{M}\d]+""")).filter { it.isNotEmpty() }
 
 private const val LAST = -1
+
+private val MONEY_HOME_WORDS = setOf(
+    "gold", "sona", "sone", "fund", "kahan", "kaha", "where", "सोना", "सोने", "गोल्ड", "फ़ंड", "फंड", "कहाँ", "कहां",
+)
 
 private val FREQUENCY_WORDS = mapOf(
     Frequency.DAILY to setOf("roz", "rozana", "daily", "day", "din", "रोज़", "रोज", "रोज़ाना", "रोजाना", "दिन", "डेली"),
