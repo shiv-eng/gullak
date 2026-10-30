@@ -6,6 +6,9 @@ import com.gullak.core.domain.ai.FestivalMatch
 import com.gullak.core.domain.ai.FollowUpQuestion
 import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.domain.ai.PlanExplanationService
+import com.gullak.core.domain.ai.SpeechError
+import com.gullak.core.domain.ai.SpeechEvent
+import com.gullak.core.domain.ai.SpeechInput
 import com.gullak.core.domain.ai.Understanding
 import com.gullak.core.domain.ai.VoiceOutput
 import com.gullak.core.domain.analytics.Analytics
@@ -41,12 +44,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** EDITING → (AutoPay sheet) → BANK → APPROVAL → PROCESSING → DONE. */
 enum class Stage { EDITING, BANK, APPROVAL, PROCESSING, DONE }
 
 /** Made-up accounts for the mock UPI AutoPay step. No real bank, account or UPI ID. */
 enum class DemoBankAccount { DEMO_BANK_SAVINGS, SAMPLE_BANK_SAVINGS }
+
+/** Why speech did not fill the form. Shown from string resources. */
+enum class VoiceProblem { FAILED, NOT_HEARD, MIC_DENIED }
 
 /** Why the form cannot make a plan yet. Shown from string resources. */
 enum class InputProblem { AMOUNT_TOO_LOW, AMOUNT_TOO_HIGH, DATE_NOT_IN_FUTURE, TOO_CLOSE_FOR_SIP, LUMP_SUM_TOO_HIGH }
@@ -65,7 +72,14 @@ data class CreateGoalUiState(
     val transcript: String? = null,
     val followUp: FollowUpQuestion? = null,
     val festival: FestivalMatch? = null,
-    val voiceFailed: Boolean = false,
+    val isListening: Boolean = false,
+    /** What the recogniser has heard so far, while listening. */
+    val partialTranscript: String? = null,
+    /** Loudness from 0 to 1, while listening. */
+    val micLevel: Float = 0f,
+    val voiceProblem: VoiceProblem? = null,
+    /** The phone has no voice for the spoken language. */
+    val showVoiceHint: Boolean = false,
     val plan: Plan? = null,
     val frequency: Frequency = Frequency.MONTHLY,
     val problem: InputProblem? = null,
@@ -82,6 +96,8 @@ data class CreateGoalUiState(
     val createFailed: Boolean = false,
     val createdGoal: Goal? = null,
 ) {
+    val voiceFailed: Boolean get() = voiceProblem == VoiceProblem.FAILED
+
     val amount: Money? get() = amountText.toLongOrNull()?.let(Money::fromRupees)
 
     val lumpSum: Money get() = lumpSumText.toLongOrNull()?.let(Money::fromRupees) ?: Money.ZERO
@@ -123,6 +139,16 @@ sealed interface CreateGoalEvent {
 
     data object VoiceUnavailable : CreateGoalEvent
 
+    /** The mic button, once the microphone permission is granted: starts or stops listening. */
+    data object ListenClicked : CreateGoalEvent
+
+    data object MicDenied : CreateGoalEvent
+
+    /** The current follow-up question, in words: read it aloud if replies are on, then listen for the answer. */
+    data class FollowUpShown(val text: String) : CreateGoalEvent
+
+    data object VoiceHintDismissed : CreateGoalEvent
+
     /** Read [text] aloud (a follow-up question or an explanation, already in the right language). */
     data class Speak(val text: String) : CreateGoalEvent
 
@@ -153,6 +179,9 @@ sealed interface CreateGoalEffect {
     data object Finish : CreateGoalEffect
 
     data object OpenGoals : CreateGoalEffect
+
+    /** This phone cannot recognise speech inside the app: use its own speech screen. */
+    data object OpenPhoneSpeech : CreateGoalEffect
 }
 
 /**
@@ -167,7 +196,8 @@ class CreateGoalViewModel @Inject constructor(
     private val explainer: PlanExplanationService,
     private val analytics: Analytics,
     private val voice: VoiceOutput,
-    settings: SettingsRepository,
+    private val speech: SpeechInput,
+    private val settings: SettingsRepository,
     clock: Clock,
 ) : ViewModel() {
 
@@ -181,10 +211,17 @@ class CreateGoalViewModel @Inject constructor(
     private val conversation = mutableListOf<ConversationTurn>()
     private var explainJob: Job? = null
     private var speakJob: Job? = null
+    private var listenJob: Job? = null
+    private var announcedFollowUp: FollowUpQuestion? = null
+    private var voiceHintShown = false
+
+    /** Read the next explanation aloud: the one for a goal that was just spoken. */
+    private var speakNextExplanation = false
 
     init {
         viewModelScope.launch {
             settings.settings.collect { prefs ->
+                voiceHintShown = prefs.voiceHintShown
                 state.update {
                     it.copy(speechLanguageTag = prefs.speechLanguage.tag, voiceReplies = prefs.voiceReplies)
                 }
@@ -213,15 +250,33 @@ class CreateGoalViewModel @Inject constructor(
                 explain()
             }
 
-            is CreateGoalEvent.GoalSpoken -> understand(event.text)
-
-            CreateGoalEvent.VoiceUnavailable -> state.update { it.copy(voiceFailed = true) }
-
-            is CreateGoalEvent.Speak -> speak(event.text)
-
             CreateGoalEvent.DoneClicked -> send(CreateGoalEffect.Finish)
 
             CreateGoalEvent.ViewGoalsClicked -> send(CreateGoalEffect.OpenGoals)
+
+            else -> onVoiceEvent(event)
+        }
+    }
+
+    private fun onVoiceEvent(event: CreateGoalEvent) {
+        when (event) {
+            is CreateGoalEvent.GoalSpoken -> understand(event.text)
+
+            CreateGoalEvent.VoiceUnavailable -> state.update { it.copy(voiceProblem = VoiceProblem.FAILED) }
+
+            CreateGoalEvent.ListenClicked -> {
+                val wasListening = state.value.isListening
+                stopVoice()
+                if (!wasListening) startListening()
+            }
+
+            CreateGoalEvent.MicDenied -> state.update { it.copy(voiceProblem = VoiceProblem.MIC_DENIED) }
+
+            is CreateGoalEvent.FollowUpShown -> announceFollowUp(event.text)
+
+            CreateGoalEvent.VoiceHintDismissed -> state.update { it.copy(showVoiceHint = false) }
+
+            is CreateGoalEvent.Speak -> speak(event.text)
 
             else -> onPaymentEvent(event)
         }
@@ -231,7 +286,7 @@ class CreateGoalViewModel @Inject constructor(
     private fun onPaymentEvent(event: CreateGoalEvent) {
         when (event) {
             CreateGoalEvent.StartClicked -> if (state.value.canStart) {
-                voice.stop()
+                stopVoice()
                 state.update { it.copy(showMandate = true) }
             }
 
@@ -258,6 +313,9 @@ class CreateGoalViewModel @Inject constructor(
     }
 
     private fun edit(change: (CreateGoalUiState) -> CreateGoalUiState) {
+        // Typing takes over from speech.
+        speakNextExplanation = false
+        if (speakJob?.isActive == true || state.value.isListening) stopVoice()
         state.update { change(it).copy(createFailed = false) }
         replan()
     }
@@ -266,11 +324,18 @@ class CreateGoalViewModel @Inject constructor(
         if (text.isBlank()) return
         analytics.log(AnalyticsEvent.VoiceUsed)
         conversation += ConversationTurn(Speaker.USER, text.trim())
-        state.update { it.copy(isUnderstanding = true, transcript = text.trim(), followUp = null, voiceFailed = false) }
+        announcedFollowUp = null
+        speakNextExplanation = false
+        state.update {
+            it.copy(isUnderstanding = true, transcript = text.trim(), followUp = null, voiceProblem = null)
+        }
         viewModelScope.launch {
             when (val result = understandGoal(conversation.toList())) {
                 is AppResult.Success -> applyUnderstanding(result.value)
-                is AppResult.Failure -> state.update { it.copy(isUnderstanding = false, voiceFailed = true) }
+
+                is AppResult.Failure -> state.update {
+                    it.copy(isUnderstanding = false, voiceProblem = VoiceProblem.FAILED)
+                }
             }
         }
     }
@@ -290,6 +355,7 @@ class CreateGoalViewModel @Inject constructor(
         when (understanding) {
             is Understanding.ReadyToConfirm -> {
                 conversation.clear()
+                speakNextExplanation = state.value.voiceReplies
                 state.update {
                     it.copy(
                         name = understanding.goalName,
@@ -378,6 +444,10 @@ class CreateGoalViewModel @Inject constructor(
             delay(EXPLAIN_DEBOUNCE_MS)
             val text = explainer.explain(current.name.trim(), plan, chosen, current.language)
             state.update { it.copy(explanation = text, isExplaining = false) }
+            if (speakNextExplanation) {
+                speakNextExplanation = false
+                speak(text)
+            }
         }
     }
 
@@ -434,7 +504,75 @@ class CreateGoalViewModel @Inject constructor(
 
     private fun speak(text: String) {
         speakJob?.cancel()
-        speakJob = viewModelScope.launch { voice.speak(text, state.value.language) }
+        speakJob = viewModelScope.launch { sayAloud(text) }
+    }
+
+    private suspend fun sayAloud(text: String) {
+        val language = state.value.language
+        if (language != GoalLanguage.ENGLISH && !voiceHintShown && !voice.isVoiceAvailable(language)) {
+            voiceHintShown = true
+            state.update { it.copy(showVoiceHint = true) }
+            settings.setVoiceHintShown()
+        }
+        voice.speak(text, language)
+    }
+
+    /** Runs once per question, so a screen rotation neither repeats it nor listens twice. */
+    private fun announceFollowUp(text: String) {
+        val question = state.value.followUp ?: return
+        if (question == announcedFollowUp) return
+        announcedFollowUp = question
+        speakJob?.cancel()
+        speakJob = viewModelScope.launch {
+            // A text-to-speech engine that never reports the end must not stop the mic from listening.
+            if (state.value.voiceReplies) withTimeoutOrNull(FOLLOW_UP_SPEECH_LIMIT_MS) { sayAloud(text) }
+            startListening()
+        }
+    }
+
+    private fun startListening() {
+        listenJob?.cancel()
+        state.update { it.copy(isListening = true, partialTranscript = null, micLevel = 0f, voiceProblem = null) }
+        listenJob = viewModelScope.launch {
+            speech.listen(state.value.speechLanguageTag).collect(::onSpeech)
+            stopListeningState()
+        }
+    }
+
+    private fun onSpeech(event: SpeechEvent) {
+        when (event) {
+            SpeechEvent.Listening -> Unit
+
+            is SpeechEvent.Level -> state.update { it.copy(micLevel = event.level) }
+
+            is SpeechEvent.Partial -> state.update { it.copy(partialTranscript = event.text) }
+
+            is SpeechEvent.Final -> {
+                stopListeningState()
+                understand(event.text)
+            }
+
+            is SpeechEvent.Error -> {
+                stopListeningState()
+                when (event.type) {
+                    SpeechError.NO_SPEECH -> state.update { it.copy(voiceProblem = VoiceProblem.NOT_HEARD) }
+                    SpeechError.PERMISSION -> state.update { it.copy(voiceProblem = VoiceProblem.MIC_DENIED) }
+                    SpeechError.FAILED -> state.update { it.copy(voiceProblem = VoiceProblem.FAILED) }
+                    SpeechError.UNAVAILABLE -> send(CreateGoalEffect.OpenPhoneSpeech)
+                }
+            }
+        }
+    }
+
+    private fun stopListeningState() {
+        state.update { it.copy(isListening = false, partialTranscript = null, micLevel = 0f) }
+    }
+
+    private fun stopVoice() {
+        speakJob?.cancel()
+        listenJob?.cancel()
+        voice.stop()
+        stopListeningState()
     }
 
     override fun onCleared() {
@@ -450,5 +588,6 @@ class CreateGoalViewModel @Inject constructor(
         val MAX_AMOUNT = Money.fromRupees(50_00_000)
         const val MAX_DIGITS = 8
         const val EXPLAIN_DEBOUNCE_MS = 400L
+        const val FOLLOW_UP_SPEECH_LIMIT_MS = 15_000L
     }
 }

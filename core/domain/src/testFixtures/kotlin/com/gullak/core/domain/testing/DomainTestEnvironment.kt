@@ -35,6 +35,7 @@ class DomainTestEnvironment(
     val seedSource = FakeDemoSeedSource(seedRequests)
     val aiInfo = FakeAiInfo()
     val voice = FakeVoiceOutput()
+    val speech = FakeSpeechInput()
 
     val engine = PlanEngine(clock)
     val poster = DebitPoster(engine, goals, debits, autoPay, ids, analytics)

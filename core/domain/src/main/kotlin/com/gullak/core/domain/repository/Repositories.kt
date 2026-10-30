@@ -43,6 +43,8 @@ interface SettingsRepository {
 
     suspend fun setVoiceReplies(enabled: Boolean)
 
+    suspend fun setVoiceHintShown()
+
     suspend fun setSpeechLanguage(language: SpeechLanguage)
 
     suspend fun setLastAiPath(path: AiPath)

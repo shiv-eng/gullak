@@ -94,4 +94,11 @@
     <string name="create_problem_lump">One-time payment must be less than the goal amount</string>
     <string name="create_listen">Listen</string>
     <string name="mandate_lump">One-time payment now</string>
+    <string name="create_listening">Listening…</string>
+    <string name="create_stop_listening">Stop listening</string>
+    <string name="create_voice_not_heard">Did not catch that. Tap the mic and try again.</string>
+    <string name="create_mic_denied">Microphone permission is off. Allow it to speak your goal, or fill in the details below.</string>
+    <string name="create_voice_hint">Hindi voice is not installed on this phone. Install it in text-to-speech settings to hear replies in Hindi.</string>
+    <string name="create_voice_hint_action">Open settings</string>
+    <string name="create_voice_hint_dismiss">Not now</string>
 </resources>

@@ -102,6 +102,15 @@ internal object DataProvidersModule {
     fun debitDao(database: GullakDatabase): DebitDao = database.debitDao()
 
     @Provides
+    @SystemClock
+    fun systemClock(): Clock = Clock.systemDefaultZone()
+}
+
+/** Public so `:app`'s JVM test can replace the file-backed store. */
+@Module
+@InstallIn(SingletonComponent::class)
+object PreferencesModule {
+    @Provides
     @Singleton
     fun preferences(
         @ApplicationContext context: Context,
@@ -111,8 +120,4 @@ internal object DataProvidersModule {
         scope = scope + ioDispatcher,
         produceFile = { context.preferencesDataStoreFile("gullak_settings") },
     )
-
-    @Provides
-    @SystemClock
-    fun systemClock(): Clock = Clock.systemDefaultZone()
 }

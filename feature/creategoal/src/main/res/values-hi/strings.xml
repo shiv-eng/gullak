@@ -94,4 +94,11 @@
     <string name="create_problem_lump">एकमुश्त भुगतान लक्ष्य रक़म से कम होना चाहिए</string>
     <string name="create_listen">सुनें</string>
     <string name="mandate_lump">अभी एकमुश्त भुगतान</string>
+    <string name="create_listening">सुन रहे हैं…</string>
+    <string name="create_stop_listening">सुनना बंद करें</string>
+    <string name="create_voice_not_heard">सुनाई नहीं दिया। माइक दबाकर फिर से बोलें।</string>
+    <string name="create_mic_denied">माइक की अनुमति बंद है। लक्ष्य बोलने के लिए अनुमति दें, या नीचे विवरण भरें।</string>
+    <string name="create_voice_hint">इस फ़ोन में हिंदी आवाज़ इंस्टॉल नहीं है। हिंदी में जवाब सुनने के लिए इसे टेक्स्ट-टू-स्पीच सेटिंग में इंस्टॉल करें।</string>
+    <string name="create_voice_hint_action">सेटिंग खोलें</string>
+    <string name="create_voice_hint_dismiss">अभी नहीं</string>
 </resources>

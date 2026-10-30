@@ -63,13 +63,15 @@ class CreateGoalFlowUiTest {
             explainer = env.explanationService,
             analytics = env.analytics,
             voice = env.voice,
+            speech = env.speech,
             settings = env.settings,
             clock = env.clock,
         )
         compose.setContent {
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             GullakTheme(darkTheme = false) {
-                CreateGoalScreen(state = state, onEvent = viewModel::onEvent, onBack = {}, onSpeak = {})
+                CreateGoalScreen(state = state, onEvent = viewModel::onEvent, onBack = {
+                }, onSpeak = {}, onOpenVoiceSettings = {})
             }
         }
 

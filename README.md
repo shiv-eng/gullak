@@ -86,7 +86,8 @@ Understanding chain: demo mode uses `DemoAiResponses` (rules if no saved answer)
 `RuleBasedGoalParser` on any failure. Settings shows which path read the last goal.
 
 Explanations come in the language the user spoke: English, Hinglish or Hindi. Voice replies read follow-up questions
-and explanations aloud with Android text-to-speech, and can be turned off in Settings.
+and explanations aloud with Android text-to-speech, and can be turned off in Settings. After a follow-up question the
+mic listens again for the answer. Only the transcript text is sent to the model.
 
 ## What is mocked
 
@@ -131,8 +132,8 @@ The app runs without a key: demo mode needs none, and outside demo mode it falls
 ./gradlew :core:domain:koverHtmlReport
 ```
 
-`check` runs unit tests, ktlint, detekt and Android lint. `CreateGoalFlowUiTest` walks the real screen and ViewModel from
-the form to the success page under Robolectric, so it needs no device.
+`check` runs unit tests, ktlint, detekt and Android lint. `DemoPathUiTest` walks the real app and Hilt graph from the
+Paytm home to goal detail under Robolectric, so it needs no device. Speech and spoken replies are not covered by it.
 
 **A key in `BuildConfig` can be read out of the APK.** A shipped app would call the model through a backend, never with
 a key in the APK. Do not share an APK built with a key you want to keep, including the release build. Build it with
@@ -179,8 +180,10 @@ Today is taken as 31 Oct 2026. These are saved in `DemoAiResponses`.
 
 - Every Paytm service is a fake, so nothing about real mandates, settlement or KYC is exercised.
 - The Gemini key is in the APK (see above). A real product needs a backend.
-- Speech goes through the phone's speech input, and spoken replies through its text-to-speech engine. A Hindi voice
-  must be installed for Hindi replies; without one the engine's current voice reads them.
+- Speech uses the phone's speech recogniser inside the app, and falls back to the phone's own speech screen if the
+  recogniser is unavailable. Recognition is not forced offline, so it may need a network.
+- Spoken replies use the phone's text-to-speech engine. Without a Hindi voice the engine's current voice reads them, and
+  Gullak shows a one-time hint pointing to the settings.
 - The app is light theme only, to match Paytm.
 - `festivals.json` covers 2026 and 2027 only.
 - No TalkBack or 200% font audit has been done.

@@ -1,6 +1,8 @@
 package com.gullak.feature.creategoal
 
 import com.gullak.core.domain.ai.FollowUpQuestion
+import com.gullak.core.domain.ai.SpeechError
+import com.gullak.core.domain.ai.SpeechEvent
 import com.gullak.core.domain.analytics.AnalyticsEvent
 import com.gullak.core.domain.testing.DomainTestEnvironment
 import com.gullak.core.domain.testing.TestData
@@ -13,6 +15,7 @@ import com.gullak.core.model.result.AppError
 import com.gullak.core.model.result.AppResult
 import com.gullak.core.testing.MainDispatcherRule
 import java.time.LocalDate
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -36,6 +39,7 @@ class CreateGoalViewModelTest {
         explainer = env.explanationService,
         analytics = env.analytics,
         voice = env.voice,
+        speech = env.speech,
         settings = env.settings,
         clock = env.clock,
     )
@@ -262,5 +266,108 @@ class CreateGoalViewModelTest {
 
         vm.onEvent(CreateGoalEvent.StartClicked)
         assertEquals(1, env.voice.stops)
+    }
+
+    private val spokenGoal =
+        ParsedGoal("Laptop", rupees(36_000), TestData.LAPTOP_DATE, null, GoalLanguage.HINGLISH, null)
+    private val askAmount = ParsedGoal("Naya phone", null, null, null, GoalLanguage.HINGLISH, "Kitne paise?")
+
+    @Test
+    fun listeningShowsWhatIsHeardAndTheFinalTextFillsTheForm() = runTest {
+        env.understandingService.result = AppResult.Success(spokenGoal)
+        env.speech.heard += listOf(SpeechEvent.Listening, SpeechEvent.Partial("Lap"), SpeechEvent.Final("Laptop"))
+        val vm = viewModel()
+
+        vm.onEvent(CreateGoalEvent.ListenClicked)
+        advanceUntilIdle()
+
+        assertEquals("Laptop", vm.uiState.value.name)
+        assertEquals("Laptop", vm.uiState.value.transcript)
+        assertFalse(vm.uiState.value.isListening)
+        assertNull(vm.uiState.value.partialTranscript)
+    }
+
+    @Test
+    fun aFollowUpIsReadAloudOnceAndThenTheMicListensAgain() = runTest {
+        env.understandingService.result = AppResult.Success(askAmount)
+        val vm = viewModel()
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Mujhe naya phone lena hai"))
+        advanceUntilIdle()
+
+        repeat(2) { vm.onEvent(CreateGoalEvent.FollowUpShown("Kitne paise?")) }
+        advanceUntilIdle()
+
+        assertEquals(listOf("Kitne paise?"), env.voice.spoken)
+        assertEquals(1, env.speech.listens)
+    }
+
+    @Test
+    fun withVoiceRepliesOffAFollowUpIsNotReadButTheMicStillListens() = runTest {
+        env.settings.setVoiceReplies(false)
+        env.understandingService.result = AppResult.Success(askAmount)
+        val vm = viewModel()
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Mujhe naya phone lena hai"))
+        advanceUntilIdle()
+
+        vm.onEvent(CreateGoalEvent.FollowUpShown("Kitne paise?"))
+        advanceUntilIdle()
+
+        assertTrue(env.voice.spoken.isEmpty())
+        assertEquals(1, env.speech.listens)
+    }
+
+    @Test
+    fun theExplanationOfASpokenGoalIsReadOnceAndNotAfterEditing() = runTest {
+        env.understandingService.result = AppResult.Success(spokenGoal)
+        val vm = viewModel()
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Laptop"))
+        advanceUntilIdle()
+        assertEquals(listOf("Explanation"), env.voice.spoken)
+
+        vm.onEvent(CreateGoalEvent.AmountChanged("40000"))
+        advanceUntilIdle()
+
+        assertEquals(listOf("Explanation"), env.voice.spoken)
+    }
+
+    @Test
+    fun silenceAndADeniedMicAreShownAsProblems() = runTest {
+        env.speech.heard += listOf(SpeechEvent.Error(SpeechError.NO_SPEECH))
+        val vm = viewModel()
+
+        vm.onEvent(CreateGoalEvent.ListenClicked)
+        advanceUntilIdle()
+        assertEquals(VoiceProblem.NOT_HEARD, vm.uiState.value.voiceProblem)
+
+        vm.onEvent(CreateGoalEvent.MicDenied)
+        assertEquals(VoiceProblem.MIC_DENIED, vm.uiState.value.voiceProblem)
+    }
+
+    @Test
+    fun aPhoneThatCannotRecogniseInsideTheAppUsesItsOwnSpeechScreen() = runTest {
+        env.speech.heard += listOf(SpeechEvent.Error(SpeechError.UNAVAILABLE))
+        val vm = viewModel()
+
+        vm.onEvent(CreateGoalEvent.ListenClicked)
+        advanceUntilIdle()
+
+        assertEquals(CreateGoalEffect.OpenPhoneSpeech, vm.effect.first())
+    }
+
+    @Test
+    fun aMissingHindiVoiceShowsTheHintOnlyOnce() = runTest {
+        env.voice.voiceAvailable = false
+        env.understandingService.result = AppResult.Success(spokenGoal)
+        val vm = viewModel()
+        vm.onEvent(CreateGoalEvent.GoalSpoken("Laptop"))
+        advanceUntilIdle()
+        assertTrue(vm.uiState.value.showVoiceHint)
+        assertTrue(env.settings.settings.value.voiceHintShown)
+
+        vm.onEvent(CreateGoalEvent.VoiceHintDismissed)
+        vm.onEvent(CreateGoalEvent.Speak("Phir se"))
+        advanceUntilIdle()
+
+        assertFalse(vm.uiState.value.showVoiceHint)
     }
 }

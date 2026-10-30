@@ -11,4 +11,7 @@ interface VoiceOutput {
     )
 
     fun stop()
+
+    /** Whether the phone has a voice for [language]. */
+    suspend fun isVoiceAvailable(language: GoalLanguage): Boolean
 }

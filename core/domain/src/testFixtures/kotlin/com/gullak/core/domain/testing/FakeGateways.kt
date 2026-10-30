@@ -138,6 +138,7 @@ class FakeAiInfo(
 class FakeVoiceOutput : com.gullak.core.domain.ai.VoiceOutput {
     val spoken = mutableListOf<String>()
     var stops = 0
+    var voiceAvailable = true
 
     override suspend fun speak(
         text: String,
@@ -148,5 +149,18 @@ class FakeVoiceOutput : com.gullak.core.domain.ai.VoiceOutput {
 
     override fun stop() {
         stops++
+    }
+
+    override suspend fun isVoiceAvailable(language: GoalLanguage): Boolean = voiceAvailable
+}
+
+class FakeSpeechInput : com.gullak.core.domain.ai.SpeechInput {
+    /** What the next `listen` calls hear, oldest first. Nothing is heard when empty. */
+    val heard = ArrayDeque<List<com.gullak.core.domain.ai.SpeechEvent>>()
+    var listens = 0
+
+    override fun listen(languageTag: String): kotlinx.coroutines.flow.Flow<com.gullak.core.domain.ai.SpeechEvent> {
+        listens++
+        return kotlinx.coroutines.flow.flowOf(*heard.removeFirstOrNull().orEmpty().toTypedArray())
     }
 }

@@ -25,16 +25,26 @@ internal class TextToSpeechVoiceOutput @Inject constructor(@ApplicationContext p
     private val ready = CompletableDeferred<Boolean>()
     private var engine: TextToSpeech? = null
 
+    private fun engine(): TextToSpeech = engine ?: TextToSpeech(context) { status ->
+        ready.complete(status == TextToSpeech.SUCCESS)
+    }.also { engine = it }
+
+    private fun locale(language: GoalLanguage): Locale =
+        Locale.forLanguageTag(if (language == GoalLanguage.ENGLISH) ENGLISH_INDIA else HINDI_INDIA)
+
+    override suspend fun isVoiceAvailable(language: GoalLanguage): Boolean {
+        val tts = engine()
+        return ready.await() && tts.isLanguageAvailable(locale(language)) >= TextToSpeech.LANG_AVAILABLE
+    }
+
     override suspend fun speak(
         text: String,
         language: GoalLanguage,
     ) {
-        val tts = engine ?: TextToSpeech(context) { status ->
-            ready.complete(status == TextToSpeech.SUCCESS)
-        }.also { engine = it }
+        val tts = engine()
         if (!ready.await()) return
 
-        val locale = Locale.forLanguageTag(if (language == GoalLanguage.ENGLISH) ENGLISH_INDIA else HINDI_INDIA)
+        val locale = locale(language)
         if (tts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) tts.language = locale
 
         suspendCancellableCoroutine { continuation ->

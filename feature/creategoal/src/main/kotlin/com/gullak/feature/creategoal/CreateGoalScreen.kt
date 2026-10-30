@@ -1,12 +1,16 @@
 package com.gullak.feature.creategoal
 
+import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.speech.RecognizerIntent
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -34,6 +38,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Info
@@ -72,6 +77,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
@@ -80,6 +87,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gullak.core.designsystem.component.AmountChip
@@ -104,7 +112,7 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// No speech app on the phone is an expected case: it is shown as a message, not lost.
+// No speech or settings screen on the phone is an expected case: it is handled, not lost.
 @Suppress("SwallowedException")
 @Composable
 internal fun CreateGoalEntry(
@@ -118,16 +126,8 @@ internal fun CreateGoalEntry(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val finish by rememberUpdatedState(onFinish)
     val openGoals by rememberUpdatedState(onOpenGoals)
-    LaunchedEffect(viewModel) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                CreateGoalEffect.Finish -> finish()
-                CreateGoalEffect.OpenGoals -> openGoals()
-            }
-        }
-    }
 
-    // Speech goes through the phone's own speech input; the text is then read by Gullak's AI.
+    // Speech is recognised inside the app; phones that cannot do that use their own speech screen.
     val speechPrompt = stringResource(R.string.create_voice_prompt)
     val speech = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val text = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
@@ -135,7 +135,7 @@ internal fun CreateGoalEntry(
             viewModel.onEvent(CreateGoalEvent.GoalSpoken(text))
         }
     }
-    val listen = {
+    val phoneSpeech = {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
             .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             .putExtra(RecognizerIntent.EXTRA_LANGUAGE, state.speechLanguageTag)
@@ -146,6 +146,40 @@ internal fun CreateGoalEntry(
             viewModel.onEvent(CreateGoalEvent.VoiceUnavailable)
         }
     }
+    val openPhoneSpeech by rememberUpdatedState(phoneSpeech)
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                CreateGoalEffect.Finish -> finish()
+                CreateGoalEffect.OpenGoals -> openGoals()
+                CreateGoalEffect.OpenPhoneSpeech -> openPhoneSpeech()
+            }
+        }
+    }
+
+    val context = LocalContext.current
+    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        viewModel.onEvent(if (granted) CreateGoalEvent.ListenClicked else CreateGoalEvent.MicDenied)
+    }
+    val listen = {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+            PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            viewModel.onEvent(
+                CreateGoalEvent.ListenClicked,
+            )
+        } else {
+            micPermission.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+    val openVoiceSettings = {
+        try {
+            context.startActivity(Intent(TTS_SETTINGS_ACTION))
+        } catch (e: ActivityNotFoundException) {
+            Log.w(TAG, "No text-to-speech settings screen", e)
+        }
+        viewModel.onEvent(CreateGoalEvent.VoiceHintDismissed)
+    }
     var voiceStarted by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(startWithVoice) {
         if (startWithVoice && !voiceStarted) {
@@ -154,16 +188,10 @@ internal fun CreateGoalEntry(
         }
     }
 
-    // Voice replies: read follow-up questions, and the explanation of a goal that was spoken.
+    // The question text needs string resources, so the screen hands it to the ViewModel to read aloud.
     val followUp = state.followUp?.let { followUpText(it) }
     LaunchedEffect(followUp) {
-        if (followUp != null && state.voiceReplies) viewModel.onEvent(CreateGoalEvent.Speak(followUp))
-    }
-    LaunchedEffect(state.explanation) {
-        val explanation = state.explanation
-        if (explanation != null && state.voiceReplies && state.transcript != null) {
-            viewModel.onEvent(CreateGoalEvent.Speak(explanation))
-        }
+        if (followUp != null) viewModel.onEvent(CreateGoalEvent.FollowUpShown(followUp))
     }
 
     CreateGoalScreen(
@@ -171,6 +199,7 @@ internal fun CreateGoalEntry(
         onEvent = viewModel::onEvent,
         onBack = onBack,
         onSpeak = listen,
+        onOpenVoiceSettings = openVoiceSettings,
         modifier = modifier,
     )
 }
@@ -182,6 +211,7 @@ internal fun CreateGoalScreen(
     onEvent: (CreateGoalEvent) -> Unit,
     onBack: () -> Unit,
     onSpeak: () -> Unit,
+    onOpenVoiceSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BackHandler(enabled = state.stage == Stage.BANK || state.stage == Stage.APPROVAL) {
@@ -234,7 +264,14 @@ internal fun CreateGoalScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                item { VoiceCard(state = state, onSpeak = onSpeak) }
+                item {
+                    VoiceCard(
+                        state = state,
+                        onSpeak = onSpeak,
+                        onOpenVoiceSettings = onOpenVoiceSettings,
+                        onDismissVoiceHint = { onEvent(CreateGoalEvent.VoiceHintDismissed) },
+                    )
+                }
                 item { GoalDetailsCard(state = state, onEvent = onEvent) }
                 state.plan?.let { plan ->
                     item { PlanCard(state = state, plan = plan, onEvent = onEvent) }
@@ -259,6 +296,8 @@ internal fun CreateGoalScreen(
 private fun VoiceCard(
     state: CreateGoalUiState,
     onSpeak: () -> Unit,
+    onOpenVoiceSettings: () -> Unit,
+    onDismissVoiceHint: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     PaytmCard(modifier = modifier) {
@@ -267,28 +306,22 @@ private fun VoiceCard(
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    stringResource(R.string.create_voice_title),
+                    stringResource(if (state.isListening) R.string.create_listening else R.string.create_voice_title),
                     style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold),
                     color = GullakTheme.colors.textPrimary,
                 )
                 Text(
-                    stringResource(R.string.create_voice_example),
+                    state.partialTranscript ?: stringResource(R.string.create_voice_example),
                     style = MaterialTheme.typography.bodySmall,
-                    color = GullakTheme.colors.textMuted,
+                    color = if (state.partialTranscript != null) {
+                        GullakTheme.colors.textBody
+                    } else {
+                        GullakTheme.colors.textMuted
+                    },
                 )
             }
             Spacer(Modifier.width(8.dp))
-            FilledIconButton(
-                onClick = onSpeak,
-                modifier = Modifier.size(52.dp),
-                shape = CircleShape,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = GullakTheme.colors.action,
-                    contentColor = GullakTheme.colors.onAction,
-                ),
-            ) {
-                Icon(Icons.Filled.Mic, contentDescription = stringResource(R.string.create_voice_title))
-            }
+            MicButton(isListening = state.isListening, level = state.micLevel, onClick = onSpeak)
         }
         state.transcript?.let {
             Spacer(Modifier.height(12.dp))
@@ -313,7 +346,11 @@ private fun VoiceCard(
             )
         }
         val note = when {
-            state.voiceFailed -> stringResource(R.string.create_voice_failed)
+            state.voiceProblem == VoiceProblem.FAILED -> stringResource(R.string.create_voice_failed)
+
+            state.voiceProblem == VoiceProblem.NOT_HEARD -> stringResource(R.string.create_voice_not_heard)
+
+            state.voiceProblem == VoiceProblem.MIC_DENIED -> stringResource(R.string.create_mic_denied)
 
             state.followUp != null -> followUpText(state.followUp)
 
@@ -329,8 +366,63 @@ private fun VoiceCard(
             Spacer(Modifier.height(10.dp))
             InfoBox(text = note)
         }
+        if (state.showVoiceHint) {
+            Spacer(Modifier.height(10.dp))
+            InfoBox(text = stringResource(R.string.create_voice_hint))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = onDismissVoiceHint) { Text(stringResource(R.string.create_voice_hint_dismiss)) }
+                TextButton(onClick = onOpenVoiceSettings) { Text(stringResource(R.string.create_voice_hint_action)) }
+            }
+        }
     }
 }
+
+/** The mic, with a ring that grows with the speaker's voice while listening. */
+@Composable
+private fun MicButton(
+    isListening: Boolean,
+    level: Float,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val ring by animateFloatAsState(
+        targetValue = if (isListening) 1f + level * MAX_RING_GROWTH else 1f,
+        label = "micRing",
+    )
+    Box(modifier = modifier.size(64.dp), contentAlignment = Alignment.Center) {
+        if (isListening) {
+            Box(
+                Modifier
+                    .size(52.dp)
+                    .graphicsLayer {
+                        scaleX = ring
+                        scaleY = ring
+                    }
+                    .background(GullakTheme.colors.field, CircleShape),
+            )
+        }
+        FilledIconButton(
+            onClick = onClick,
+            modifier = Modifier.size(52.dp),
+            shape = CircleShape,
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = GullakTheme.colors.action,
+                contentColor = GullakTheme.colors.onAction,
+            ),
+        ) {
+            Icon(
+                if (isListening) Icons.Filled.Stop else Icons.Filled.Mic,
+                contentDescription = stringResource(
+                    if (isListening) R.string.create_stop_listening else R.string.create_voice_title,
+                ),
+            )
+        }
+    }
+}
+
+private const val MAX_RING_GROWTH = 0.22f
+private const val TTS_SETTINGS_ACTION = "com.android.settings.TTS_SETTINGS"
+private const val TAG = "CreateGoal"
 
 @Composable
 private fun followUpText(question: FollowUpQuestion): String = when (question) {

@@ -66,6 +66,8 @@ class FakeSettingsRepository(initial: AppSettings = AppSettings()) : SettingsRep
 
     override suspend fun setVoiceReplies(enabled: Boolean) = state.update { it.copy(voiceReplies = enabled) }
 
+    override suspend fun setVoiceHintShown() = state.update { it.copy(voiceHintShown = true) }
+
     override suspend fun setSpeechLanguage(language: SpeechLanguage) = state.update {
         it.copy(speechLanguage = language)
     }
