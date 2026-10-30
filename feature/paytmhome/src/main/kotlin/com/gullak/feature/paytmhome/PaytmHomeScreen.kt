@@ -77,6 +77,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gullak.core.designsystem.component.CardDivider
 import com.gullak.core.designsystem.component.GoalSummaryRow
 import com.gullak.core.designsystem.component.GullakImage
+import com.gullak.core.designsystem.component.OneLineLabel
 import com.gullak.core.designsystem.component.PaytmBadge
 import com.gullak.core.designsystem.component.PaytmCard
 import com.gullak.core.designsystem.component.SectionHeader
@@ -324,7 +325,11 @@ private fun SmallPillButton(
             contentColor = GullakTheme.colors.onAction,
         ),
     ) {
-        Text(text, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold))
+        OneLineLabel(
+            text,
+            style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.weight(1f, fill = false),
+        )
         Spacer(Modifier.width(6.dp))
         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp))
     }

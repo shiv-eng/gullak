@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,9 +34,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -186,6 +189,7 @@ fun PillButton(
         enabled = enabled,
         modifier = modifier.heightIn(min = 52.dp),
         shape = CircleShape,
+        contentPadding = BUTTON_PADDING,
         colors = ButtonDefaults.buttonColors(
             containerColor = GullakTheme.colors.action,
             contentColor = GullakTheme.colors.onAction,
@@ -195,7 +199,7 @@ fun PillButton(
             Icon(leadingIcon, contentDescription = null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
         }
-        Text(
+        OneLineLabel(
             text,
             style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
         )
@@ -214,6 +218,7 @@ fun OutlinePillButton(
         onClick = onClick,
         modifier = modifier.heightIn(min = 48.dp),
         shape = CircleShape,
+        contentPadding = BUTTON_PADDING,
         border = BorderStroke(1.dp, GullakTheme.colors.chipSelectedBorder),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = GullakTheme.colors.chipSelected,
@@ -224,12 +229,32 @@ fun OutlinePillButton(
             Icon(leadingIcon, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
         }
-        Text(
-            text = text,
+        OneLineLabel(
+            text,
             style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold),
-            textAlign = TextAlign.Center,
         )
     }
+}
+
+/**
+ * A button or chip label: always one line. A long label or a large phone font shrinks the text instead of wrapping it.
+ */
+@Composable
+fun OneLineLabel(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        style = style,
+        color = color,
+        textAlign = TextAlign.Center,
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(minFontSize = MIN_LABEL_SIZE, maxFontSize = style.fontSize),
+    )
 }
 
 /** Amount chip (₹11 / ₹21 / ₹51): outline, light blue when selected. */
@@ -250,8 +275,8 @@ fun AmountChip(
             .padding(horizontal = 20.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = label,
+        OneLineLabel(
+            label,
             style = MaterialTheme.typography.titleMedium,
             color = if (selected) colors.chipSelectedText else colors.textBody,
         )
@@ -275,7 +300,7 @@ fun SuggestionBubble(
             .padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = label, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp), color = colors.textBody)
+        OneLineLabel(label, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp), color = colors.textBody)
     }
 }
 
@@ -294,8 +319,8 @@ fun StatusChip(
         StatusTone.WARNING -> colors.warningContainer to colors.warningText
         StatusTone.ERROR -> colors.errorContainer to colors.errorText
     }
-    Text(
-        text = text,
+    OneLineLabel(
+        text,
         modifier = modifier
             .background(container, CircleShape)
             .padding(horizontal = 12.dp, vertical = 4.dp),
@@ -328,3 +353,6 @@ fun SavingsProgressBar(
 fun CardDivider(modifier: Modifier = Modifier) {
     HorizontalDivider(modifier = modifier.padding(vertical = 12.dp), color = GullakTheme.colors.divider)
 }
+
+private val MIN_LABEL_SIZE = 9.sp
+private val BUTTON_PADDING = PaddingValues(horizontal = 14.dp, vertical = 8.dp)

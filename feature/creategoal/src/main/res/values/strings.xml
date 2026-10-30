@@ -129,4 +129,5 @@
     <string name="bank_icici_name">ICICI Bank · Savings</string>
     <string name="bank_icici_number">A/c ••2056</string>
     <string name="bank_icici_upi">UPI ID: sun•••@okicici</string>
+    <string name="create_rupee_symbol" translatable="false">₹</string>
 </resources>

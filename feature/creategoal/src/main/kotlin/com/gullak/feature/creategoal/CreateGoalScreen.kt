@@ -95,6 +95,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gullak.core.designsystem.component.AmountChip
 import com.gullak.core.designsystem.component.CardDivider
 import com.gullak.core.designsystem.component.GullakImage
+import com.gullak.core.designsystem.component.OneLineLabel
 import com.gullak.core.designsystem.component.OutlinePillButton
 import com.gullak.core.designsystem.component.PaytmCard
 import com.gullak.core.designsystem.component.PillButton
@@ -557,7 +558,11 @@ private fun GoalDetailsCard(
             value = state.amountText,
             onValueChange = { onEvent(CreateGoalEvent.AmountChanged(it)) },
             leadingIcon = {
-                Text("₹", style = MaterialTheme.typography.titleLarge, color = GullakTheme.colors.textPrimary)
+                Text(
+                    stringResource(R.string.create_rupee_symbol),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = GullakTheme.colors.textPrimary,
+                )
             },
             placeholder = {
                 Text(stringResource(R.string.create_amount_hint), style = MaterialTheme.typography.bodyMedium)
@@ -588,7 +593,11 @@ private fun GoalDetailsCard(
             value = state.lumpSumText,
             onValueChange = { onEvent(CreateGoalEvent.LumpSumChanged(it)) },
             leadingIcon = {
-                Text("₹", style = MaterialTheme.typography.titleLarge, color = GullakTheme.colors.textPrimary)
+                Text(
+                    stringResource(R.string.create_rupee_symbol),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = GullakTheme.colors.textPrimary,
+                )
             },
             placeholder = {
                 Text(stringResource(R.string.create_lump_hint), style = MaterialTheme.typography.bodyMedium)
@@ -760,7 +769,7 @@ private fun PlanCard(
                         colors = RadioButtonDefaults.colors(selectedColor = GullakTheme.colors.action),
                     )
                     Spacer(Modifier.width(6.dp))
-                    Text(
+                    OneLineLabel(
                         stringResource(frequencyLabel(option.frequency)),
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                         color = if (option.frequency ==
