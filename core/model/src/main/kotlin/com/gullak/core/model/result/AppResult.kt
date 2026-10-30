@@ -12,6 +12,9 @@ sealed interface AppError {
 
     data object Timeout : AppError
 
+    /** A required setting (such as the Gemini API key) is missing. */
+    data object NotConfigured : AppError
+
     data class Http(val code: Int) : AppError
 
     /** The response arrived but could not be parsed or did not match the expected schema. */

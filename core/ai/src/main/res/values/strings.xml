@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Explanation templates follow the language the user spoke (English, Hinglish or Hindi), not the app's UI
+    language, so each language has its own named string here and none are translated through values-hi.
+-->
+<resources>
+    <!-- Destinations as named in explanations. Product names. -->
+    <string name="destination_gold" translatable="false">Paytm Gold</string>
+    <string name="destination_fund" translatable="false">Paytm Money · low-risk fund</string>
+
+    <!-- Plan: %1$s amount, %2$d debits, %3$s first date, %4$s last date, %5$s goal, %6$s destination. -->
+    <string name="explain_daily_en" translatable="false">Save %1$s every day, %2$d times from %3$s to %4$s, and %5$s is covered. The money goes to %6$s.</string>
+    <string name="explain_weekly_en" translatable="false">Save %1$s every week, %2$d times from %3$s to %4$s, and %5$s is covered. The money goes to %6$s.</string>
+    <string name="explain_monthly_en" translatable="false">Save %1$s on the 5th of every month, %2$d times from %3$s to %4$s, and %5$s is covered. The money goes to %6$s.</string>
+    <string name="explain_gold_risk_en" translatable="false">Gold\'s price can go up or down, so its value may change along the way.</string>
+
+    <string name="explain_daily_hinglish" translatable="false">Roz %1$s bachaiye, %3$s se %4$s tak, %2$d baar, aur %5$s ka paisa jud jayega. Paisa %6$s mein jayega.</string>
+    <string name="explain_weekly_hinglish" translatable="false">Har hafte %1$s bachaiye, %3$s se %4$s tak, %2$d baar, aur %5$s ka paisa jud jayega. Paisa %6$s mein jayega.</string>
+    <string name="explain_monthly_hinglish" translatable="false">Har mahine ki 5 tareekh ko %1$s bachaiye, %3$s se %4$s tak, %2$d baar, aur %5$s ka paisa jud jayega. Paisa %6$s mein jayega.</string>
+    <string name="explain_gold_risk_hinglish" translatable="false">Sone ka daam upar-neeche ho sakta hai, isliye value badal sakti hai.</string>
+
+    <string name="explain_daily_hi" translatable="false">रोज़ %1$s बचाइए, %3$s से %4$s तक, %2$d बार, और %5$s का पैसा जुड़ जाएगा। पैसा %6$s में जाएगा।</string>
+    <string name="explain_weekly_hi" translatable="false">हर हफ़्ते %1$s बचाइए, %3$s से %4$s तक, %2$d बार, और %5$s का पैसा जुड़ जाएगा। पैसा %6$s में जाएगा।</string>
+    <string name="explain_monthly_hi" translatable="false">हर महीने की 5 तारीख़ को %1$s बचाइए, %3$s से %4$s तक, %2$d बार, और %5$s का पैसा जुड़ जाएगा। पैसा %6$s में जाएगा।</string>
+    <string name="explain_gold_risk_hi" translatable="false">सोने का दाम ऊपर-नीचे हो सकता है, इसलिए उसकी क़ीमत बदल सकती है।</string>
+
+    <!-- Replan: %1$s missed amount; catch-up %2$s each, %3$s/%4$s dates, %5$s goal; spread %2$d debits, %3$s new amount, %4$s goal; extend %2$s new date, %3$s goal. -->
+    <string name="explain_catch_up_en" translatable="false">Your %1$s AutoPay did not go through. Two extra debits of %2$s, on %3$s and %4$s, put %5$s back on track.</string>
+    <string name="explain_spread_en" translatable="false">Your %1$s AutoPay did not go through. Raising the next %2$d debits to %3$s each makes it up by the goal date for %4$s.</string>
+    <string name="explain_extend_en" translatable="false">Your %1$s AutoPay did not go through. Moving %3$s to %2$s keeps every debit the same.</string>
+
+    <string name="explain_catch_up_hinglish" translatable="false">%1$s ki AutoPay nahi hui. Koi baat nahi: %3$s aur %4$s ko %2$s ke do extra debit se %5$s phir track par aa jayega.</string>
+    <string name="explain_spread_hinglish" translatable="false">%1$s ki AutoPay nahi hui. Agle %2$d debit %3$s ke kar dete hain, to %4$s time par poora hoga.</string>
+    <string name="explain_extend_hinglish" translatable="false">%1$s ki AutoPay nahi hui. %3$s ki date %2$s kar dete hain, har debit wahi rahega.</string>
+
+    <string name="explain_catch_up_hi" translatable="false">%1$s की AutoPay नहीं हुई। कोई बात नहीं: %3$s और %4$s को %2$s के दो अतिरिक्त डेबिट से %5$s फिर से सही रास्ते पर आ जाएगा।</string>
+    <string name="explain_spread_hi" translatable="false">%1$s की AutoPay नहीं हुई। अगले %2$d डेबिट %3$s के कर देते हैं, तो %4$s समय पर पूरा होगा।</string>
+    <string name="explain_extend_hi" translatable="false">%1$s की AutoPay नहीं हुई। %3$s की तारीख़ %2$s कर देते हैं, हर डेबिट वही रहेगा।</string>
+</resources>

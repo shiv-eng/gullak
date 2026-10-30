@@ -22,6 +22,7 @@ import com.gullak.core.model.goal.Frequency
 import com.gullak.core.model.money.Money
 import com.gullak.core.model.plan.Plan
 import com.gullak.core.model.plan.PlanOption
+import com.gullak.core.model.plan.ReplanChoice
 import com.gullak.core.model.result.AppError
 import com.gullak.core.model.result.AppResult
 import java.time.LocalDate
@@ -114,6 +115,13 @@ class FakePlanExplanationService(var reply: String = "Explanation") : PlanExplan
         goalName: String,
         plan: Plan,
         chosen: PlanOption,
+        language: GoalLanguage,
+    ): String = reply
+
+    override suspend fun explainReplan(
+        goalName: String,
+        choice: ReplanChoice,
+        missed: Money,
         language: GoalLanguage,
     ): String = reply
 }

@@ -13,6 +13,7 @@ import com.gullak.core.data.clock.SystemClock
 import com.gullak.core.data.db.DebitDao
 import com.gullak.core.data.db.GoalDao
 import com.gullak.core.data.db.GullakDatabase
+import com.gullak.core.data.demo.BundledFestivalCalendar
 import com.gullak.core.data.demo.SeedData
 import com.gullak.core.data.paytm.DemoAutoPayGateway
 import com.gullak.core.data.paytm.DemoSavingsDestinationGateway
@@ -25,6 +26,7 @@ import com.gullak.core.domain.di.IoDispatcher
 import com.gullak.core.domain.gateway.AutoPayGateway
 import com.gullak.core.domain.gateway.DemoClockController
 import com.gullak.core.domain.gateway.DemoSeedSource
+import com.gullak.core.domain.gateway.FestivalCalendar
 import com.gullak.core.domain.gateway.IdGenerator
 import com.gullak.core.domain.gateway.SavingsDestinationGateway
 import com.gullak.core.domain.repository.DebitRepository
@@ -54,13 +56,6 @@ internal abstract class DataBindingsModule {
     @Binds
     abstract fun settingsRepository(impl: DataStoreSettingsRepository): SettingsRepository
 
-    /** Swap for real Paytm Gold / Paytm Money and UPI AutoPay clients here. */
-    @Binds
-    abstract fun savingsDestinationGateway(impl: DemoSavingsDestinationGateway): SavingsDestinationGateway
-
-    @Binds
-    abstract fun autoPayGateway(impl: DemoAutoPayGateway): AutoPayGateway
-
     /** The app-wide Clock is the demo clock, so "today" can be moved for the demo. */
     @Binds
     abstract fun clock(impl: DemoClock): Clock
@@ -76,6 +71,20 @@ internal abstract class DataBindingsModule {
 
     @Binds
     abstract fun demoSeedSource(impl: SeedData): DemoSeedSource
+
+    @Binds
+    abstract fun festivalCalendar(impl: BundledFestivalCalendar): FestivalCalendar
+}
+
+/** The simulated Paytm integrations. Swap for real Paytm Gold / Paytm Money and UPI AutoPay clients here. */
+@Module
+@InstallIn(SingletonComponent::class)
+internal abstract class PaytmGatewaysModule {
+    @Binds
+    abstract fun savingsDestinationGateway(impl: DemoSavingsDestinationGateway): SavingsDestinationGateway
+
+    @Binds
+    abstract fun autoPayGateway(impl: DemoAutoPayGateway): AutoPayGateway
 }
 
 @Module
