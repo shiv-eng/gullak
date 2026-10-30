@@ -3,7 +3,7 @@ sdk.dir=/path/to/Android/Sdk
 
 # Gemini (prototype only; a shipped app would call the model through a backend).
 GEMINI_API_KEY=
-GEMINI_MODEL_ID=
+GEMINI_MODEL_ID=gemini-3.5-flash-lite
 
 # Optional release signing. Without these, the release build is signed with the debug key.
 RELEASE_STORE_FILE=
