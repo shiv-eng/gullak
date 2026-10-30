@@ -61,7 +61,7 @@
     <string name="mandate_last">Last payment</string>
     <string name="mandate_destination">Goes to</string>
     <string name="mandate_demo">Demo: no real payment</string>
-    <string name="mandate_confirm">Confirm AutoPay</string>
+    <string name="mandate_confirm">Continue</string>
 
     <string name="processing_title">Processing your request</string>
     <string name="processing_step_plan">Registering your plan</string>
@@ -72,4 +72,21 @@
     <string name="success_destination">Goes to %1$s</string>
     <string name="success_done">Done</string>
     <string name="success_view_goals">View Goal SIPs</string>
+    <string name="bank_title">Set up AutoPay</string>
+    <string name="bank_paying">You are setting up</string>
+    <string name="bank_payee">UPI AutoPay to %1$s Goal SIP</string>
+    <string name="bank_section">Pay from</string>
+    <string name="bank_demo_name">Demo Bank · Savings</string>
+    <string name="bank_demo_number">A/c ••4321</string>
+    <string name="bank_demo_upi">UPI ID: sunita@demobank</string>
+    <string name="bank_sample_name">Sample Co-op Bank · Savings</string>
+    <string name="bank_sample_number">A/c ••7788</string>
+    <string name="bank_sample_upi">UPI ID: sunita@samplebank</string>
+    <string name="bank_proceed">Proceed to approve</string>
+    <string name="approval_title">Approve AutoPay</string>
+    <string name="approval_payee">Gullak Goal SIP</string>
+    <string name="approval_details">%1$s AutoPay · %2$s %3$s</string>
+    <string name="approval_enter">Enter 4-digit demo approval code</string>
+    <string name="approval_demo_note">Demo approval: enter any 4 digits. This is not your UPI PIN, and nothing is saved or sent.</string>
+    <string name="approval_delete">Delete</string>
 </resources>

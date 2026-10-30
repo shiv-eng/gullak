@@ -152,7 +152,7 @@ internal fun GoalDetailScreen(
                     Text(
                         text = detail?.summary?.goal?.name ?: stringResource(R.string.detail_title),
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 17.sp,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                         ),
                     )
@@ -255,7 +255,7 @@ private fun SavedCard(
                 )
                 Text(
                     text = savedText,
-                    style = GullakTheme.typography.amountLarge.copy(fontSize = 34.sp),
+                    style = GullakTheme.typography.amountLarge.copy(fontSize = 26.sp),
                     color = if (goal.destination ==
                         Destination.PAYTM_GOLD
                     ) {
@@ -517,7 +517,7 @@ private fun ReplanSheet(
         ) {
             Text(
                 stringResource(R.string.replan_title, date(offer.failedDebit.date)),
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold),
                 color = GullakTheme.colors.textPrimary,
             )
             Spacer(Modifier.height(2.dp))

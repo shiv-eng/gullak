@@ -150,10 +150,16 @@ class CreateGoalViewModelTest {
         vm.onEvent(CreateGoalEvent.StartClicked)
         assertTrue(vm.uiState.value.showMandate)
         vm.onEvent(CreateGoalEvent.MandateConfirmed)
+        assertEquals(Stage.BANK, vm.uiState.value.stage)
+        vm.onEvent(CreateGoalEvent.BankSelected(DemoBankAccount.SAMPLE_BANK_SAVINGS))
+        vm.onEvent(CreateGoalEvent.BankProceed)
+        assertEquals(Stage.APPROVAL, vm.uiState.value.stage)
+        repeat(CreateGoalUiState.APPROVAL_LENGTH) { vm.onEvent(CreateGoalEvent.ApprovalDigit) }
         advanceUntilIdle()
 
         val state = vm.uiState.value
         assertEquals(Stage.DONE, state.stage)
+        assertEquals(0, state.approvalDigits)
         val goal = env.goals.goals.single()
         assertEquals(goal, state.createdGoal)
         assertEquals(rupees(4_500), goal.schedule?.amountPerDebit)
@@ -170,6 +176,8 @@ class CreateGoalViewModelTest {
 
         vm.onEvent(CreateGoalEvent.StartClicked)
         vm.onEvent(CreateGoalEvent.MandateConfirmed)
+        vm.onEvent(CreateGoalEvent.BankProceed)
+        repeat(CreateGoalUiState.APPROVAL_LENGTH) { vm.onEvent(CreateGoalEvent.ApprovalDigit) }
         advanceUntilIdle()
 
         assertEquals(Stage.EDITING, vm.uiState.value.stage)
@@ -186,5 +194,27 @@ class CreateGoalViewModelTest {
 
         assertEquals(InputProblem.TOO_CLOSE_FOR_SIP, vm.uiState.value.problem)
         assertFalse(vm.uiState.value.canStart)
+    }
+
+    @Test
+    fun approvalStepCountsDigitsAndCanGoBack() = runTest {
+        val vm = viewModel()
+        vm.typeLaptop()
+        advanceUntilIdle()
+        vm.onEvent(CreateGoalEvent.StartClicked)
+        vm.onEvent(CreateGoalEvent.MandateConfirmed)
+        vm.onEvent(CreateGoalEvent.BankProceed)
+
+        vm.onEvent(CreateGoalEvent.ApprovalDigit)
+        vm.onEvent(CreateGoalEvent.ApprovalDigit)
+        vm.onEvent(CreateGoalEvent.ApprovalDelete)
+        assertEquals(1, vm.uiState.value.approvalDigits)
+
+        vm.onEvent(CreateGoalEvent.StepBack)
+        assertEquals(Stage.BANK, vm.uiState.value.stage)
+        assertEquals(0, vm.uiState.value.approvalDigits)
+        vm.onEvent(CreateGoalEvent.StepBack)
+        assertEquals(Stage.EDITING, vm.uiState.value.stage)
+        assertTrue(env.goals.goals.isEmpty())
     }
 }

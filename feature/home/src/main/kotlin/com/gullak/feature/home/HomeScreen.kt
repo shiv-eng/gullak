@@ -81,7 +81,7 @@ internal fun HomeScreen(
                     Text(
                         text = stringResource(R.string.home_title),
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 17.sp,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                         ),
                     )
@@ -134,7 +134,7 @@ private fun SummaryCard(
                     Text(
                         stringResource(R.string.home_empty_prompt),
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 17.sp,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                         ),
                         color = GullakTheme.colors.textPrimary,
@@ -153,7 +153,7 @@ private fun SummaryCard(
                     )
                     Text(
                         IndianMoneyFormat.format(overview.totalSaved),
-                        style = GullakTheme.typography.amountLarge.copy(fontSize = 28.sp),
+                        style = GullakTheme.typography.amountLarge.copy(fontSize = 22.sp),
                         color = GullakTheme.colors.textPrimary,
                     )
                     Spacer(Modifier.height(4.dp))
@@ -204,7 +204,7 @@ private fun GoalsCard(
     PaytmCard(modifier = modifier) {
         Text(
             stringResource(R.string.home_goals_title),
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold),
             color = GullakTheme.colors.textPrimary,
         )
         goals.forEachIndexed { index, summary ->

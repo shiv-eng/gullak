@@ -274,7 +274,7 @@ private fun GoalSipBanner(
                 Spacer(Modifier.height(6.dp))
                 Text(
                     text = stringResource(R.string.gullak_banner_title),
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
                     color = GullakTheme.colors.textPrimary,
                 )
                 Spacer(Modifier.height(4.dp))

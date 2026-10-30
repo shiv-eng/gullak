@@ -44,7 +44,7 @@ fun GoalSummaryRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = name,
-                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp),
+                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp),
                     color = GullakTheme.colors.textPrimary,
                     modifier = Modifier.weight(1f),
                 )

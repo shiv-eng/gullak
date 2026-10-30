@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.speech.RecognizerIntent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -169,7 +171,14 @@ internal fun CreateGoalScreen(
     onSpeak: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    BackHandler(enabled = state.stage == Stage.BANK || state.stage == Stage.APPROVAL) {
+        onEvent(CreateGoalEvent.StepBack)
+    }
     when (state.stage) {
+        Stage.BANK -> BankScreen(state = state, onEvent = onEvent, modifier = modifier)
+
+        Stage.APPROVAL -> ApprovalScreen(state = state, onEvent = onEvent, modifier = modifier)
+
         Stage.PROCESSING -> ProcessingScreen(modifier)
 
         Stage.DONE -> SuccessScreen(state = state, onEvent = onEvent, modifier = modifier)
@@ -183,7 +192,7 @@ internal fun CreateGoalScreen(
                         Text(
                             stringResource(R.string.create_title),
                             style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 17.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
                         )
@@ -246,7 +255,7 @@ private fun VoiceCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     stringResource(R.string.create_voice_title),
-                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold),
                     color = GullakTheme.colors.textPrimary,
                 )
                 Text(
@@ -369,7 +378,7 @@ private fun GoalDetailsCard(
             singleLine = true,
             shape = MaterialTheme.shapes.small,
             colors = fieldColors(),
-            textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp),
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(14.dp))
@@ -416,7 +425,7 @@ private fun GoalDetailsCard(
         ) {
             Text(
                 text = state.targetDate?.let(DATE::format) ?: stringResource(R.string.create_date_hint),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp),
                 color = if (state.targetDate == null) GullakTheme.colors.textMuted else GullakTheme.colors.textPrimary,
                 modifier = Modifier.weight(1f),
             )
@@ -546,7 +555,7 @@ private fun PlanCard(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         stringResource(frequencyLabel(option.frequency)),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                         color = if (option.frequency ==
                             state.frequency
                         ) {
@@ -569,7 +578,7 @@ private fun PlanCard(
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = IndianMoneyFormat.format(chosen.amountPerDebit),
-                        style = GullakTheme.typography.amountLarge.copy(fontSize = 28.sp),
+                        style = GullakTheme.typography.amountLarge.copy(fontSize = 22.sp),
                         color = GullakTheme.colors.textPrimary,
                     )
                     Spacer(Modifier.width(6.dp))
@@ -692,7 +701,7 @@ private fun MandateSheet(
         Column(modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
             Text(
                 stringResource(R.string.mandate_title),
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold),
                 color = GullakTheme.colors.textPrimary,
             )
             Spacer(Modifier.height(4.dp))
@@ -759,7 +768,7 @@ private fun ProcessingScreen(modifier: Modifier = Modifier) {
     ) {
         Text(
             stringResource(R.string.processing_title),
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold),
             color = GullakTheme.colors.textPrimary,
         )
         Spacer(Modifier.height(28.dp))
@@ -821,7 +830,7 @@ private fun SuccessScreen(
         Spacer(Modifier.height(20.dp))
         Text(
             stringResource(R.string.success_title),
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp, fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
             color = GullakTheme.colors.textPrimary,
         )
         if (goal != null && schedule != null) {
@@ -887,3 +896,317 @@ private val DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", 
 /** English (India) writes Hinglish in Latin script ("bhai ki shaadi"), which the goal reader handles best. */
 private const val SPEECH_LANGUAGE = "en-IN"
 private const val MAX_YEARS = 10
+
+/** The AutoPay bank step: made-up demo accounts only, in the style of Paytm's account picker. */
+@Composable
+private fun BankScreen(
+    state: CreateGoalUiState,
+    onEvent: (CreateGoalEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val chosen = state.chosen ?: return
+    Scaffold(
+        modifier = modifier,
+        containerColor = GullakTheme.colors.page,
+        topBar = { StepTopBar(stringResource(R.string.bank_title), onBack = { onEvent(CreateGoalEvent.StepBack) }) },
+        bottomBar = {
+            Surface(color = GullakTheme.colors.card, shadowElevation = 8.dp) {
+                Column(Modifier.navigationBarsPadding().padding(16.dp)) {
+                    PillButton(
+                        text = stringResource(R.string.bank_proceed),
+                        onClick = { onEvent(CreateGoalEvent.BankProceed) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        },
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PaytmCard {
+                Text(
+                    stringResource(R.string.bank_paying),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = GullakTheme.colors.textMuted,
+                )
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        IndianMoneyFormat.format(chosen.amountPerDebit),
+                        style = GullakTheme.typography.amountLarge,
+                        color = GullakTheme.colors.textPrimary,
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        stringResource(perLabel(chosen.frequency)),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = GullakTheme.colors.textMuted,
+                        modifier = Modifier.padding(bottom = 4.dp),
+                    )
+                }
+                Text(
+                    stringResource(R.string.bank_payee, state.name.trim()),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = GullakTheme.colors.textBody,
+                )
+            }
+            PaytmCard {
+                SectionHeader(title = stringResource(R.string.bank_section))
+                Spacer(Modifier.height(8.dp))
+                DemoBankAccount.entries.forEachIndexed { index, account ->
+                    if (index > 0) CardDivider()
+                    BankRow(
+                        account = account,
+                        selected = account == state.bankAccount,
+                        onSelect = { onEvent(CreateGoalEvent.BankSelected(account)) },
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.mandate_demo),
+                style = MaterialTheme.typography.labelMedium,
+                color = GullakTheme.colors.warningText,
+                modifier = Modifier
+                    .background(GullakTheme.colors.warningContainer, CircleShape)
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun BankRow(
+    account: DemoBankAccount,
+    selected: Boolean,
+    onSelect: () -> Unit,
+) {
+    val labels = bankLabels(account)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
+            .heightIn(min = 56.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(GullakTheme.colors.chipSelected, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Outlined.AccountBalance,
+                null,
+                tint = GullakTheme.colors.iconNavy,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(labels.name, style = MaterialTheme.typography.titleSmall, color = GullakTheme.colors.textPrimary)
+            Text(labels.number, style = MaterialTheme.typography.bodySmall, color = GullakTheme.colors.textMuted)
+            Text(labels.upi, style = MaterialTheme.typography.bodySmall, color = GullakTheme.colors.textMuted)
+        }
+        RadioButton(
+            selected = selected,
+            onClick = null,
+            colors = RadioButtonDefaults.colors(selectedColor = GullakTheme.colors.action),
+        )
+    }
+}
+
+private class BankLabels(
+    val name: String,
+    val number: String,
+    val upi: String,
+)
+
+@Composable
+private fun bankLabels(account: DemoBankAccount): BankLabels = when (account) {
+    DemoBankAccount.DEMO_BANK_SAVINGS -> BankLabels(
+        stringResource(R.string.bank_demo_name),
+        stringResource(R.string.bank_demo_number),
+        stringResource(R.string.bank_demo_upi),
+    )
+
+    DemoBankAccount.SAMPLE_BANK_SAVINGS -> BankLabels(
+        stringResource(R.string.bank_sample_name),
+        stringResource(R.string.bank_sample_number),
+        stringResource(R.string.bank_sample_upi),
+    )
+}
+
+/**
+ * The approval step. Deliberately not a copy of the UPI PIN screen: it says it is a demo, takes any digits,
+ * and only counts them; nothing is stored or sent.
+ */
+@Composable
+private fun ApprovalScreen(
+    state: CreateGoalUiState,
+    onEvent: (CreateGoalEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val chosen = state.chosen ?: return
+    val bank = bankLabels(state.bankAccount)
+    Scaffold(
+        modifier = modifier,
+        containerColor = GullakTheme.colors.card,
+        topBar = {
+            StepTopBar(stringResource(R.string.approval_title), onBack = { onEvent(CreateGoalEvent.StepBack) })
+        },
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.approval_payee),
+                style = MaterialTheme.typography.bodyMedium,
+                color = GullakTheme.colors.textMuted,
+            )
+            Text(
+                IndianMoneyFormat.format(chosen.amountPerDebit),
+                style = GullakTheme.typography.amountLarge,
+                color = GullakTheme.colors.textPrimary,
+            )
+            Text(
+                stringResource(
+                    R.string.approval_details,
+                    stringResource(frequencyLabel(chosen.frequency)),
+                    bank.name,
+                    bank.number,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = GullakTheme.colors.textBody,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+            Spacer(Modifier.height(24.dp))
+            Text(
+                stringResource(R.string.approval_enter),
+                style = MaterialTheme.typography.titleSmall,
+                color = GullakTheme.colors.textPrimary,
+            )
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                repeat(CreateGoalUiState.APPROVAL_LENGTH) { index ->
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(
+                                if (index <
+                                    state.approvalDigits
+                                ) {
+                                    GullakTheme.colors.iconNavy
+                                } else {
+                                    GullakTheme.colors.field
+                                },
+                                CircleShape,
+                            ),
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.approval_demo_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = GullakTheme.colors.warningText,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .background(GullakTheme.colors.warningContainer, MaterialTheme.shapes.small)
+                    .padding(10.dp),
+            )
+            Spacer(Modifier.weight(1f))
+            ApprovalKeypad(
+                onDigit = { onEvent(CreateGoalEvent.ApprovalDigit) },
+                onDelete = { onEvent(CreateGoalEvent.ApprovalDelete) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ApprovalKeypad(
+    onDigit: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val deleteLabel = stringResource(R.string.approval_delete)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(GullakTheme.colors.page)
+            .navigationBarsPadding()
+            .padding(8.dp),
+    ) {
+        KEYPAD_ROWS.forEach { row ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                row.forEach { key ->
+                    val keyModifier = when (key) {
+                        BLANK_KEY -> Modifier
+
+                        else ->
+                            Modifier
+                                .background(GullakTheme.colors.card, MaterialTheme.shapes.small)
+                                .clickable(role = Role.Button) { if (key == DELETE_KEY) onDelete() else onDigit() }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 56.dp)
+                            .padding(4.dp)
+                            .then(keyModifier),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = if (key == DELETE_KEY) deleteLabel else key,
+                            style = if (key == DELETE_KEY) {
+                                MaterialTheme.typography.labelLarge
+                            } else {
+                                GullakTheme.typography.amountMedium
+                            },
+                            color = GullakTheme.colors.textPrimary,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StepTopBar(
+    title: String,
+    onBack: () -> Unit,
+) {
+    CenterAlignedTopAppBar(
+        title = { Text(title, style = MaterialTheme.typography.titleMedium) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.create_back))
+            }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = GullakTheme.colors.page,
+            titleContentColor = GullakTheme.colors.textPrimary,
+            navigationIconContentColor = GullakTheme.colors.textPrimary,
+        ),
+    )
+}
+
+private const val DELETE_KEY = "delete"
+private const val BLANK_KEY = ""
+private val KEYPAD_ROWS = listOf(
+    listOf("1", "2", "3"),
+    listOf("4", "5", "6"),
+    listOf("7", "8", "9"),
+    listOf(BLANK_KEY, "0", DELETE_KEY),
+)

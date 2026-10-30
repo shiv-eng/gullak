@@ -39,7 +39,11 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class Stage { EDITING, PROCESSING, DONE }
+/** EDITING → (AutoPay sheet) → BANK → APPROVAL → PROCESSING → DONE. */
+enum class Stage { EDITING, BANK, APPROVAL, PROCESSING, DONE }
+
+/** Made-up accounts for the mock UPI AutoPay step. No real bank, account or UPI ID. */
+enum class DemoBankAccount { DEMO_BANK_SAVINGS, SAMPLE_BANK_SAVINGS }
 
 /** Why the form cannot make a plan yet. Shown from string resources. */
 enum class InputProblem { AMOUNT_TOO_LOW, AMOUNT_TOO_HIGH, DATE_NOT_IN_FUTURE, TOO_CLOSE_FOR_SIP }
@@ -64,6 +68,9 @@ data class CreateGoalUiState(
     val isExplaining: Boolean = false,
     val showMandate: Boolean = false,
     val stage: Stage = Stage.EDITING,
+    val bankAccount: DemoBankAccount = DemoBankAccount.DEMO_BANK_SAVINGS,
+    /** How many demo approval digits are entered. The digits themselves are never kept. */
+    val approvalDigits: Int = 0,
     val createFailed: Boolean = false,
     val createdGoal: Goal? = null,
 ) {
@@ -72,7 +79,15 @@ data class CreateGoalUiState(
     /** The option the user picked; null until the form makes a recurring plan. */
     val chosen: PlanOption? get() = plan?.option(frequency)
 
-    val canStart: Boolean get() = chosen != null && problem == null && stage == Stage.EDITING
+    private val planReady: Boolean get() = chosen != null && problem == null
+
+    val canStart: Boolean get() = planReady && stage == Stage.EDITING
+
+    val canConfirm: Boolean get() = planReady && stage == Stage.APPROVAL && approvalDigits == APPROVAL_LENGTH
+
+    companion object {
+        const val APPROVAL_LENGTH = 4
+    }
 }
 
 private fun deviceLanguage(): GoalLanguage =
@@ -101,6 +116,18 @@ sealed interface CreateGoalEvent {
     data object MandateDismissed : CreateGoalEvent
 
     data object MandateConfirmed : CreateGoalEvent
+
+    data class BankSelected(val account: DemoBankAccount) : CreateGoalEvent
+
+    data object BankProceed : CreateGoalEvent
+
+    /** A key on the demo approval keypad; the value is not used or stored. */
+    data object ApprovalDigit : CreateGoalEvent
+
+    data object ApprovalDelete : CreateGoalEvent
+
+    /** Back from the bank or approval step. */
+    data object StepBack : CreateGoalEvent
 
     data object DoneClicked : CreateGoalEvent
 
@@ -158,15 +185,38 @@ class CreateGoalViewModel @Inject constructor(
 
             CreateGoalEvent.VoiceUnavailable -> state.update { it.copy(voiceFailed = true) }
 
+            CreateGoalEvent.DoneClicked -> send(CreateGoalEffect.Finish)
+
+            CreateGoalEvent.ViewGoalsClicked -> send(CreateGoalEffect.OpenGoals)
+
+            else -> onPaymentEvent(event)
+        }
+    }
+
+    /** The AutoPay steps: sheet, bank account, demo approval. */
+    private fun onPaymentEvent(event: CreateGoalEvent) {
+        when (event) {
             CreateGoalEvent.StartClicked -> if (state.value.canStart) state.update { it.copy(showMandate = true) }
 
             CreateGoalEvent.MandateDismissed -> state.update { it.copy(showMandate = false) }
 
-            CreateGoalEvent.MandateConfirmed -> confirm()
+            CreateGoalEvent.MandateConfirmed -> if (state.value.canStart) {
+                state.update { it.copy(showMandate = false, stage = Stage.BANK) }
+            }
 
-            CreateGoalEvent.DoneClicked -> send(CreateGoalEffect.Finish)
+            is CreateGoalEvent.BankSelected -> state.update { it.copy(bankAccount = event.account) }
 
-            CreateGoalEvent.ViewGoalsClicked -> send(CreateGoalEffect.OpenGoals)
+            CreateGoalEvent.BankProceed -> state.update { it.copy(stage = Stage.APPROVAL, approvalDigits = 0) }
+
+            CreateGoalEvent.ApprovalDigit -> enterDigit()
+
+            CreateGoalEvent.ApprovalDelete -> state.update {
+                it.copy(approvalDigits = (it.approvalDigits - 1).coerceAtLeast(0))
+            }
+
+            CreateGoalEvent.StepBack -> stepBack()
+
+            else -> Unit
         }
     }
 
@@ -293,12 +343,30 @@ class CreateGoalViewModel @Inject constructor(
         }
     }
 
+    /** Back from approval goes to the bank step; back from the bank step returns to the form. */
+    private fun stepBack() {
+        state.update {
+            when (it.stage) {
+                Stage.APPROVAL -> it.copy(stage = Stage.BANK, approvalDigits = 0)
+                Stage.BANK -> it.copy(stage = Stage.EDITING)
+                else -> it
+            }
+        }
+    }
+
+    private fun enterDigit() {
+        val current = state.value
+        if (current.stage != Stage.APPROVAL || current.approvalDigits >= CreateGoalUiState.APPROVAL_LENGTH) return
+        state.update { it.copy(approvalDigits = it.approvalDigits + 1) }
+        if (state.value.canConfirm) confirm()
+    }
+
     private fun confirm() {
         val current = state.value
         val amount = current.amount ?: return
         val date = current.targetDate ?: return
-        if (!current.canStart) return
-        state.update { it.copy(showMandate = false, stage = Stage.PROCESSING) }
+        if (!current.canConfirm) return
+        state.update { it.copy(stage = Stage.PROCESSING, approvalDigits = 0) }
         viewModelScope.launch {
             val request = NewGoalRequest(
                 name = current.name.trim(),
