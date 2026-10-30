@@ -56,7 +56,10 @@
     <string name="gullak_banner_eyebrow">GOAL SIP</string>
     <string name="gullak_strip_title">Goal SIP by Gullak</string>
     <string name="gullak_strip_body">Set an amount and a date. We plan the SIP and AutoPay.</string>
-    <string name="gullak_strip_summary">%1$d active goals · %2$s saved</string>
     <string name="gullak_strip_action">Start Goal SIP</string>
     <string name="gullak_next_sip">Next SIP: %1$s on %2$s</string>
+    <plurals name="gullak_strip_summary">
+        <item quantity="one">%1$d active goal · %2$s saved</item>
+        <item quantity="other">%1$d active goals · %2$s saved</item>
+    </plurals>
 </resources>

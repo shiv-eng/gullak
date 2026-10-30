@@ -26,6 +26,7 @@ import com.gullak.core.model.result.AppResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.LocalDate
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -49,7 +50,8 @@ data class CreateGoalUiState(
     val amountText: String = "",
     val targetDate: LocalDate? = null,
     val dateIsFixed: Boolean = false,
-    val language: GoalLanguage = GoalLanguage.HINGLISH,
+    /** Typed goals follow the phone's language; speech sets the language the user spoke. */
+    val language: GoalLanguage = deviceLanguage(),
     val isUnderstanding: Boolean = false,
     val transcript: String? = null,
     val followUp: FollowUpQuestion? = null,
@@ -72,6 +74,11 @@ data class CreateGoalUiState(
 
     val canStart: Boolean get() = chosen != null && problem == null && stage == Stage.EDITING
 }
+
+private fun deviceLanguage(): GoalLanguage =
+    if (Locale.getDefault().language == HINDI_TAG) GoalLanguage.HINDI else GoalLanguage.ENGLISH
+
+private const val HINDI_TAG = "hi"
 
 sealed interface CreateGoalEvent {
     data class NameChanged(val name: String) : CreateGoalEvent

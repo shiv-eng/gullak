@@ -62,6 +62,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -449,8 +450,9 @@ private fun GullakStrip(
                 text = if (state.goals.isEmpty()) {
                     stringResource(R.string.gullak_strip_body)
                 } else {
-                    stringResource(
-                        R.string.gullak_strip_summary,
+                    pluralStringResource(
+                        R.plurals.gullak_strip_summary,
+                        state.goals.size,
                         state.goals.size,
                         IndianMoneyFormat.format(state.totalSaved),
                     )

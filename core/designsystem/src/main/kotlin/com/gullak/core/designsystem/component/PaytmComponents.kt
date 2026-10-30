@@ -164,7 +164,9 @@ fun PaytmBadge(
         modifier = modifier
             .background(GullakTheme.colors.badge, MaterialTheme.shapes.small)
             .padding(horizontal = 8.dp, vertical = 2.dp),
-        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold, fontSize = 10.sp),
+        maxLines = 1,
+        softWrap = false,
         color = GullakTheme.colors.onBadge,
     )
 }
