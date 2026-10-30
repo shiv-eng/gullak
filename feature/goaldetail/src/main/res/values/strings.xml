@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="detail_title">Goal SIP</string>
+    <string name="detail_back">Back</string>
+
+    <string name="detail_saved_label">Saved so far</string>
+    <string name="detail_of_target">of %1$s · by %2$s</string>
+    <string name="detail_jar_description">%1$s of %2$s saved</string>
+    <string name="detail_progress">%1$d%% of goal</string>
+    <string name="detail_goes_to">Goes to</string>
+    <string name="detail_destination_gold">Paytm Gold</string>
+    <string name="detail_destination_fund">Paytm Money · low-risk fund</string>
+    <string name="detail_autopay">UPI AutoPay</string>
+    <string name="detail_autopay_value">%1$s %2$s</string>
+    <string name="detail_daily">daily</string>
+    <string name="detail_weekly">weekly</string>
+    <string name="detail_monthly">monthly</string>
+    <string name="detail_next_sip">Your Next SIP Payment: %1$s on %2$s</string>
+    <string name="detail_status_on_track">On track</string>
+    <string name="detail_status_behind">Behind by %1$s</string>
+    <string name="detail_status_reached">Goal reached</string>
+
+    <string name="detail_failed_banner">AutoPay failed on %1$s</string>
+    <string name="detail_fix_plan">Fix plan</string>
+
+    <string name="detail_demo_title">Demo controls</string>
+    <string name="detail_demo_body">Run the next AutoPay now. Demo: no real payment.</string>
+    <string name="detail_simulate_next">Simulate next SIP</string>
+    <string name="detail_simulate_failed">Simulate failed AutoPay</string>
+
+    <string name="detail_history_title">Payment History</string>
+    <string name="detail_history_empty">No payments yet. Your first SIP is on the date above.</string>
+    <string name="detail_kind_sip">SIP payment</string>
+    <string name="detail_kind_catch_up">Catch-up payment</string>
+    <string name="detail_kind_lump_sum">One-time payment</string>
+    <string name="detail_success">Success</string>
+    <string name="detail_failed">Failed</string>
+
+    <string name="detail_debit_success">%1$s saved on %2$s</string>
+    <string name="detail_debit_failed">AutoPay failed on %1$s</string>
+    <string name="detail_nothing_due">No SIP payments left on this goal</string>
+    <string name="detail_plan_updated">Plan updated</string>
+    <string name="detail_action_failed">Something went wrong. Please try again.</string>
+
+    <string name="replan_title">AutoPay failed on %1$s</string>
+    <string name="replan_behind">Behind by %1$s</string>
+    <string name="replan_body">Choose how to get back on track. Only future payments change.</string>
+    <string name="replan_catch_up_title">Catch up this month</string>
+    <string name="replan_catch_up_body">Two extra payments of %1$s on %2$s and %3$s</string>
+    <string name="replan_spread_title">Spread it out</string>
+    <string name="replan_spread_body">%1$s for each of the next %2$d payments</string>
+    <string name="replan_extend_title">Move the goal date</string>
+    <string name="replan_extend_body">New date %1$s. Payments stay the same.</string>
+    <string name="replan_why">Why this works</string>
+    <string name="replan_apply">Apply</string>
+</resources>

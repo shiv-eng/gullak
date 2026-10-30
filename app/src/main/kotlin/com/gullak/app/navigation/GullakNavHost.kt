@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.gullak.feature.creategoal.CreateGoalRoute
 import com.gullak.feature.creategoal.createGoalScreen
+import com.gullak.feature.goaldetail.GoalDetailRoute
+import com.gullak.feature.goaldetail.goalDetailScreen
 import com.gullak.feature.home.HomeRoute
 import com.gullak.feature.home.homeScreen
 import com.gullak.feature.paytmhome.PaytmHomeRoute
@@ -29,14 +31,14 @@ fun GullakNavHost(
         paytmHomeScreen(
             onOpenGullak = { navController.navigate(HomeRoute) },
             onNewGoal = { navController.navigate(CreateGoalRoute()) },
-            // Goal detail arrives with the replan flow; until then a goal opens Gullak's page.
-            onOpenGoal = { navController.navigate(HomeRoute) },
+            onOpenGoal = { goalId -> navController.navigate(GoalDetailRoute(goalId)) },
         )
         homeScreen(
             onBack = { navController.popBackStack() },
             onNewGoal = { withVoice -> navController.navigate(CreateGoalRoute(startWithVoice = withVoice)) },
-            onOpenGoal = { },
+            onOpenGoal = { goalId -> navController.navigate(GoalDetailRoute(goalId)) },
         )
+        goalDetailScreen(onBack = { navController.popBackStack() })
         createGoalScreen(
             onBack = { navController.popBackStack() },
             onFinish = { navController.popBackStack(PaytmHomeRoute, inclusive = false) },
