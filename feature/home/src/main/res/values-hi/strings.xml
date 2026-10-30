@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_title">गुल्लक भरो</string>
+    <string name="home_title">गुल्लक</string>
     <string name="home_new_goal">गुल्लक शुरू करें</string>
     <string name="home_empty_prompt">अभी कोई गुल्लक नहीं</string>
     <string name="home_empty_hint">लक्ष्य, रक़म और तारीख़ चुनें। गुल्लक रोज़, हफ़्ते या महीने की SIP बनाकर AutoPay सेट करता है।</string>

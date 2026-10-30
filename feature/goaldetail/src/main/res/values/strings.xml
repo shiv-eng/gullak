@@ -54,4 +54,5 @@
     <string name="replan_why">Why this works</string>
     <string name="replan_apply">Apply</string>
     <string name="replan_listen">Listen</string>
+    <string name="detail_talk">Hear how this goal is doing</string>
 </resources>

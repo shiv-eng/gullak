@@ -5,6 +5,7 @@ import com.gullak.core.domain.ai.SpeechEvent
 import com.gullak.core.domain.ai.SpeechInput
 import com.gullak.core.domain.ai.VoiceOutput
 import com.gullak.core.model.ai.GoalLanguage
+import com.gullak.core.speech.gemini.GeminiVoiceOutput
 import com.gullak.core.speech.sarvam.SarvamConfig
 import com.gullak.core.speech.sarvam.SarvamSpeechInput
 import com.gullak.core.speech.sarvam.SarvamVoiceOutput
@@ -43,10 +44,11 @@ internal fun speakable(
 
 private val RUPEES = Regex("""₹\s*([\d,]+(?:\.\d+)?)""")
 
-/** Sarvam first; with no key, or when it cannot be reached, the phone's own text-to-speech. */
+/** Sarvam first, then Gemini's voice, then the phone's own text-to-speech: whichever can speak right now. */
 internal class FallbackVoiceOutput @Inject constructor(
     private val config: SarvamConfig,
     private val sarvam: SarvamVoiceOutput,
+    private val gemini: GeminiVoiceOutput,
     private val phone: TextToSpeechVoiceOutput,
 ) : VoiceOutput {
     override suspend fun speak(
@@ -55,6 +57,7 @@ internal class FallbackVoiceOutput @Inject constructor(
     ) {
         val spoken = speakable(text, language)
         if (config.isConfigured && sarvam.speak(spoken, language)) return
+        if (gemini.speak(spoken, language)) return
         phone.speak(spoken, language)
     }
 

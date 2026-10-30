@@ -78,7 +78,7 @@
     <string name="bank_section">Pay from</string>
     <string name="bank_proceed">Proceed to approve</string>
     <string name="approval_title">Approve AutoPay</string>
-    <string name="approval_payee">Gullak Bharo</string>
+    <string name="approval_payee">Gullak</string>
     <string name="approval_details">%1$s AutoPay · %2$s %3$s</string>
     <string name="approval_enter">Enter 4-digit demo approval code</string>
     <string name="approval_demo_note">Demo approval: enter any 4 digits. This is not your UPI PIN, and nothing is saved or sent.</string>

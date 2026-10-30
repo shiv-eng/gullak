@@ -49,8 +49,8 @@
     <string name="gullak_status_behind">%1$s पीछे</string>
     <string name="gullak_status_reached">लक्ष्य पूरा</string>
     <string name="paytm_header_promo">अपनी गुल्लक भरना शुरू करें</string>
-    <string name="gullak_banner_eyebrow">गुल्लक भरो</string>
-    <string name="gullak_strip_title">गुल्लक भरो</string>
+    <string name="gullak_banner_eyebrow">गुल्लक</string>
+    <string name="gullak_strip_title">गुल्लक</string>
     <string name="gullak_strip_body">रक़म और तारीख़ चुनें। SIP और AutoPay हम तय करेंगे।</string>
     <string name="gullak_strip_action">गुल्लक शुरू करें</string>
     <string name="gullak_next_sip">अगली SIP: %2$s को %1$s</string>

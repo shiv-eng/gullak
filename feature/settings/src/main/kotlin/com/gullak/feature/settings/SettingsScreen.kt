@@ -431,5 +431,7 @@ private fun InfoRow(
 
 private const val ENGLISH = "en"
 private const val HINDI = "hi"
-private val DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
-private val MONTH: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH)
+private val DATE: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
+private val MONTH: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault())

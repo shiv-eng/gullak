@@ -570,7 +570,8 @@ private fun ScanQrButton(
 }
 
 private const val TILES_PER_ROW = 4
-private val NEXT_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+private val NEXT_DATE: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
 
 @Preview(showBackground = true, heightDp = 1600)
 @Composable

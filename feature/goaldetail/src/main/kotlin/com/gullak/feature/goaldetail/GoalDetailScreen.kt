@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -157,6 +158,15 @@ internal fun GoalDetailScreen(
                             fontWeight = FontWeight.Bold,
                         ),
                     )
+                },
+                actions = {
+                    IconButton(onClick = { onEvent(GoalDetailEvent.TalkClicked) }) {
+                        Icon(
+                            Icons.Filled.Mic,
+                            contentDescription = stringResource(R.string.detail_talk),
+                            tint = GullakTheme.colors.iconNavy,
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -665,7 +675,8 @@ private fun money(amount: Money): String = IndianMoneyFormat.format(amount)
 
 private fun date(value: LocalDate): String = DATE.format(value)
 
-private val DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+private val DATE: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
 private const val PERCENT = 100
 private const val COIN_DROP_MS = 700
 private const val COIN_TRAVEL_DP = 40f

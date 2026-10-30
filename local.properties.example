@@ -5,6 +5,7 @@ sdk.dir=/path/to/Android/Sdk
 GEMINI_API_KEY=
 GEMINI_MODEL_ID=gemini-3.5-flash-lite
 # Optional: GEMINI_TALK_MODEL_ID (default gemini-3.5-flash), for the spoken conversation
+# Optional: GEMINI_TTS_MODEL (default gemini-3.8-flash-lite-tts), GEMINI_TTS_VOICE (default Sulafat), the voice when Sarvam is not set
 
 # Sarvam voice (speech to text and text to speech). Without a key, the phone's own speech and voice are used.
 SARVAM_API_KEY=

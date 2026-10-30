@@ -38,6 +38,7 @@ internal object ConversationPrompt {
           NO: they disagree, with no new details
           CHOOSE_PLAN: they picked daily, weekly or monthly
           QUESTION: they asked you something
+          CHECK_SAVINGS: they asked how much they have saved so far (the app says the amounts)
           ANOTHER_GOAL: they want to start another savings goal
           FINISHED: they are done talking, or want to stop
           UNCLEAR: you cannot tell
@@ -62,6 +63,7 @@ internal object ConversationPrompt {
         follow_up: if the goal is still missing a name, amount or date, ONE short friendly question for the first thing
           missing, with no numbers in it; otherwise null
         frequency: DAILY, WEEKLY or MONTHLY if they picked one, else null
+        one_time_amount: whole rupees if they want to pay a one-time amount now towards the goal, else null
 
         Language of say and follow_up: if the user spoke Hindi or Hinglish, write in simple, everyday spoken Hindi in
         Devanagari script, with correct spelling, even if they mixed in English words. Only if they spoke entirely in
@@ -77,6 +79,7 @@ internal object ConversationPrompt {
         "NO",
         "CHOOSE_PLAN",
         "QUESTION",
+        "CHECK_SAVINGS",
         "ANOTHER_GOAL",
         "FINISHED",
         "UNCLEAR",
@@ -93,6 +96,7 @@ internal object ConversationPrompt {
         "language",
         "follow_up",
         "frequency",
+        "one_time_amount",
     )
 
     val responseSchema: JsonObject = buildJsonObject {
@@ -110,6 +114,10 @@ internal object ConversationPrompt {
             choice("language", LANGUAGES, nullable = false)
             nullableString("follow_up")
             choice("frequency", FREQUENCIES, nullable = true)
+            putJsonObject("one_time_amount") {
+                put("type", "INTEGER")
+                put("nullable", true)
+            }
         }
         putJsonArray("required") { FIELDS.forEach { add(it) } }
         putJsonArray("propertyOrdering") { FIELDS.forEach { add(it) } }

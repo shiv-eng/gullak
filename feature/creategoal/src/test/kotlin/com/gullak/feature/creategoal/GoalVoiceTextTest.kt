@@ -1,5 +1,7 @@
 package com.gullak.feature.creategoal
 
+import com.gullak.core.domain.ai.ReadbackReply
+import com.gullak.core.domain.ai.readbackReply
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

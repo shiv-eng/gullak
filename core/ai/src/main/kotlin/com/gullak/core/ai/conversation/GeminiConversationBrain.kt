@@ -73,6 +73,7 @@ internal data class BrainJson(
     val language: String,
     @SerialName("follow_up") val followUp: String? = null,
     val frequency: String? = null,
+    @SerialName("one_time_amount") val oneTimeAmount: Long? = null,
 )
 
 /** Anything the model says with a number in it is dropped: numbers are for the plan engine alone. */
@@ -111,6 +112,7 @@ internal fun parseBrainAnswer(
                 followUp = reply.followUp.withoutNumbers().inLanguageOf(language),
             ),
             frequency = Frequency.entries.firstOrNull { it.name == reply.frequency },
+            oneTime = reply.oneTimeAmount?.takeIf { it > 0 }?.let(Money::fromRupees),
         ),
     )
 }

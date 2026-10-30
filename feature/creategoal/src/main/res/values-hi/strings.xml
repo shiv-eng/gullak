@@ -78,7 +78,7 @@
     <string name="bank_section">इस खाते से भुगतान</string>
     <string name="bank_proceed">मंज़ूरी के लिए आगे बढ़ें</string>
     <string name="approval_title">AutoPay को मंज़ूरी दें</string>
-    <string name="approval_payee">गुल्लक भरो</string>
+    <string name="approval_payee">गुल्लक</string>
     <string name="approval_details">%1$s AutoPay · %2$s %3$s</string>
     <string name="approval_enter">4 अंकों का डेमो कोड डालें</string>
     <string name="approval_demo_note">डेमो मंज़ूरी: कोई भी 4 अंक डालें। यह आपका UPI PIN नहीं है, और कुछ भी सेव या भेजा नहीं जाता।</string>

@@ -3,11 +3,12 @@ package com.gullak.core.domain.ai
 import com.gullak.core.model.ai.ConversationTurn
 import com.gullak.core.model.ai.ParsedGoal
 import com.gullak.core.model.goal.Frequency
+import com.gullak.core.model.money.Money
 import com.gullak.core.model.result.AppResult
 import java.time.LocalDate
 
 /** What the user meant by what they just said. */
-enum class TalkIntent { GOAL_DETAILS, YES, NO, CHOOSE_PLAN, QUESTION, ANOTHER_GOAL, FINISHED, UNCLEAR }
+enum class TalkIntent { GOAL_DETAILS, YES, NO, CHOOSE_PLAN, QUESTION, CHECK_SAVINGS, ANOTHER_GOAL, FINISHED, UNCLEAR }
 
 /**
  * The model's reading of one turn. [say] is its own reaction, always free of numbers: every amount and date that is
@@ -18,6 +19,8 @@ data class BrainAnswer(
     val say: String?,
     val goal: ParsedGoal,
     val frequency: Frequency?,
+    /** A one-time payment they want to make now. */
+    val oneTime: Money? = null,
 )
 
 /** Understands each turn of the spoken conversation and reacts to it like a person. */

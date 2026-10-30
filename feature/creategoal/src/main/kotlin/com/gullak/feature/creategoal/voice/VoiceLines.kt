@@ -35,6 +35,20 @@ internal interface VoiceLines {
 
     fun anythingElse(language: GoalLanguage): String
 
+    fun savings(
+        language: GoalLanguage,
+        total: Money,
+        name: String,
+        saved: Money,
+    ): String
+
+    fun noSavingsYet(language: GoalLanguage): String
+
+    fun oneTimeNoted(
+        language: GoalLanguage,
+        amount: Money,
+    ): String
+
     fun greetingAgain(language: GoalLanguage): String
 
     fun moment(language: GoalLanguage): String
@@ -123,6 +137,23 @@ internal class ResourceVoiceLines @Inject constructor(@ApplicationContext privat
         R.array.voice_greeting_progress_hinglish,
         R.array.voice_greeting_progress_hi,
     ).format(name, IndianMoneyFormat.format(saved))
+
+    override fun savings(
+        language: GoalLanguage,
+        total: Money,
+        name: String,
+        saved: Money,
+    ) = language.pick(R.array.voice_savings_en, R.array.voice_savings_hi, R.array.voice_savings_hi)
+        .format(IndianMoneyFormat.format(total), name, IndianMoneyFormat.format(saved))
+
+    override fun noSavingsYet(language: GoalLanguage) =
+        language.pick(R.array.voice_no_savings_en, R.array.voice_no_savings_hi, R.array.voice_no_savings_hi)
+
+    override fun oneTimeNoted(
+        language: GoalLanguage,
+        amount: Money,
+    ) = language.pick(R.array.voice_one_time_en, R.array.voice_one_time_hi, R.array.voice_one_time_hi)
+        .format(IndianMoneyFormat.format(amount))
 
     override fun anythingElse(language: GoalLanguage) =
         language.pick(R.array.voice_else_en, R.array.voice_else_hinglish, R.array.voice_else_hi)

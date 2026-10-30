@@ -4,7 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gullak.core.domain.ai.PlanExplanationService
-import com.gullak.core.domain.ai.VoiceOutput
+import com.gullak.core.domain.ai.ReadbackReply
+import com.gullak.core.domain.ai.readbackReply
 import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.domain.usecase.ApplyReplanUseCase
 import com.gullak.core.domain.usecase.GetReplanOptionsUseCase
@@ -27,9 +28,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** The recovery sheet after a failed AutoPay: the engine's choices, the selected one and its explanation. */
 data class ReplanUi(
@@ -70,6 +73,9 @@ sealed interface GoalDetailEvent {
     data object DismissReplan : GoalDetailEvent
 
     data object SpeakExplanation : GoalDetailEvent
+
+    /** The mic: Gullak says how this goal is doing, and offers to fix a failed AutoPay. */
+    data object TalkClicked : GoalDetailEvent
 }
 
 sealed interface GoalDetailEffect {
@@ -87,7 +93,7 @@ sealed interface GoalDetailEffect {
  * sheet after a failure. Every amount and date comes from the plan engine through the use cases.
  */
 @HiltViewModel
-class GoalDetailViewModel @Inject constructor(
+class GoalDetailViewModel @Inject internal constructor(
     savedStateHandle: SavedStateHandle,
     observeDetail: ObserveGoalDetailUseCase,
     settings: SettingsRepository,
@@ -95,7 +101,7 @@ class GoalDetailViewModel @Inject constructor(
     private val getReplanOptions: GetReplanOptionsUseCase,
     private val applyReplan: ApplyReplanUseCase,
     private val explainer: PlanExplanationService,
-    private val voice: VoiceOutput,
+    private val talk: GoalTalk,
 ) : ViewModel() {
 
     private val goalId: String = checkNotNull(savedStateHandle[GOAL_ID_KEY]) { "goalId argument missing" }
@@ -107,6 +113,7 @@ class GoalDetailViewModel @Inject constructor(
     val effect: Flow<GoalDetailEffect> = effects.receiveAsFlow()
 
     private var explainJob: Job? = null
+    private var talkJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -125,13 +132,22 @@ class GoalDetailViewModel @Inject constructor(
 
             is GoalDetailEvent.OpenReplan -> openReplan(event.failedDebitId)
 
-            is GoalDetailEvent.ChoiceSelected -> select(event.index)
+            is GoalDetailEvent.ChoiceSelected -> {
+                stopTalking()
+                select(event.index)
+            }
 
-            GoalDetailEvent.ApplyReplan -> apply()
+            GoalDetailEvent.ApplyReplan -> {
+                stopTalking()
+                viewModelScope.launch { apply() }
+            }
+
+            GoalDetailEvent.TalkClicked -> talkAboutGoal()
 
             GoalDetailEvent.SpeakExplanation -> speakExplanation()
 
             GoalDetailEvent.DismissReplan -> {
+                stopTalking()
                 explainJob?.cancel()
                 state.update { it.copy(replan = null) }
             }
@@ -169,6 +185,7 @@ class GoalDetailViewModel @Inject constructor(
                 is AppResult.Success -> {
                     state.update { it.copy(replan = ReplanUi(result.value)) }
                     explainSelected()
+                    talkThroughReplan(result.value)
                 }
 
                 is AppResult.Failure -> send(GoalDetailEffect.ActionFailed)
@@ -190,7 +207,7 @@ class GoalDetailViewModel @Inject constructor(
         val goal = replan.offer.goal
         state.update { it.copy(replan = replan.copy(isExplaining = true)) }
         explainJob = viewModelScope.launch {
-            val language = GoalLanguage.fromTag(goal.languageTag) ?: GoalLanguage.ENGLISH
+            val language = spokenLanguage(goal.languageTag)
             val text = explainer.explainReplan(goal.name, choice, replan.offer.failedDebit.amount, language)
             state.update { current ->
                 current.copy(replan = current.replan?.copy(explanation = text, isExplaining = false))
@@ -198,34 +215,102 @@ class GoalDetailViewModel @Inject constructor(
         }
     }
 
-    private fun apply() {
-        val replan = state.value.replan ?: return
-        val choice = replan.offer.choices.getOrNull(replan.selected) ?: return
+    /** True if the plan was changed. */
+    private suspend fun apply(): Boolean {
+        val replan = state.value.replan ?: return false
+        val choice = replan.offer.choices.getOrNull(replan.selected) ?: return false
         state.update { it.copy(replan = replan.copy(isApplying = true)) }
-        viewModelScope.launch {
-            when (applyReplan(goalId, replan.offer.failedDebit.id, choice)) {
-                is AppResult.Success -> {
-                    state.update { it.copy(replan = null) }
-                    send(GoalDetailEffect.PlanUpdated)
-                }
+        return when (applyReplan(goalId, replan.offer.failedDebit.id, choice)) {
+            is AppResult.Success -> {
+                state.update { it.copy(replan = null) }
+                send(GoalDetailEffect.PlanUpdated)
+                true
+            }
 
-                is AppResult.Failure -> {
-                    state.update { it.copy(replan = it.replan?.copy(isApplying = false)) }
-                    send(GoalDetailEffect.ActionFailed)
-                }
+            is AppResult.Failure -> {
+                state.update { it.copy(replan = it.replan?.copy(isApplying = false)) }
+                send(GoalDetailEffect.ActionFailed)
+                false
             }
         }
+    }
+
+    private fun stopTalking() {
+        talkJob?.cancel()
+        talk.stop()
+    }
+
+    /** Spoken Hinglish uses Hindi lines in Devanagari, which the voices say best. */
+    private fun spokenLanguage(tag: String): GoalLanguage =
+        if (GoalLanguage.fromTag(tag) == GoalLanguage.ENGLISH) GoalLanguage.ENGLISH else GoalLanguage.HINDI
+
+    private fun talkAboutGoal() {
+        val current = state.value
+        val summary = current.detail?.summary ?: return
+        val failure = current.unresolvedFailure
+        stopTalking()
+        talkJob = viewModelScope.launch {
+            talk.say(
+                talk.lines.status(spokenLanguage(summary.goal.languageTag), summary),
+                spokenLanguage(summary.goal.languageTag),
+            )
+            if (failure != null && state.value.replan == null) openReplan(failure.id)
+        }
+    }
+
+    /** Offers the engine's choices aloud, then applies one only on a yes that code reads from the user's words. */
+    private fun talkThroughReplan(offer: ReplanOffer) {
+        stopTalking()
+        talkJob = viewModelScope.launch {
+            if (!talk.isOn()) return@launch
+            val language = spokenLanguage(offer.goal.languageTag)
+            talk.say(talk.lines.offer(language, offer.failedDebit, offer.status, offer.choices), language)
+            val index = askWhichChoice(offer, language) ?: return@launch
+            select(index)
+            val explanation = withTimeoutOrNull(EXPLANATION_WAIT_MS) {
+                uiState.first { it.replan?.isExplaining == false && it.replan?.explanation != null }
+            }?.replan?.explanation
+            talk.say(listOfNotNull(explanation, talk.lines.applyQuestion(language)).joinToString(" "), language)
+            val heard = talk.listen() ?: return@launch
+            if (readbackReply(heard) == ReadbackReply.YES) {
+                if (apply()) talk.say(talk.lines.applied(language), language)
+            } else {
+                talk.say(talk.lines.leftAsIs(language), language)
+            }
+        }
+    }
+
+    private suspend fun askWhichChoice(
+        offer: ReplanOffer,
+        language: GoalLanguage,
+    ): Int? {
+        repeat(CHOICE_TRIES) {
+            val heard = talk.listen() ?: return null
+            val choice = replanChoiceFrom(heard, offer.choices)
+            when {
+                choice != null -> return choice
+
+                readbackReply(heard) == ReadbackReply.NO -> {
+                    talk.say(talk.lines.leftAsIs(language), language)
+                    return null
+                }
+
+                else -> talk.say(talk.lines.whichOne(language), language)
+            }
+        }
+        return null
     }
 
     private fun speakExplanation() {
         val replan = state.value.replan ?: return
         val text = replan.explanation ?: return
-        val language = GoalLanguage.fromTag(replan.offer.goal.languageTag) ?: GoalLanguage.ENGLISH
-        viewModelScope.launch { voice.speak(text, language) }
+        val language = spokenLanguage(replan.offer.goal.languageTag)
+        stopTalking()
+        talkJob = viewModelScope.launch { talk.say(text, language) }
     }
 
     override fun onCleared() {
-        voice.stop()
+        talk.stop()
     }
 
     private fun send(effect: GoalDetailEffect) {
@@ -235,5 +320,7 @@ class GoalDetailViewModel @Inject constructor(
     companion object {
         /** Matches the property name in [GoalDetailRoute]. */
         const val GOAL_ID_KEY = "goalId"
+        private const val CHOICE_TRIES = 2
+        private const val EXPLANATION_WAIT_MS = 10_000L
     }
 }

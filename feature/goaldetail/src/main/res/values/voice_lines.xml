@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What Gullak says aloud on the goal page. Named per language because it follows the goal's language. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string-array name="voice_status_en" translatable="false"><item>Your %1$s Gullak has %2$s so far, out of %3$s.</item></string-array>
+    <string-array name="voice_status_hi" translatable="false"><item>आपकी %1$s गुल्लक में अब तक %2$s जुड़े हैं, लक्ष्य %3$s का है।</item></string-array>
+    <string-array name="voice_on_track_en" translatable="false"><item>You are right on track, well done!</item></string-array>
+    <string-array name="voice_on_track_hi" translatable="false"><item>सब समय पर चल रहा है, बहुत बढ़िया!</item></string-array>
+    <string-array name="voice_behind_en" translatable="false"><item>You are %1$s behind, but we can fix that.</item></string-array>
+    <string-array name="voice_behind_hi" translatable="false"><item>आप %1$s पीछे हैं, पर इसे ठीक कर सकते हैं।</item></string-array>
+    <string-array name="voice_reached_en" translatable="false"><item>You have reached your goal, congratulations!</item></string-array>
+    <string-array name="voice_reached_hi" translatable="false"><item>आपका लक्ष्य पूरा हो गया, बहुत-बहुत बधाई!</item></string-array>
+    <string-array name="voice_next_en" translatable="false"><item>The next payment is %1$s on %2$s.</item></string-array>
+    <string-array name="voice_next_hi" translatable="false"><item>अगली क़िस्त %1$s की है, %2$s को।</item></string-array>
+
+    <string-array name="voice_offer_en" translatable="false">
+        <item>Oh, the AutoPay on %1$s did not go through. Don\'t worry, you are %2$s behind and we can sort it out. You could %3$s. Which one works for you?</item>
+    </string-array>
+    <string-array name="voice_offer_hi" translatable="false">
+        <item>अरे, %1$s की AutoPay नहीं हो पाई। चिंता मत कीजिए, आप %2$s पीछे हैं और इसे ठीक कर सकते हैं। आप %3$s। कौन सा ठीक रहेगा?</item>
+    </string-array>
+    <string-array name="voice_catch_up_en" translatable="false"><item>catch up with two extra payments of %1$s on %2$s</item></string-array>
+    <string-array name="voice_catch_up_hi" translatable="false"><item>इसी महीने %2$s को %1$s के दो अतिरिक्त भुगतान कर सकते हैं</item></string-array>
+    <string-array name="voice_spread_en" translatable="false"><item>spread it out with %1$s for each of the next %2$d payments</item></string-array>
+    <string-array name="voice_spread_hi" translatable="false"><item>इसे आगे बाँट सकते हैं, अगले %2$d भुगतान %1$s के</item></string-array>
+    <string-array name="voice_extend_en" translatable="false"><item>move the goal date to %1$s</item></string-array>
+    <string-array name="voice_extend_hi" translatable="false"><item>लक्ष्य की तारीख़ %1$s कर सकते हैं</item></string-array>
+    <string-array name="voice_or_en" translatable="false"><item>, or </item></string-array>
+    <string-array name="voice_or_hi" translatable="false"><item>, या </item></string-array>
+    <string-array name="voice_and_en" translatable="false"><item> and </item></string-array>
+    <string-array name="voice_and_hi" translatable="false"><item> और </item></string-array>
+
+    <string-array name="voice_apply_en" translatable="false"><item>Shall I apply this?</item></string-array>
+    <string-array name="voice_apply_hi" translatable="false"><item>यह लागू कर दूँ?</item></string-array>
+    <string-array name="voice_which_way_en" translatable="false"><item>Sorry, which one should I use?</item></string-array>
+    <string-array name="voice_which_way_hi" translatable="false"><item>माफ़ कीजिए, कौन सा रास्ता चुनें?</item></string-array>
+    <string-array name="voice_applied_en" translatable="false"><item>Done, your plan is updated!</item></string-array>
+    <string-array name="voice_applied_hi" translatable="false"><item>हो गया, आपकी योजना अपडेट हो गई!</item></string-array>
+    <string-array name="voice_left_en" translatable="false"><item>All right, I will leave it as it is. You can choose on screen any time.</item></string-array>
+    <string-array name="voice_left_hi" translatable="false"><item>ठीक है, अभी ऐसे ही रहने देते हैं। आप स्क्रीन पर कभी भी चुन सकते हैं।</item></string-array>
+</resources>

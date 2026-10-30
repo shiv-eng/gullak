@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_title">Gullak Bharo</string>
+    <string name="home_title">Gullak</string>
     <string name="home_new_goal">Start a Gullak</string>
     <string name="home_empty_prompt">No Gullaks yet</string>
     <string name="home_empty_hint">Set a goal, an amount and a date. Gullak plans a Daily, Weekly or Monthly SIP and sets up AutoPay.</string>

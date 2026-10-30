@@ -2,6 +2,9 @@ package com.gullak.core.speech.sarvam
 
 import com.gullak.core.domain.ai.SpeechError
 import com.gullak.core.domain.ai.SpeechEvent
+import com.gullak.core.speech.cloud.WavAudio
+import com.gullak.core.speech.cloud.spokenSentences
+import com.gullak.core.speech.gemini.geminiClip
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -91,6 +94,25 @@ class SarvamParsingTest {
 
         assertEquals(24_000, audio.sampleRate)
         assertArrayEquals(pcm, audio.pcm)
+    }
+
+    @Test
+    fun geminiAudioIsReadAsWavOrRaw() {
+        val pcm = byteArrayOf(1, 2, 3, 4)
+        fun reply(
+            audio: ByteArray,
+            mime: String,
+        ) = """{"candidates":[{"content":{"parts":[{"inlineData":{"mimeType":"$mime","data":"${
+            java.util.Base64.getEncoder().encodeToString(audio)
+        }"}}]}}]}"""
+
+        val wav = geminiClip(reply(wav(24_000, pcm), "audio/wav"))
+        val raw = geminiClip(reply(pcm, "audio/L16;codec=pcm;rate=16000"))
+
+        assertArrayEquals(pcm, wav.pcm)
+        assertEquals(24_000, wav.sampleRate)
+        assertArrayEquals(pcm, raw.pcm)
+        assertEquals(16_000, raw.sampleRate)
     }
 
     @Test(expected = IllegalArgumentException::class)

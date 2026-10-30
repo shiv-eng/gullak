@@ -7,12 +7,14 @@ import com.gullak.core.domain.ai.ConversationBrain
 import com.gullak.core.domain.ai.FollowUpQuestion
 import com.gullak.core.domain.ai.FollowUpReason
 import com.gullak.core.domain.ai.PlanExplanationService
+import com.gullak.core.domain.ai.ReadbackReply
 import com.gullak.core.domain.ai.SpeechError
 import com.gullak.core.domain.ai.SpeechEvent
 import com.gullak.core.domain.ai.SpeechInput
 import com.gullak.core.domain.ai.TalkIntent
 import com.gullak.core.domain.ai.Understanding
 import com.gullak.core.domain.ai.VoiceOutput
+import com.gullak.core.domain.ai.readbackReply
 import com.gullak.core.domain.plan.PlanInput
 import com.gullak.core.domain.repository.SettingsRepository
 import com.gullak.core.domain.usecase.BuildPlanUseCase
@@ -31,8 +33,6 @@ import com.gullak.core.model.plan.Plan
 import com.gullak.core.model.plan.PlanOption
 import com.gullak.core.model.result.AppResult
 import com.gullak.feature.creategoal.DemoBankAccount
-import com.gullak.feature.creategoal.ReadbackReply
-import com.gullak.feature.creategoal.readbackReply
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.LocalDate
@@ -77,6 +77,8 @@ data class VoiceGoalUiState(
     val name: String? = null,
     val target: Money? = null,
     val date: LocalDate? = null,
+    /** A one-time payment now; the plan covers what is left. */
+    val oneTime: Money = Money.ZERO,
     val plan: Plan? = null,
     val frequency: Frequency? = null,
     val bank: DemoBankAccount = DemoBankAccount.SBI_SAVINGS,
@@ -198,7 +200,7 @@ class VoiceGoalViewModel @Inject internal constructor(
     private suspend fun converse(first: String?) {
         var line = first
         do {
-            line?.let { say(it) }
+            line?.takeIf { it.isNotEmpty() }?.let { say(it) }
             val heard = listen()
             line = if (heard == null) afterSilence() else respond(heard)
         } while (line != null)
@@ -256,10 +258,18 @@ class VoiceGoalViewModel @Inject internal constructor(
         return heard?.takeIf { it.isNotBlank() }
     }
 
-    /** One nudge, then Gullak waits for a tap on the orb, as a person would stop talking to an empty room. */
+    /**
+     * The phone's recogniser gives up after a few seconds, too quick for someone thinking: it listens again quietly,
+     * then gives one nudge, then Gullak waits for a tap on the orb, as a person would stop talking to an empty room.
+     */
     private fun afterSilence(): String? {
         silences++
-        return if (silences == 1 && state.value.step != TalkStep.DONE) lines.didNotHear(language) else null
+        return when {
+            state.value.step == TalkStep.DONE -> null
+            silences == 1 -> ""
+            silences == 2 -> lines.didNotHear(language)
+            else -> null
+        }
     }
 
     private suspend fun respond(text: String): String? {
@@ -303,6 +313,7 @@ class VoiceGoalViewModel @Inject internal constructor(
         heard: BrainAnswer,
     ): String? {
         adoptLanguage(heard.goal.language)
+        heard.oneTime?.let { oneTime -> state.update { it.copy(oneTime = oneTime) } }
         val next = nextLine(text, heard) ?: return null
         return listOfNotNull(heard.say, next).joinToString(" ").also { line ->
             conversation += ConversationTurn(Speaker.GULLAK, line)
@@ -317,6 +328,8 @@ class VoiceGoalViewModel @Inject internal constructor(
         TalkIntent.GOAL_DETAILS -> onUnderstood(understandGoal.check(withWhatWeKnow(heard.goal)))
 
         TalkIntent.QUESTION -> currentQuestion()
+
+        TalkIntent.CHECK_SAVINGS -> "${savingsSoFar()} ${currentQuestion()}"
 
         TalkIntent.NO -> if (state.value.step == TalkStep.DONE) {
             finish()
@@ -339,6 +352,17 @@ class VoiceGoalViewModel @Inject internal constructor(
 
         // Yes is decided by step, and at AutoPay by the rules alone, from the user's own words.
         TalkIntent.YES, TalkIntent.UNCLEAR -> respondByRules(text)
+    }
+
+    /** The amounts are from the plan engine, whatever the model thought. */
+    private suspend fun savingsSoFar(): String {
+        val overview = observeGoals().first()
+        val best = overview.goals.filter { it.saved.isPositive }.maxByOrNull { it.saved.paise }
+        return if (best == null) {
+            lines.noSavingsYet(language)
+        } else {
+            lines.savings(language, overview.totalSaved, best.goal.name, best.saved)
+        }
     }
 
     private fun withWhatWeKnow(goal: ParsedGoal): ParsedGoal {
@@ -457,13 +481,17 @@ class VoiceGoalViewModel @Inject internal constructor(
         val target = current.target
         val date = current.date
         if (target == null || date == null) return ask(FollowUpQuestion.Standard(FollowUpReason.MISSING_AMOUNT))
-        val plan = when (val result = buildPlan(PlanInput(target = target, targetDate = date))) {
+        // More than the goal is not a one-time payment towards it, so that is left out rather than guessed at.
+        val oneTime = current.oneTime.takeIf { it < target } ?: Money.ZERO
+        state.update { it.copy(oneTime = oneTime) }
+        val plan = when (val result = buildPlan(PlanInput(target = target, targetDate = date, lumpSum = oneTime))) {
             is AppResult.Success -> result.value
             is AppResult.Failure -> return dateTooClose()
         }
         if (plan.oneTimeOnly || plan.options.isEmpty()) return dateTooClose()
         state.update { it.copy(step = TalkStep.CHOOSE_PLAN, plan = plan, frequency = null) }
-        return lines.plan(language, current.name.orEmpty(), plan.options)
+        val options = lines.plan(language, current.name.orEmpty(), plan.options)
+        return if (oneTime.isPositive) "${lines.oneTimeNoted(language, oneTime)} $options" else options
     }
 
     private fun dateTooClose(): String {
@@ -528,6 +556,7 @@ class VoiceGoalViewModel @Inject internal constructor(
             targetDate = date,
             dateIsFixed = false,
             frequency = current.frequency,
+            lumpSum = current.oneTime,
             language = goalLanguage,
         )
         return when (val result = createGoal(request)) {

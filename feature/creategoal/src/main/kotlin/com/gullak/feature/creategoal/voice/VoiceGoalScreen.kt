@@ -308,6 +308,9 @@ private fun GoalFacts(
         state.name?.let { Fact(stringResource(R.string.create_name_label), it) }
         state.target?.let { Fact(stringResource(R.string.create_amount_label), IndianMoneyFormat.format(it)) }
         state.date?.let { Fact(stringResource(R.string.create_date_label), DATE.format(it)) }
+        if (state.oneTime.isPositive) {
+            Fact(stringResource(R.string.mandate_lump), IndianMoneyFormat.format(state.oneTime))
+        }
         state.plan?.options?.forEach { option ->
             Fact(stringResource(periodLabel(option.frequency)), amountLine(option), bold = option == state.chosen)
         }
@@ -361,4 +364,5 @@ private const val IMAGE_SIZE = 110
 private const val PULSE_SCALE = 1.12f
 private const val PULSE_MS = 700
 private const val MAX_LEVEL_GROWTH = 0.3f
-private val DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+private val DATE: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())

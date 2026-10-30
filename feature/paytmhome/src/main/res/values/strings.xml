@@ -53,8 +53,8 @@
     <string name="gullak_status_behind">Behind by %1$s</string>
     <string name="gullak_status_reached">Goal reached</string>
     <string name="paytm_header_promo">Start filling your Gullak</string>
-    <string name="gullak_banner_eyebrow">GULLAK BHARO</string>
-    <string name="gullak_strip_title">Gullak Bharo</string>
+    <string name="gullak_banner_eyebrow">GULLAK</string>
+    <string name="gullak_strip_title">Gullak</string>
     <string name="gullak_strip_body">Set an amount and a date. We plan the SIP and AutoPay.</string>
     <string name="gullak_strip_action">Start a Gullak</string>
     <string name="gullak_next_sip">Next SIP: %1$s on %2$s</string>

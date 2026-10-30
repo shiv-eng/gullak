@@ -54,4 +54,5 @@
     <string name="replan_why">यह क्यों काम करेगा</string>
     <string name="replan_apply">लागू करें</string>
     <string name="replan_listen">सुनें</string>
+    <string name="detail_talk">सुनें कि यह लक्ष्य कैसा चल रहा है</string>
 </resources>

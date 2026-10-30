@@ -39,12 +39,16 @@ Starting a Gullak is a conversation, in Hindi, Hinglish or English:
 (The amounts above only show the shape of the talk; the app's come from `PlanEngine`.)
 
 [Sarvam](https://www.sarvam.ai) provides the ears and voice: Saaras over a WebSocket for speech to text, Bulbul for text
-to speech. Without a key or a connection, the phone's own speech and voice take over. With Sarvam on, microphone audio is
-sent to Sarvam; nothing else from the phone is.
+to speech. Without a Sarvam key, Gemini's voice speaks and the phone's recogniser listens; without a connection, the phone
+does both. With Sarvam on, microphone audio is sent to Sarvam; spoken lines go to whichever voice is used. Nothing else
+from the phone is sent.
+
+The goal page talks too. When an AutoPay fails, Gullak says what happened and offers the recovery plans aloud; you pick
+one by talking and it is applied on your yes. The mic button there says how the goal is doing.
 
 ## Flow
 
-1. **Paytm home:** Gold & Silver card, then "Gullak Bharo". Only Gullak works; other tiles say so.
+1. **Paytm home:** Gold & Silver card, then "Gullak". Only Gullak works; other tiles say so.
 2. **Goal form:** name, amount, optional one-time payment, date. The mic fills the form through the AI.
 3. **Plan:** Daily, Weekly or Monthly with the amount, where the money goes, and why.
 4. **AutoPay:** mandate summary, demo bank account, demo approval code, processing, success.
@@ -205,6 +209,8 @@ Today is taken as 31 Oct 2026. These are saved in `DemoAiResponses`.
 - The Gemini and Sarvam keys are in the APK (see above). A real product needs a backend.
 - Saying yes is the demo's approval. A real UPI AutoPay mandate needs the customer's UPI PIN in the bank or NPCI flow.
 - Gullak cannot yet be interrupted by speaking over it; tap the orb instead.
+- With Gemini's voice each line takes a few seconds to arrive, and a rate-limited free key drops to the phone's voice for
+  a minute. Sarvam or a paid key avoids this.
 - Speech uses the phone's speech recogniser inside the app, and falls back to the phone's own speech screen if the
   recogniser is unavailable. Recognition is not forced offline, so it may need a network.
 - Spoken replies use the phone's text-to-speech engine. Without a Hindi voice the engine's current voice reads them, and

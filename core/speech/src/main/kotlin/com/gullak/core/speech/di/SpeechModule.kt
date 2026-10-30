@@ -5,6 +5,7 @@ import com.gullak.core.domain.ai.VoiceOutput
 import com.gullak.core.speech.BuildConfig
 import com.gullak.core.speech.FallbackSpeechInput
 import com.gullak.core.speech.FallbackVoiceOutput
+import com.gullak.core.speech.gemini.GeminiVoiceConfig
 import com.gullak.core.speech.sarvam.SarvamConfig
 import com.gullak.core.speech.sarvam.SarvamHttp
 import dagger.Binds
@@ -35,6 +36,13 @@ internal object SarvamModule {
         sttModel = BuildConfig.SARVAM_STT_MODEL,
         ttsModel = BuildConfig.SARVAM_TTS_MODEL,
         ttsSpeaker = BuildConfig.SARVAM_TTS_SPEAKER,
+    )
+
+    @Provides
+    fun geminiVoice(): GeminiVoiceConfig = GeminiVoiceConfig(
+        apiKey = BuildConfig.GEMINI_API_KEY,
+        model = BuildConfig.GEMINI_TTS_MODEL,
+        voice = BuildConfig.GEMINI_TTS_VOICE,
     )
 
     @Provides

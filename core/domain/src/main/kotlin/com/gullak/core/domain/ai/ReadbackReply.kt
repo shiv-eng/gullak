@@ -1,10 +1,13 @@
-package com.gullak.feature.creategoal
+package com.gullak.core.domain.ai
 
-/** What the user said after Gullak read a goal back to them. */
-internal enum class ReadbackReply { YES, NO, CORRECTION }
+/** What the user said when Gullak asked them to confirm something. */
+enum class ReadbackReply { YES, NO, CORRECTION }
 
-/** Plain yes or no only; anything else ("nahi, 20 hazaar") is read as a correction of the goal. */
-internal fun readbackReply(text: String): ReadbackReply {
+/**
+ * Plain yes or no only; anything else ("nahi, 20 hazaar") is read as a correction. This is code, not the model, so a
+ * misheard reply or injected words can never confirm anything.
+ */
+fun readbackReply(text: String): ReadbackReply {
     val words = text.lowercase().split(Regex("""[^\p{L}\p{M}]+""")).filter { it.isNotEmpty() }
     return when {
         words.isEmpty() -> ReadbackReply.CORRECTION

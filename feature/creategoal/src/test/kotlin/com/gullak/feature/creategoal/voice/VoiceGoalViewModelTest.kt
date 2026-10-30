@@ -332,6 +332,49 @@ class VoiceGoalViewModelTest {
     }
 
     @Test
+    fun askingAboutSavingsGivesTheEnginesAmountThenTheTalkGoesOn() = runTest {
+        brainSays(TalkIntent.CHECK_SAVINGS, goal = ParsedGoal(null, null, null, null, GoalLanguage.HINGLISH, null))
+        says("kitna bacha liya?")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals("no savings follow MISSING_NAME", env.voice.spoken[1])
+    }
+
+    @Test
+    fun aOneTimePaymentLowersThePlanAndIsRecorded() = runTest {
+        env.brain.answers += BrainAnswer(TalkIntent.GOAL_DETAILS, null, laptop, null, oneTime = rupees(6_000))
+        brainSays(TalkIntent.YES)
+        brainSays(TalkIntent.CHOOSE_PLAN, frequency = Frequency.MONTHLY)
+        brainSays(TalkIntent.YES)
+        says("laptop, abhi 6000 daalunga", "haan", "mahine wala", "haan")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals(rupees(3_750), env.goals.goals.single().schedule?.amountPerDebit)
+        assertEquals(rupees(6_000), vm.uiState.value.oneTime)
+        assertTrue(env.voice.spoken.any { it.startsWith("one time") })
+    }
+
+    @Test
+    fun aOneTimePaymentOfMoreThanTheGoalIsLeftOut() = runTest {
+        env.brain.answers += BrainAnswer(TalkIntent.GOAL_DETAILS, null, laptop, null, oneTime = rupees(90_000))
+        brainSays(TalkIntent.YES)
+        says("laptop", "haan")
+        val vm = viewModel()
+
+        vm.onEvent(VoiceGoalEvent.MicReady)
+        advanceUntilIdle()
+
+        assertEquals(Money.ZERO, vm.uiState.value.oneTime)
+        assertEquals(Frequency.MONTHLY, vm.uiState.value.plan?.options?.last()?.frequency)
+    }
+
+    @Test
     fun repliesNamingAPlanOrBankAreRead() {
         val options = listOf(option(Frequency.DAILY), option(Frequency.WEEKLY), option(Frequency.MONTHLY))
 
@@ -366,6 +409,20 @@ private object FakeLines : VoiceLines {
     ) = "progress $name"
 
     override fun anythingElse(language: GoalLanguage) = "else"
+
+    override fun savings(
+        language: GoalLanguage,
+        total: Money,
+        name: String,
+        saved: Money,
+    ) = "savings $name"
+
+    override fun noSavingsYet(language: GoalLanguage) = "no savings"
+
+    override fun oneTimeNoted(
+        language: GoalLanguage,
+        amount: Money,
+    ) = "one time"
 
     override fun greetingAgain(language: GoalLanguage) = "again"
 

@@ -254,4 +254,11 @@
     <string-array name="voice_else_hi" translatable="false">
         <item>और कुछ?</item>
     </string-array>
+
+    <string-array name="voice_savings_en" translatable="false"><item>So far you have saved %1$s in all, with %3$s in your %2$s Gullak.</item></string-array>
+    <string-array name="voice_savings_hi" translatable="false"><item>अब तक आपने कुल %1$s बचाए हैं, सबसे ज़्यादा %3$s आपकी %2$s गुल्लक में।</item></string-array>
+    <string-array name="voice_no_savings_en" translatable="false"><item>Nothing saved yet, but today is a great day to begin.</item></string-array>
+    <string-array name="voice_no_savings_hi" translatable="false"><item>अभी कोई बचत नहीं है, पर शुरुआत के लिए आज का दिन बढ़िया है।</item></string-array>
+    <string-array name="voice_one_time_en" translatable="false"><item>Good, %1$s goes in right away.</item></string-array>
+    <string-array name="voice_one_time_hi" translatable="false"><item>बढ़िया, %1$s अभी जुड़ जाएँगे।</item></string-array>
 </resources>
