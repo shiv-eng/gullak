@@ -3,5 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "com.gullak.feature.goaldetail"
+    namespace = "com.shivangi.gullak.feature.goaldetail"
 }

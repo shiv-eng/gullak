@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gullak.feature.settings"
+    namespace = "com.shivangi.gullak.feature.settings"
 }
 
 dependencies {

@@ -1,7 +1,7 @@
 import com.android.build.api.dsl.CommonExtension
-import com.gullak.buildlogic.libs
-import com.gullak.buildlogic.library
-import com.gullak.buildlogic.pluginId
+import com.shivangi.gullak.buildlogic.libs
+import com.shivangi.gullak.buildlogic.library
+import com.shivangi.gullak.buildlogic.pluginId
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies

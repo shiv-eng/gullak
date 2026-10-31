@@ -57,6 +57,10 @@
     <string name="detail_add_money">Add money</string>
     <string name="detail_add_money_hint">Enter amount in rupees</string>
     <string name="detail_money_added">%1$s added</string>
+    <string name="detail_add_money_up_to">You can add up to %1$s</string>
+    <string name="detail_add_money_over">Only %1$s is left for this goal. Enter that amount or less.</string>
+    <string name="detail_add_money_full">This goal is already full. No more money is needed.</string>
+    <string name="detail_add_money_paid_out">This Gullak has been paid out. No more money can be added.</string>
     <string name="detail_pay_out">Pay out %1$s to my bank</string>
     <string name="detail_paid_out">%1$s paid out to your bank</string>
     <string name="detail_money_demo">Demo: no real payment</string>

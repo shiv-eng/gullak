@@ -1,4 +1,4 @@
-import com.gullak.buildlogic.localProperties
+import com.shivangi.gullak.buildlogic.localProperties
 
 plugins {
     alias(libs.plugins.gullak.android.application)
@@ -11,10 +11,10 @@ val localProps = localProperties()
 val releaseStoreFile: String? = localProps.getProperty("RELEASE_STORE_FILE")?.takeIf { it.isNotBlank() }
 
 android {
-    namespace = "com.gullak.app"
+    namespace = "com.shivangi.gullak.app"
 
     defaultConfig {
-        applicationId = "com.gullak.app"
+        applicationId = "com.shivangi.gullak.app"
         versionCode = 1
         versionName = "0.1.0"
     }

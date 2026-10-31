@@ -42,8 +42,14 @@
     <string-array name="voice_confirm_add_hi" translatable="false"><item>अभी %1$s इस गुल्लक में जोड़ दूँ? यह डेमो है, असली पैसा नहीं कटेगा।</item></string-array>
     <string-array name="voice_added_en" translatable="false"><item>Done, %1$s added. Well done!</item></string-array>
     <string-array name="voice_added_hi" translatable="false"><item>हो गया, %1$s जुड़ गए। बहुत बढ़िया!</item></string-array>
-    <string-array name="voice_cannot_add_en" translatable="false"><item>I could not add that much: it goes past your goal, or this Gullak is closed.</item></string-array>
-    <string-array name="voice_cannot_add_hi" translatable="false"><item>इतना नहीं जोड़ पाई: यह लक्ष्य से ज़्यादा है, या यह गुल्लक बंद हो चुकी है।</item></string-array>
+    <string-array name="voice_cannot_add_en" translatable="false"><item>Sorry, I could not add that just now.</item></string-array>
+    <string-array name="voice_cannot_add_hi" translatable="false"><item>माफ़ कीजिए, अभी यह नहीं जोड़ पाई।</item></string-array>
+    <string-array name="voice_only_left_en" translatable="false"><item>That is more than this goal needs. Only %1$s is left, so you can add up to that.</item></string-array>
+    <string-array name="voice_only_left_hi" translatable="false"><item>यह इस लक्ष्य से ज़्यादा है। सिर्फ़ %1$s बाक़ी हैं, आप इतने तक जोड़ सकते हैं।</item></string-array>
+    <string-array name="voice_goal_full_en" translatable="false"><item>This goal is already full, so no more money is needed.</item></string-array>
+    <string-array name="voice_goal_full_hi" translatable="false"><item>यह लक्ष्य पूरा हो चुका है, अब और पैसों की ज़रूरत नहीं।</item></string-array>
+    <string-array name="voice_goal_paid_out_en" translatable="false"><item>This Gullak has already been paid out to your bank, so no more money can be added.</item></string-array>
+    <string-array name="voice_goal_paid_out_hi" translatable="false"><item>इस गुल्लक का पैसा बैंक में भेजा जा चुका है, अब और पैसे नहीं जुड़ सकते।</item></string-array>
     <string-array name="voice_confirm_pay_out_en" translatable="false"><item>Your goal day is here! Shall I send %1$s to your bank? This is a demo, no real money moves.</item></string-array>
     <string-array name="voice_confirm_pay_out_hi" translatable="false"><item>बधाई हो, आपका दिन आ गया! %1$s आपके बैंक खाते में भेज दूँ? यह डेमो है, असली पैसा नहीं आएगा।</item></string-array>
     <string-array name="voice_paid_out_en" translatable="false"><item>Done! %1$s is on its way to your bank. Enjoy it, you earned it!</item></string-array>

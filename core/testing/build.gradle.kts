@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gullak.core.testing"
+    namespace = "com.shivangi.gullak.core.testing"
 }
 
 dependencies {

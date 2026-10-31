@@ -1,9 +1,9 @@
 import com.android.build.api.dsl.ApplicationExtension
-import com.gullak.buildlogic.configureKotlinAndroid
-import com.gullak.buildlogic.configureStaticAnalysis
-import com.gullak.buildlogic.libs
-import com.gullak.buildlogic.pluginId
-import com.gullak.buildlogic.versionOf
+import com.shivangi.gullak.buildlogic.configureKotlinAndroid
+import com.shivangi.gullak.buildlogic.configureStaticAnalysis
+import com.shivangi.gullak.buildlogic.libs
+import com.shivangi.gullak.buildlogic.pluginId
+import com.shivangi.gullak.buildlogic.versionOf
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure

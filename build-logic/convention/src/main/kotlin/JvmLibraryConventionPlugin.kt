@@ -1,7 +1,7 @@
-import com.gullak.buildlogic.configureKotlin
-import com.gullak.buildlogic.configureStaticAnalysis
-import com.gullak.buildlogic.libs
-import com.gullak.buildlogic.pluginId
+import com.shivangi.gullak.buildlogic.configureKotlin
+import com.shivangi.gullak.buildlogic.configureStaticAnalysis
+import com.shivangi.gullak.buildlogic.libs
+import com.shivangi.gullak.buildlogic.pluginId
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project

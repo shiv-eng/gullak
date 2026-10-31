@@ -4,5 +4,5 @@ plugins {
 
 // A stand-in for the Paytm app's home screen, so Gullak can be shown as an extension of it.
 android {
-    namespace = "com.gullak.feature.paytmhome"
+    namespace = "com.shivangi.gullak.feature.paytmhome"
 }

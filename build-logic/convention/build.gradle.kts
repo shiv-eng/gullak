@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "com.gullak.buildlogic"
+group = "com.shivangi.gullak.buildlogic"
 
 kotlin {
     jvmToolchain(17)

@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gullak.feature.creategoal"
+    namespace = "com.shivangi.gullak.feature.creategoal"
 }
 
 dependencies {

@@ -3,5 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "com.gullak.feature.home"
+    namespace = "com.shivangi.gullak.feature.home"
 }

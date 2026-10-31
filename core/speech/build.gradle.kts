@@ -1,4 +1,4 @@
-import com.gullak.buildlogic.localProperties
+import com.shivangi.gullak.buildlogic.localProperties
 
 plugins {
     alias(libs.plugins.gullak.android.library)
@@ -9,7 +9,7 @@ plugins {
 val localProps = localProperties()
 
 android {
-    namespace = "com.gullak.core.speech"
+    namespace = "com.shivangi.gullak.core.speech"
     buildFeatures {
         buildConfig = true
     }

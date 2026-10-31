@@ -1,0 +1,48 @@
+package com.shivangi.gullak.core.domain.ai
+
+import com.shivangi.gullak.core.model.ai.ConversationTurn
+import com.shivangi.gullak.core.model.ai.GoalLanguage
+import com.shivangi.gullak.core.model.ai.ParsedGoal
+import com.shivangi.gullak.core.model.money.Money
+import com.shivangi.gullak.core.model.plan.Plan
+import com.shivangi.gullak.core.model.plan.PlanOption
+import com.shivangi.gullak.core.model.plan.ReplanChoice
+import com.shivangi.gullak.core.model.result.AppResult
+import java.time.LocalDate
+
+/** Reads a goal out of the user's words. It never decides amounts: `UnderstandGoalUseCase` validates. */
+interface GoalUnderstandingService {
+    suspend fun understand(
+        conversation: List<ConversationTurn>,
+        today: LocalDate,
+    ): AppResult<ParsedGoal>
+}
+
+/** Explains a plan the engine already calculated. Never fails: falls back to a template. */
+interface PlanExplanationService {
+    suspend fun explain(
+        goalName: String,
+        plan: Plan,
+        chosen: PlanOption,
+        language: GoalLanguage,
+    ): String
+
+    /**
+     * Explains why the engine's destination suits this goal's timeline, the honest gold-or-fund answer. Null if the
+     * model cannot give a checked answer: the caller then says its own line.
+     */
+    suspend fun explainDestination(
+        goalName: String,
+        plan: Plan,
+        question: String?,
+        language: GoalLanguage,
+    ): String?
+
+    /** Explains a recovery choice after [missed] failed to debit. Never fails: falls back to a template. */
+    suspend fun explainReplan(
+        goalName: String,
+        choice: ReplanChoice,
+        missed: Money,
+        language: GoalLanguage,
+    ): String
+}

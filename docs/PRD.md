@@ -3,7 +3,7 @@
 This document describes the app that exists in this repository, closely enough to build it again. Where the code and this
 document disagree, the code is right; please fix this document.
 
-Status on 31 Oct 2026: 285 automated tests pass. See [section 15](#15-what-has-not-been-proven-yet) for what has not been
+Status on 31 Oct 2026: 288 automated tests pass. See [section 15](#15-what-has-not-been-proven-yet) for what has not been
 proven on a real phone. To build it again, follow the phases in [section 18](#18-build-phases).
 
 ---
@@ -214,7 +214,8 @@ With spread: after 5 Apr `Behind(₹3,000)`, after 5 May `Behind(₹1,500)`, aft
 
 ### Money use cases
 
-- `AddMoneyUseCase`: a lump sum at any time, up to what is left of the goal. Not after a pay-out.
+- `AddMoneyUseCase`: a lump sum at any time, up to what is left of the goal. Not after a pay-out. The sheet shows how much can be
+  added, and a larger amount is refused with that figure, on screen or by voice.
 - `PayOutGoalUseCase`: available when saved ≥ target or the target date has come, once, and only when the user asks. Records a
   `PAYOUT` debit; paid-out money leaves the totals.
 - `CheckTopUpUseCase`: runs only when asked. Gap = target − saved − all upcoming debits. `NoGap`, `NotYetProven(shortfall)` under 3

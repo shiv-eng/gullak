@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gullak.core.data"
+    namespace = "com.shivangi.gullak.core.data"
 }
 
 dependencies {

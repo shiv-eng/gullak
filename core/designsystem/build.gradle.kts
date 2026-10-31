@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gullak.core.designsystem"
+    namespace = "com.shivangi.gullak.core.designsystem"
 }
 
 dependencies {

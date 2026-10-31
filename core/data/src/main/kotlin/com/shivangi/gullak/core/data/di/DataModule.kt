@@ -1,0 +1,123 @@
+package com.shivangi.gullak.core.data.di
+
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.room.Room
+import com.shivangi.gullak.core.data.UuidIdGenerator
+import com.shivangi.gullak.core.data.analytics.LogcatAnalytics
+import com.shivangi.gullak.core.data.clock.DemoClock
+import com.shivangi.gullak.core.data.clock.SystemClock
+import com.shivangi.gullak.core.data.db.DebitDao
+import com.shivangi.gullak.core.data.db.GoalDao
+import com.shivangi.gullak.core.data.db.GullakDatabase
+import com.shivangi.gullak.core.data.demo.BundledFestivalCalendar
+import com.shivangi.gullak.core.data.demo.SeedData
+import com.shivangi.gullak.core.data.paytm.DemoAutoPayGateway
+import com.shivangi.gullak.core.data.paytm.DemoSavingsDestinationGateway
+import com.shivangi.gullak.core.data.repository.DataStoreSettingsRepository
+import com.shivangi.gullak.core.data.repository.RoomDebitRepository
+import com.shivangi.gullak.core.data.repository.RoomGoalRepository
+import com.shivangi.gullak.core.domain.analytics.Analytics
+import com.shivangi.gullak.core.domain.di.ApplicationScope
+import com.shivangi.gullak.core.domain.di.IoDispatcher
+import com.shivangi.gullak.core.domain.gateway.AutoPayGateway
+import com.shivangi.gullak.core.domain.gateway.DemoClockController
+import com.shivangi.gullak.core.domain.gateway.DemoSeedSource
+import com.shivangi.gullak.core.domain.gateway.FestivalCalendar
+import com.shivangi.gullak.core.domain.gateway.IdGenerator
+import com.shivangi.gullak.core.domain.gateway.SavingsDestinationGateway
+import com.shivangi.gullak.core.domain.repository.DebitRepository
+import com.shivangi.gullak.core.domain.repository.GoalRepository
+import com.shivangi.gullak.core.domain.repository.SettingsRepository
+import dagger.Binds
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import java.time.Clock
+import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.plus
+
+@Module
+@InstallIn(SingletonComponent::class)
+internal abstract class DataBindingsModule {
+    @Binds
+    abstract fun goalRepository(impl: RoomGoalRepository): GoalRepository
+
+    @Binds
+    abstract fun debitRepository(impl: RoomDebitRepository): DebitRepository
+
+    @Binds
+    abstract fun settingsRepository(impl: DataStoreSettingsRepository): SettingsRepository
+
+    /** The app-wide Clock is the demo clock, so "today" can be moved for the demo. */
+    @Binds
+    abstract fun clock(impl: DemoClock): Clock
+
+    @Binds
+    abstract fun demoClockController(impl: DemoClock): DemoClockController
+
+    @Binds
+    abstract fun idGenerator(impl: UuidIdGenerator): IdGenerator
+
+    @Binds
+    abstract fun analytics(impl: LogcatAnalytics): Analytics
+
+    @Binds
+    abstract fun demoSeedSource(impl: SeedData): DemoSeedSource
+
+    @Binds
+    abstract fun festivalCalendar(impl: BundledFestivalCalendar): FestivalCalendar
+}
+
+/** The simulated Paytm integrations. Swap for real Paytm Gold / Paytm Money and UPI AutoPay clients here. */
+@Module
+@InstallIn(SingletonComponent::class)
+internal abstract class PaytmGatewaysModule {
+    @Binds
+    abstract fun savingsDestinationGateway(impl: DemoSavingsDestinationGateway): SavingsDestinationGateway
+
+    @Binds
+    abstract fun autoPayGateway(impl: DemoAutoPayGateway): AutoPayGateway
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+internal object DataProvidersModule {
+    @Provides
+    @Singleton
+    fun database(@ApplicationContext context: Context): GullakDatabase =
+        Room.databaseBuilder(context, GullakDatabase::class.java, GullakDatabase.NAME).build()
+
+    @Provides
+    fun goalDao(database: GullakDatabase): GoalDao = database.goalDao()
+
+    @Provides
+    fun debitDao(database: GullakDatabase): DebitDao = database.debitDao()
+
+    @Provides
+    @SystemClock
+    fun systemClock(): Clock = Clock.systemDefaultZone()
+}
+
+/** Public so `:app`'s JVM test can replace the file-backed store. */
+@Module
+@InstallIn(SingletonComponent::class)
+object PreferencesModule {
+    @Provides
+    @Singleton
+    fun preferences(
+        @ApplicationContext context: Context,
+        @ApplicationScope scope: CoroutineScope,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        scope = scope + ioDispatcher,
+        produceFile = { context.preferencesDataStoreFile("gullak_settings") },
+    )
+}

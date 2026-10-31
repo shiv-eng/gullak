@@ -1,0 +1,185 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "f7ba3f08b208fd8d467aadbd5d043241",
+    "entities": [
+      {
+        "tableName": "goals",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `target_paise` INTEGER NOT NULL, `target_date` TEXT NOT NULL, `date_is_fixed` INTEGER NOT NULL, `created_on` TEXT NOT NULL, `destination` TEXT NOT NULL, `language_tag` TEXT NOT NULL, `schedule_frequency` TEXT, `schedule_base_amount_paise` INTEGER, `schedule_amount_paise` INTEGER, `schedule_start_date` TEXT, `schedule_end_date` TEXT, `schedule_mandate_id` TEXT, `schedule_extra_debits` TEXT, `schedule_excused_dates` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetPaise",
+            "columnName": "target_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetDate",
+            "columnName": "target_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateIsFixed",
+            "columnName": "date_is_fixed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdOn",
+            "columnName": "created_on",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destination",
+            "columnName": "destination",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "languageTag",
+            "columnName": "language_tag",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "schedule.frequency",
+            "columnName": "schedule_frequency",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "schedule.baseAmountPaise",
+            "columnName": "schedule_base_amount_paise",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "schedule.amountPaise",
+            "columnName": "schedule_amount_paise",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "schedule.startDate",
+            "columnName": "schedule_start_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "schedule.endDate",
+            "columnName": "schedule_end_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "schedule.mandateId",
+            "columnName": "schedule_mandate_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "schedule.extraDebits",
+            "columnName": "schedule_extra_debits",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "schedule.excusedDates",
+            "columnName": "schedule_excused_dates",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "debits",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `goal_id` TEXT NOT NULL, `date` TEXT NOT NULL, `amount_paise` INTEGER NOT NULL, `status` TEXT NOT NULL, `kind` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`goal_id`) REFERENCES `goals`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "goalId",
+            "columnName": "goal_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountPaise",
+            "columnName": "amount_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_debits_goal_id",
+            "unique": false,
+            "columnNames": [
+              "goal_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_debits_goal_id` ON `${TABLE_NAME}` (`goal_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "goals",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "goal_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f7ba3f08b208fd8d467aadbd5d043241')"
+    ]
+  }
+}

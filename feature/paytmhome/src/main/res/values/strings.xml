@@ -41,7 +41,7 @@
     <string name="paytm_health_insurance">Health\nInsurance</string>
 
     <!-- Gullak inside the Paytm home. -->
-    <string name="gullak_banner_title">Save for a goal, on a date</string>
+    <string name="gullak_banner_title">Save for an aspiration, on a date</string>
     <string name="gullak_banner_body">Laptop, wedding or trip: set the amount and date, get a Daily, Weekly or Monthly plan</string>
     <string name="gullak_banner_action">Start a Gullak</string>
     <string name="gullak_card_title">Your Gullaks</string>

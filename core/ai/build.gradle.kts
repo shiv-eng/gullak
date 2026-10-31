@@ -1,4 +1,4 @@
-import com.gullak.buildlogic.localProperties
+import com.shivangi.gullak.buildlogic.localProperties
 
 plugins {
     alias(libs.plugins.gullak.android.library)
@@ -10,7 +10,7 @@ plugins {
 val localProps = localProperties()
 
 android {
-    namespace = "com.gullak.core.ai"
+    namespace = "com.shivangi.gullak.core.ai"
     buildFeatures {
         buildConfig = true
     }
