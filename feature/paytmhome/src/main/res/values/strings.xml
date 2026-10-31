@@ -51,6 +51,7 @@
     <string name="gullak_speak_goal">Speak your goal</string>
     <string name="gullak_status_on_track">On track</string>
     <string name="gullak_status_behind">Behind by %1$s</string>
+    <string name="gullak_status_catching_up">Catching up: %1$s to go</string>
     <string name="gullak_status_reached">Goal reached</string>
     <string name="paytm_header_promo">Start filling your Gullak</string>
     <string name="gullak_banner_eyebrow">GULLAK</string>

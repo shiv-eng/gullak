@@ -648,6 +648,12 @@ private fun GoalStatusChip(
             StatusTone.WARNING,
             modifier,
         )
+
+        is GoalStatus.CatchingUp -> StatusChip(
+            stringResource(R.string.detail_status_catching_up, money(status.by)),
+            StatusTone.WARNING,
+            modifier,
+        )
     }
 }
 

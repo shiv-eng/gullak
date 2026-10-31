@@ -243,6 +243,9 @@ private fun GoalItem(
 
         is GoalStatus.Behind ->
             stringResource(R.string.home_status_behind, IndianMoneyFormat.format(status.by)) to StatusTone.WARNING
+
+        is GoalStatus.CatchingUp ->
+            stringResource(R.string.home_status_catching_up, IndianMoneyFormat.format(status.by)) to StatusTone.WARNING
     }
     val destination = stringResource(
         if (summary.goal.destination ==

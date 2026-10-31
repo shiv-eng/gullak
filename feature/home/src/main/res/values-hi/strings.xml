@@ -11,6 +11,7 @@
     <string name="home_goals_title">आपकी गुल्लक</string>
     <string name="home_status_on_track">सही रास्ते पर</string>
     <string name="home_status_behind">%1$s पीछे</string>
+    <string name="home_status_catching_up">भरपाई जारी: %1$s बाक़ी</string>
     <string name="home_status_reached">लक्ष्य पूरा</string>
     <string name="home_saved_of_target">%2$s में से %1$s · %3$s तक</string>
     <string name="home_next_sip">अगली क़िस्त: %2$s को %1$s · %3$s</string>

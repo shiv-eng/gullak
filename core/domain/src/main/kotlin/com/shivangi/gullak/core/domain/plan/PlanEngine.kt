@@ -105,7 +105,24 @@ class PlanEngine @Inject constructor(private val clock: Clock) {
             ?: 0
         val base = schedule?.baseAmountPerDebit ?: Money.ZERO
         val expected = minOf(lumpSum + base * dueDebits, goal.target)
-        return if (saved >= expected) GoalStatus.OnTrack else GoalStatus.Behind(expected - saved)
+        return when {
+            saved >= expected -> GoalStatus.OnTrack
+            recoveryInPlace(goal, debits, saved) -> GoalStatus.CatchingUp(expected - saved)
+            else -> GoalStatus.Behind(expected - saved)
+        }
+    }
+
+    /** A catch-up or spread has been applied, and the payments still to come reach the target. */
+    private fun recoveryInPlace(
+        goal: Goal,
+        debits: List<Debit>,
+        saved: Money,
+    ): Boolean {
+        val schedule = goal.schedule ?: return false
+        val upcoming = upcomingDebits(goal, debits)
+        val applied = schedule.amountPerDebit > schedule.baseAmountPerDebit ||
+            upcoming.any { it.kind == DebitKind.CATCH_UP }
+        return applied && saved + upcoming.map { it.amount }.sum() >= goal.target
     }
 
     /** Debits not yet attempted, earliest first: scheduled dates (at the current amount) and catch-ups. */
@@ -140,7 +157,7 @@ class PlanEngine @Inject constructor(private val clock: Clock) {
                 add(ReplanChoice.CatchUp(catchUpDebits(missed, failedDebit.date, today)))
             }
             if (remainingDebits > 0) {
-                val extra = missed.splitRoundedUp(remainingDebits, MONTHLY_STEP_RUPEES)
+                val extra = missed.splitRoundedUp(remainingDebits, stepFor(schedule.frequency))
                 add(ReplanChoice.Spread(schedule.amountPerDebit + extra, remainingDebits))
             }
             if (!goal.dateIsFixed) {
@@ -223,6 +240,12 @@ class PlanEngine @Inject constructor(private val clock: Clock) {
             .take(CATCH_UP_DAYS.size - preferred.size)
         val half = missed.splitRoundedUp(CATCH_UP_DAYS.size, MONTHLY_STEP_RUPEES)
         return (preferred + fallback).sorted().map { ScheduledDebit(it, half, DebitKind.CATCH_UP) }
+    }
+
+    private fun stepFor(frequency: Frequency): Long = when (frequency) {
+        Frequency.DAILY -> DAILY_STEP_RUPEES
+        Frequency.WEEKLY -> WEEKLY_STEP_RUPEES
+        Frequency.MONTHLY -> MONTHLY_STEP_RUPEES
     }
 
     private fun destinationFor(monthsToGoal: Int): Pair<Destination, DestinationReason> =

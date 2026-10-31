@@ -3,7 +3,7 @@
 This document describes the app that exists in this repository, closely enough to build it again. Where the code and this
 document disagree, the code is right; please fix this document.
 
-Status on 31 Oct 2026: 288 automated tests pass. See [section 15](#15-what-has-not-been-proven-yet) for what has not been
+Status on 31 Oct 2026: 292 automated tests pass. See [section 15](#15-what-has-not-been-proven-yet) for what has not been
 proven on a real phone. To build it again, follow the phases in [section 18](#18-build-phases).
 
 ---
@@ -158,7 +158,7 @@ Code conventions:
   `DebitKind { SCHEDULED, LUMP_SUM, CATCH_UP, PAYOUT }`.
 - `PlanOption(frequency, amountPerDebit, numberOfDebits, firstDebit, lastDebit)`.
 - `Plan(remaining, options, oneTimeOnly, destination, destinationReason, monthsToGoal)`.
-- `GoalStatus { OnTrack, Behind(by), Reached }`.
+- `GoalStatus { OnTrack, Behind(by), CatchingUp(by), Reached }`.
 - `ReplanChoice { CatchUp(debits), Spread(newAmountPerDebit, remainingDebits), Extend(newTargetDate) }`.
 - `ParsedGoal(goalName, targetAmount, targetDate, dateHint, language, followUp)`, `GoalLanguage { HINDI, HINGLISH, ENGLISH }`.
 - `AppSettings(demoMode, voiceReplies, interruptBySpeaking, voiceHintShown, speechLanguage, lastAiPath)`.
@@ -189,7 +189,8 @@ more goes to `PAYTM_GOLD` (long goal: gold's price can still move).
 **Saved** = successful debits, excluding `PAYOUT`.
 
 **Status:** saved ≥ target is `Reached`. Otherwise expected = lump sum + `baseAmountPerDebit` × non-excused scheduled dates up to
-today, capped at target. Saved ≥ expected is `OnTrack`, otherwise `Behind(expected − saved)`. Catch-ups never raise expected.
+today, capped at target. Saved ≥ expected is `OnTrack`. Otherwise the gap is `CatchingUp(gap)` if a catch-up or spread is in
+place and the payments still to come reach the target, or `Behind(gap)` if not. Catch-ups never raise expected.
 `baseAmountPerDebit` never changes, so a spread shows the gap shrinking.
 
 **Upcoming debits:** none once the goal is filled or paid out.
@@ -198,7 +199,8 @@ today, capped at target. Saved ≥ expected is `OnTrack`, otherwise `Behind(expe
 
 - `CatchUp` (monthly only): two debits of A ÷ 2 rounded up to ₹50, on the 15th and 25th of that month. A date already past is
   replaced by the next free day after today, so there are always two.
-- `Spread`: n scheduled debits left. New amount = current + (A ÷ n rounded up to ₹50). Not offered if n = 0.
+- `Spread`: n scheduled debits left. New amount = current + (A ÷ n rounded up to the plan's step: ₹5 daily, ₹10 weekly, ₹50
+  monthly). Not offered if n = 0.
 - `Extend`: target moved one period later, amount unchanged, failed date excused. Not offered when the date is fixed.
 
 ### Exact worked examples (today 31 Oct 2026, start 5 Nov 2026)
@@ -210,7 +212,7 @@ today, capped at target. Saved ≥ expected is `OnTrack`, otherwise `Behind(expe
 
 **Recovery example:** laptop monthly. 5 Nov to 5 Feb succeed; 5 Mar 2027 fails. Saved ₹18,000, expected ₹22,500, `Behind(₹4,500)`.
 Catch-up: ₹2,250 on 15 and 25 Mar. Spread: 3 left, ₹6,000 each. Extend hidden if the date is fixed. After both catch-ups: `OnTrack`.
-With spread: after 5 Apr `Behind(₹3,000)`, after 5 May `Behind(₹1,500)`, after 5 Jun `Reached`.
+With spread: after 5 Apr `CatchingUp(₹3,000)`, after 5 May `CatchingUp(₹1,500)`, after 5 Jun `Reached`.
 
 ### Money use cases
 
@@ -236,7 +238,7 @@ Other use cases: `UnderstandGoalUseCase` (also `check`), `BuildPlanUseCase`, `Cr
 | Reading each spoken turn | `GeminiConversationBrain`, JSON schema | Fails to `respondByRules` and `RuleBasedGoalParser` |
 | Friendly reaction | The same reply's `say` field | Dropped if it has a number, a promise about money, or the wrong script |
 | Amounts, dates, schedule, destination | `PlanEngine` | Unit tests |
-| Explaining a plan, a recovery or where money goes | `GeminiPlanExplanationService` | `NumberGuard`: an unknown number discards the reply for a template |
+| Explaining a plan, a recovery or where money goes | `GeminiPlanExplanationService` | `NumberGuard`: an unknown number discards the reply for a template. So does raw plan text ("2027-04-05", "debit", "101750") |
 | Confirming anything | `readbackReply`, code only | The model's YES is ignored at AutoPay; only the user's own words count |
 | Moving money | Nobody in AI | Gateways are called by use cases, after a code-checked yes |
 

@@ -141,6 +141,21 @@ class GoalDetailViewModelTest {
     }
 
     @Test
+    fun fixPlanGoesAwayOnceARecoveryIsInPlace() = runTest {
+        val laptop = laptopUpToFebruary()
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+
+        vm.onEvent(GoalDetailEvent.SimulateFailedDebit)
+        advanceUntilIdle()
+        vm.onEvent(GoalDetailEvent.ApplyReplan)
+        advanceUntilIdle()
+
+        assertEquals(GoalStatus.CatchingUp(rupees(4_500)), vm.uiState.value.detail?.summary?.status)
+        assertEquals(null, vm.uiState.value.unresolvedFailure)
+    }
+
+    @Test
     fun tooMuchMoneySaysHowMuchIsLeft() = runTest {
         val laptop = laptopUpToFebruary()
         val vm = viewModel(laptop)

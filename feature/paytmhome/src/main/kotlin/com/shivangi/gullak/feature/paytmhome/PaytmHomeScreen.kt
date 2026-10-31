@@ -527,6 +527,10 @@ private fun GoalRow(
 
         is GoalStatus.Behind ->
             stringResource(R.string.gullak_status_behind, IndianMoneyFormat.format(status.by)) to StatusTone.WARNING
+
+        is GoalStatus.CatchingUp ->
+            stringResource(R.string.gullak_status_catching_up, IndianMoneyFormat.format(status.by)) to
+                StatusTone.WARNING
     }
     val nextSip = if (goal.nextDebitDate != null && goal.nextDebitAmount != null) {
         stringResource(

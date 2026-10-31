@@ -18,6 +18,7 @@
     <string name="detail_next_sip">Next payment: %1$s on %2$s</string>
     <string name="detail_status_on_track">On track</string>
     <string name="detail_status_behind">Behind by %1$s</string>
+    <string name="detail_status_catching_up">Catching up: %1$s to go</string>
     <string name="detail_status_reached">Goal reached</string>
 
     <string name="detail_failed_banner">AutoPay failed on %1$s</string>

@@ -7,6 +7,8 @@
     <string-array name="voice_on_track_hi" translatable="false"><item>सब समय पर चल रहा है, बहुत बढ़िया!</item></string-array>
     <string-array name="voice_behind_en" translatable="false"><item>You are %1$s behind, but we can fix that.</item></string-array>
     <string-array name="voice_behind_hi" translatable="false"><item>आप %1$s पीछे हैं, पर इसे ठीक कर सकते हैं।</item></string-array>
+    <string-array name="voice_catching_up_en" translatable="false"><item>You are catching up: %1$s to go, and your plan covers it.</item></string-array>
+    <string-array name="voice_catching_up_hi" translatable="false"><item>भरपाई चल रही है: %1$s बाक़ी हैं, और आपकी योजना इसे पूरा कर देगी।</item></string-array>
     <string-array name="voice_reached_en" translatable="false"><item>You have reached your goal, congratulations!</item></string-array>
     <string-array name="voice_reached_hi" translatable="false"><item>आपका लक्ष्य पूरा हो गया, बहुत-बहुत बधाई!</item></string-array>
     <string-array name="voice_next_en" translatable="false"><item>The next payment is %1$s on %2$s.</item></string-array>

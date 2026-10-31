@@ -87,10 +87,10 @@ class PlanEngineReplanTest {
         val catchUp = engine.replanOptions(laptop, laptopFailed).filterIsInstance<ReplanChoice.CatchUp>().single()
         val goal = engine.applyReplan(laptop, catchUp, laptopFailed)
 
-        assertEquals(GoalStatus.Behind(rupees(4_500)), statusOn(march5, goal, laptopUntilFailure))
+        assertEquals(GoalStatus.CatchingUp(rupees(4_500)), statusOn(march5, goal, laptopUntilFailure))
 
         val afterFirst = laptopUntilFailure + debit("laptop", march15, rupees(2_250), kind = DebitKind.CATCH_UP)
-        assertEquals(GoalStatus.Behind(rupees(2_250)), statusOn(march15, goal, afterFirst))
+        assertEquals(GoalStatus.CatchingUp(rupees(2_250)), statusOn(march15, goal, afterFirst))
 
         val afterSecond = afterFirst + debit("laptop", march25, rupees(2_250), kind = DebitKind.CATCH_UP)
         assertEquals(rupees(22_500), engine.saved(afterSecond))
@@ -123,10 +123,10 @@ class PlanEngineReplanTest {
         assertEquals(rupees(6_000), goal.schedule?.amountPerDebit)
 
         val april = laptopUntilFailure + debit("laptop", LocalDate.of(2027, 4, 5), rupees(6_000))
-        assertEquals(GoalStatus.Behind(rupees(3_000)), statusOn(LocalDate.of(2027, 4, 5), goal, april))
+        assertEquals(GoalStatus.CatchingUp(rupees(3_000)), statusOn(LocalDate.of(2027, 4, 5), goal, april))
 
         val may = april + debit("laptop", LocalDate.of(2027, 5, 5), rupees(6_000))
-        assertEquals(GoalStatus.Behind(rupees(1_500)), statusOn(LocalDate.of(2027, 5, 5), goal, may))
+        assertEquals(GoalStatus.CatchingUp(rupees(1_500)), statusOn(LocalDate.of(2027, 5, 5), goal, may))
 
         val june = may + debit("laptop", LocalDate.of(2027, 6, 5), rupees(6_000))
         assertEquals(rupees(36_000), engine.saved(june))
@@ -198,8 +198,27 @@ class PlanEngineReplanTest {
 
         val choices = engine.replanOptions(weekly, failed)
 
-        // 32 weekly debits remain: ₹1,060 / 32 = ₹33.13 → ₹50 more each.
-        assertEquals(listOf(ReplanChoice.Spread(rupees(1_110), 32)), choices)
+        // 32 weekly debits remain: ₹1,060 / 32 = ₹33.13 → ₹40 more each.
+        assertEquals(listOf(ReplanChoice.Spread(rupees(1_100), 32)), choices)
+    }
+
+    @Test
+    fun aDailySpreadAddsOnlyWhatTheMissedPaymentNeeds() {
+        val daily = laptop.copy(schedule = TestData.monthlySchedule(rupees(1_670), LAPTOP_DATE, Frequency.DAILY))
+        val failed = debit("laptop", TestData.FIRST_DEBIT, rupees(1_670), DebitStatus.FAILED)
+        clock.date = failed.date
+
+        // 237 daily debits remain: ₹1,670 / 237 = ₹7.05 → ₹10 more each, not ₹50.
+        assertEquals(listOf(ReplanChoice.Spread(rupees(1_680), 237)), engine.replanOptions(daily, failed))
+    }
+
+    @Test
+    fun anotherFailureDuringARecoveryIsBehindAgain() {
+        val goal = engine.applyReplan(laptop, ReplanChoice.Spread(rupees(6_000), 3), laptopFailed)
+        val april = LocalDate.of(2027, 4, 5)
+        val failedAgain = laptopUntilFailure + debit("laptop", april, rupees(6_000), DebitStatus.FAILED)
+
+        assertEquals(GoalStatus.Behind(rupees(9_000)), statusOn(april, goal, failedAgain))
     }
 
     @Test

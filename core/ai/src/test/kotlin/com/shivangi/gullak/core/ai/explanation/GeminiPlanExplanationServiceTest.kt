@@ -79,8 +79,24 @@ class GeminiPlanExplanationServiceTest {
 
         assertEquals(reply, explainWedding(service(), GoalLanguage.HINGLISH))
         val sent = server.takeRequest().body?.utf8().orEmpty()
-        assertTrue(sent.contains("amount_per_debit_rupees"))
+        assertTrue(sent.contains("amount_per_payment"))
+        assertTrue(sent, sent.contains("₹3,600") || sent.contains("\\u20b93,600"))
+        assertTrue(sent, !sent.contains("2027-12-05"))
         assertTrue(sent.contains("Language: hinglish"))
+    }
+
+    @Test
+    fun replyWithRawPlanTextIsReplacedByTheTemplate() = runTest {
+        listOf(
+            "Your 14 debits run until 5 December 2027.",
+            "Your 14 payments run until 2027-12-05.",
+            "Har mahine 3600 rupees, 14 baar.",
+        ).forEach { raw ->
+            server.enqueue(geminiResponse(raw))
+            val text = explainWedding(service(), GoalLanguage.HINGLISH)
+            assertTrue(text, text.startsWith("Har mahine ki 5 tareekh ko ₹3,600 bachaiye"))
+        }
+        assertTrue(AnalyticsEvent.AiFallbackUsed("raw_text") in analytics.events)
     }
 
     @Test
@@ -123,7 +139,7 @@ class GeminiPlanExplanationServiceTest {
             .explainReplan("Laptop", catchUp, Money.fromRupees(4_500), GoalLanguage.ENGLISH)
 
         assertEquals(
-            "Your ₹4,500 AutoPay did not go through. Two extra debits of ₹2,250, on 15 Mar 2027 and 25 Mar 2027, " +
+            "Your ₹4,500 AutoPay did not go through. Two extra payments of ₹2,250, on 15 Mar 2027 and 25 Mar 2027, " +
                 "put Laptop back on track.",
             text,
         )
@@ -131,15 +147,15 @@ class GeminiPlanExplanationServiceTest {
 
     @Test
     fun replanReplyIsGuardedToo() = runTest {
-        server.enqueue(geminiResponse("Koi baat nahi. Agle 3 debit ₹6,000 ke honge."))
-        server.enqueue(geminiResponse("Koi baat nahi. Agle 4 debit ₹6,000 ke honge."))
+        server.enqueue(geminiResponse("Koi baat nahi. Agli 3 kist ₹6,000 ki hongi."))
+        server.enqueue(geminiResponse("Koi baat nahi. Agli 4 kist ₹6,000 ki hongi."))
         val spread = ReplanChoice.Spread(Money.fromRupees(6_000), 3)
         val service = service()
 
         val grounded = service.explainReplan("Laptop", spread, Money.fromRupees(4_500), GoalLanguage.HINGLISH)
         val invented = service.explainReplan("Laptop", spread, Money.fromRupees(4_500), GoalLanguage.HINGLISH)
 
-        assertEquals("Koi baat nahi. Agle 3 debit ₹6,000 ke honge.", grounded)
+        assertEquals("Koi baat nahi. Agli 3 kist ₹6,000 ki hongi.", grounded)
         assertTrue(invented, invented.startsWith("₹4,500 ki AutoPay nahi hui."))
     }
 }

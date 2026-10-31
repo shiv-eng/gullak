@@ -190,6 +190,11 @@ internal class ResourceGoalVoiceLines @Inject constructor(@ApplicationContext pr
                 R.array.voice_behind_hi,
             ).format(money(status.by))
 
+            is GoalStatus.CatchingUp -> language.pick(
+                R.array.voice_catching_up_en,
+                R.array.voice_catching_up_hi,
+            ).format(money(status.by))
+
             GoalStatus.Reached -> language.pick(R.array.voice_reached_en, R.array.voice_reached_hi)
         }
         val next = summary.nextDebit?.let {

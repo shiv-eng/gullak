@@ -47,6 +47,7 @@
     <string name="gullak_speak_goal">अपना लक्ष्य बोलें</string>
     <string name="gullak_status_on_track">सही रास्ते पर</string>
     <string name="gullak_status_behind">%1$s पीछे</string>
+    <string name="gullak_status_catching_up">भरपाई जारी: %1$s बाक़ी</string>
     <string name="gullak_status_reached">लक्ष्य पूरा</string>
     <string name="paytm_header_promo">अपनी गुल्लक भरना शुरू करें</string>
     <string name="gullak_banner_eyebrow">गुल्लक</string>

@@ -18,6 +18,7 @@
     <string name="detail_next_sip">आपकी अगली क़िस्त: %2$s को %1$s</string>
     <string name="detail_status_on_track">सही रास्ते पर</string>
     <string name="detail_status_behind">%1$s पीछे</string>
+    <string name="detail_status_catching_up">भरपाई जारी: %1$s बाक़ी</string>
     <string name="detail_status_reached">लक्ष्य पूरा</string>
 
     <string name="detail_failed_banner">%1$s को AutoPay नहीं हुई</string>

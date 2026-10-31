@@ -25,15 +25,15 @@
     <string name="explain_gold_risk_hi" translatable="false">सोने का दाम ऊपर-नीचे हो सकता है, इसलिए उसकी क़ीमत बदल सकती है।</string>
 
     <!-- Replan: %1$s missed amount; catch-up %2$s each, %3$s/%4$s dates, %5$s goal; spread %2$d debits, %3$s new amount, %4$s goal; extend %2$s new date, %3$s goal. -->
-    <string name="explain_catch_up_en" translatable="false">Your %1$s AutoPay did not go through. Two extra debits of %2$s, on %3$s and %4$s, put %5$s back on track.</string>
-    <string name="explain_spread_en" translatable="false">Your %1$s AutoPay did not go through. Raising the next %2$d debits to %3$s each makes it up by the goal date for %4$s.</string>
-    <string name="explain_extend_en" translatable="false">Your %1$s AutoPay did not go through. Moving %3$s to %2$s keeps every debit the same.</string>
+    <string name="explain_catch_up_en" translatable="false">Your %1$s AutoPay did not go through. Two extra payments of %2$s, on %3$s and %4$s, put %5$s back on track.</string>
+    <string name="explain_spread_en" translatable="false">Your %1$s AutoPay did not go through. Raising the next %2$d payments to %3$s each makes it up by the goal date for %4$s.</string>
+    <string name="explain_extend_en" translatable="false">Your %1$s AutoPay did not go through. Moving %3$s to %2$s keeps every payment the same.</string>
 
-    <string name="explain_catch_up_hinglish" translatable="false">%1$s ki AutoPay nahi hui. Koi baat nahi: %3$s aur %4$s ko %2$s ke do extra debit se %5$s phir track par aa jayega.</string>
-    <string name="explain_spread_hinglish" translatable="false">%1$s ki AutoPay nahi hui. Agle %2$d debit %3$s ke kar dete hain, to %4$s time par poora hoga.</string>
-    <string name="explain_extend_hinglish" translatable="false">%1$s ki AutoPay nahi hui. %3$s ki date %2$s kar dete hain, har debit wahi rahega.</string>
+    <string name="explain_catch_up_hinglish" translatable="false">%1$s ki AutoPay nahi hui. Koi baat nahi: %3$s aur %4$s ko %2$s ki do extra kist se %5$s phir track par aa jayega.</string>
+    <string name="explain_spread_hinglish" translatable="false">%1$s ki AutoPay nahi hui. Agli %2$d kist %3$s ki kar dete hain, to %4$s time par poora hoga.</string>
+    <string name="explain_extend_hinglish" translatable="false">%1$s ki AutoPay nahi hui. %3$s ki date %2$s kar dete hain, har kist wahi rahegi.</string>
 
-    <string name="explain_catch_up_hi" translatable="false">%1$s की AutoPay नहीं हुई। कोई बात नहीं: %3$s और %4$s को %2$s के दो अतिरिक्त डेबिट से %5$s फिर से सही रास्ते पर आ जाएगा।</string>
-    <string name="explain_spread_hi" translatable="false">%1$s की AutoPay नहीं हुई। अगले %2$d डेबिट %3$s के कर देते हैं, तो %4$s समय पर पूरा होगा।</string>
-    <string name="explain_extend_hi" translatable="false">%1$s की AutoPay नहीं हुई। %3$s की तारीख़ %2$s कर देते हैं, हर डेबिट वही रहेगा।</string>
+    <string name="explain_catch_up_hi" translatable="false">%1$s की AutoPay नहीं हुई। कोई बात नहीं: %3$s और %4$s को %2$s की दो अतिरिक्त क़िस्तों से %5$s फिर से सही रास्ते पर आ जाएगा।</string>
+    <string name="explain_spread_hi" translatable="false">%1$s की AutoPay नहीं हुई। अगली %2$d क़िस्तें %3$s की कर देते हैं, तो %4$s समय पर पूरा होगा।</string>
+    <string name="explain_extend_hi" translatable="false">%1$s की AutoPay नहीं हुई। %3$s की तारीख़ %2$s कर देते हैं, हर क़िस्त वही रहेगी।</string>
 </resources>

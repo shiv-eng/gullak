@@ -45,6 +45,9 @@ sealed interface GoalStatus {
 
     data class Behind(val by: Money) : GoalStatus
 
+    /** Still [by] short, but a recovery is in place whose payments cover the goal. */
+    data class CatchingUp(val by: Money) : GoalStatus
+
     data object Reached : GoalStatus
 }
 

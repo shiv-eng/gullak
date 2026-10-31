@@ -88,7 +88,7 @@ class DemoScriptUseCaseTest {
         assertTrue(AnalyticsEvent.ReplanShown(2) in env.analytics.events)
 
         val status = env.applyReplan(laptop.id, failed.id, catchUp)
-        assertEquals(AppResult.Success(GoalStatus.Behind(rupees(4_500))), status)
+        assertEquals(AppResult.Success(GoalStatus.CatchingUp(rupees(4_500))), status)
         assertTrue(AnalyticsEvent.ReplanApplied("catch_up") in env.analytics.events)
 
         val first = requireNotNull(env.postNextDebit(laptop.id, succeed = true).getOrNull())
