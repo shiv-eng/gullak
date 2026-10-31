@@ -56,7 +56,14 @@ data class TopUpUi(
     val requested: Boolean = false,
 )
 
+/** What the goal page's voice is doing, shown on screen. */
+enum class GoalTalkPhase { LISTENING, THINKING, SPEAKING }
+
 data class GoalDetailUiState(
+    /** Null when the voice is not active. */
+    val talkPhase: GoalTalkPhase? = null,
+    val gullakSaid: String? = null,
+    val youSaid: String? = null,
     val canPayOut: Boolean = false,
     val isPaidOut: Boolean = false,
     val addingMoney: Boolean = false,
@@ -350,40 +357,76 @@ class GoalDetailViewModel @Inject internal constructor(
     private fun stopTalking() {
         talkJob?.cancel()
         talk.stop()
+        state.update { it.copy(talkPhase = null) }
     }
 
     /** Spoken Hinglish uses Hindi lines in Devanagari, which the voices say best. */
     private fun spokenLanguage(tag: String): GoalLanguage =
         if (GoalLanguage.fromTag(tag) == GoalLanguage.ENGLISH) GoalLanguage.ENGLISH else GoalLanguage.HINDI
 
-    private fun talkAboutGoal() {
-        val current = state.value
-        val summary = current.detail?.summary ?: return
-        val failure = current.unresolvedFailure
+    private suspend fun say(
+        text: String,
+        language: GoalLanguage,
+    ) {
+        state.update { it.copy(talkPhase = GoalTalkPhase.SPEAKING, gullakSaid = text) }
+        talk.say(text, language)
+    }
+
+    /** The user's words, or null if nothing was heard. */
+    private suspend fun listen(): String? {
+        state.update { it.copy(talkPhase = GoalTalkPhase.LISTENING, youSaid = null) }
+        val heard = talk.listen { partial -> state.update { it.copy(youSaid = partial) } }
+        state.update { it.copy(youSaid = heard, talkPhase = if (heard == null) null else GoalTalkPhase.THINKING) }
+        return heard
+    }
+
+    /** Runs a stretch of talking, and clears what is shown when it ends, however it ends. */
+    private fun startTalking(block: suspend () -> Unit) {
         stopTalking()
         talkJob = viewModelScope.launch(talkFailed) {
-            val language = spokenLanguage(summary.goal.languageTag)
-            talk.say(talk.lines.status(language, summary), language)
-            if (failure != null && state.value.replan == null) {
-                openReplan(failure.id)
-            } else if (talk.isOn()) {
-                talk.say(talk.lines.anythingElse(language), language)
-                talk.listen()?.let { heard -> act(heard, summary.goal, language) }
+            try {
+                block()
+            } finally {
+                state.update { it.copy(talkPhase = null) }
             }
         }
     }
 
+    /** The mic listens straight away; a second tap stops it. Silence or anything else gets how the goal is doing. */
+    private fun talkAboutGoal() {
+        val current = state.value
+        val summary = current.detail?.summary ?: return
+        if (current.talkPhase != null) {
+            stopTalking()
+            return
+        }
+        val failure = current.unresolvedFailure
+        val language = spokenLanguage(summary.goal.languageTag)
+        startTalking {
+            state.update { it.copy(gullakSaid = null) }
+            val request = listen()?.let { heard -> talk.readRequest(heard, situation(summary.goal)) }
+            if (request != null) {
+                act(request, summary.goal, language)
+            } else {
+                say(talk.lines.status(language, summary), language)
+                if (failure != null && state.value.replan == null) openReplan(failure.id)
+            }
+        }
+    }
+
+    private fun situation(goal: Goal) =
+        "On the page of the goal ${goal.name}. They tapped the mic and may ask to add money, take it out, " +
+            "or about a top-up."
+
     private suspend fun act(
-        heard: String,
+        request: GoalRequest,
         goal: Goal,
         language: GoalLanguage,
     ) {
-        val situation = "On the page of the goal ${goal.name}. You asked if they want to add money or anything else."
-        when (val request = talk.readRequest(heard, situation)) {
+        when (request) {
             is GoalRequest.AddMoney -> addMoneyByVoice(request.amount, language)
             GoalRequest.PayOut -> payOutByVoice(goal, language)
             GoalRequest.TopUp -> topUpByVoice(language)
-            null -> Unit
         }
     }
 
@@ -391,14 +434,14 @@ class GoalDetailViewModel @Inject internal constructor(
         amount: Money,
         language: GoalLanguage,
     ) {
-        talk.say(talk.lines.confirmAdd(language, amount), language)
-        val heard = talk.listen() ?: return
+        say(talk.lines.confirmAdd(language, amount), language)
+        val heard = listen() ?: return
         if (readbackReply(heard) != ReadbackReply.YES) {
-            talk.say(talk.lines.leftAsIs(language), language)
+            say(talk.lines.leftAsIs(language), language)
             return
         }
         val line = if (addMoney(amount)) talk.lines.added(language, amount) else talk.lines.cannotAdd(language)
-        talk.say(line, language)
+        say(line, language)
     }
 
     private suspend fun payOutByVoice(
@@ -407,37 +450,37 @@ class GoalDetailViewModel @Inject internal constructor(
     ) {
         val detail = state.value.detail ?: return
         if (!money.payOut.canPayOut(detail.summary.goal, detail.debits)) {
-            talk.say(talk.lines.notTimeToPayOut(language, goal.targetDate), language)
+            say(talk.lines.notTimeToPayOut(language, goal.targetDate), language)
             return
         }
-        talk.say(talk.lines.confirmPayOut(language, detail.summary.saved), language)
-        val heard = talk.listen() ?: return
+        say(talk.lines.confirmPayOut(language, detail.summary.saved), language)
+        val heard = listen() ?: return
         if (readbackReply(heard) == ReadbackReply.YES) {
-            payOut()?.let { talk.say(talk.lines.paidOut(language, it), language) }
+            payOut()?.let { say(talk.lines.paidOut(language, it), language) }
         } else {
-            talk.say(talk.lines.leftAsIs(language), language)
+            say(talk.lines.leftAsIs(language), language)
         }
     }
 
     private suspend fun topUpByVoice(language: GoalLanguage) {
         val answer = askTopUp() ?: return
-        talk.say(talk.lines.topUp(language, answer), language)
+        say(talk.lines.topUp(language, answer), language)
         if (answer !is TopUpAnswer.Offer) return
-        val heard = talk.listen() ?: return
+        val heard = listen() ?: return
         if (readbackReply(heard) == ReadbackReply.YES) {
             state.update { it.copy(topUp = it.topUp?.copy(requested = true)) }
-            talk.say(talk.lines.topUpRequested(language), language)
+            say(talk.lines.topUpRequested(language), language)
         } else {
-            talk.say(talk.lines.leftAsIs(language), language)
+            say(talk.lines.leftAsIs(language), language)
         }
     }
 
     /** The moment the goal is reached is the moment to say so. */
     private fun offerPayOutIfDue() {
         val detail = state.value.detail ?: return
-        viewModelScope.launch {
+        startTalking {
             // The new payment reaches the state through the repository's flow.
-            val current = withTimeoutOrNull(STATE_WAIT_MS) { uiState.first { it.canPayOut } } ?: return@launch
+            val current = withTimeoutOrNull(STATE_WAIT_MS) { uiState.first { it.canPayOut } } ?: return@startTalking
             val goal = current.detail?.summary?.goal ?: detail.summary.goal
             if (current.replan == null && talk.isOn()) payOutByVoice(goal, spokenLanguage(goal.languageTag))
         }
@@ -445,22 +488,21 @@ class GoalDetailViewModel @Inject internal constructor(
 
     /** Offers the engine's choices aloud, then applies one only on a yes that code reads from the user's words. */
     private fun talkThroughReplan(offer: ReplanOffer) {
-        stopTalking()
-        talkJob = viewModelScope.launch(talkFailed) {
-            if (!talk.isOn()) return@launch
+        startTalking {
+            if (!talk.isOn()) return@startTalking
             val language = spokenLanguage(offer.goal.languageTag)
-            talk.say(talk.lines.offer(language, offer.failedDebit, offer.status, offer.choices), language)
-            val index = askWhichChoice(offer, language) ?: return@launch
+            say(talk.lines.offer(language, offer.failedDebit, offer.status, offer.choices), language)
+            val index = askWhichChoice(offer, language) ?: return@startTalking
             select(index)
             val explanation = withTimeoutOrNull(EXPLANATION_WAIT_MS) {
                 uiState.first { it.replan?.isExplaining == false && it.replan?.explanation != null }
             }?.replan?.explanation
-            talk.say(listOfNotNull(explanation, talk.lines.applyQuestion(language)).joinToString(" "), language)
-            val heard = talk.listen() ?: return@launch
+            say(listOfNotNull(explanation, talk.lines.applyQuestion(language)).joinToString(" "), language)
+            val heard = listen() ?: return@startTalking
             if (readbackReply(heard) == ReadbackReply.YES) {
-                if (apply()) talk.say(talk.lines.applied(language), language)
+                if (apply()) say(talk.lines.applied(language), language)
             } else {
-                talk.say(talk.lines.leftAsIs(language), language)
+                say(talk.lines.leftAsIs(language), language)
             }
         }
     }
@@ -470,17 +512,17 @@ class GoalDetailViewModel @Inject internal constructor(
         language: GoalLanguage,
     ): Int? {
         repeat(CHOICE_TRIES) {
-            val heard = talk.listen() ?: return null
+            val heard = listen() ?: return null
             val choice = replanChoiceFrom(heard, offer.choices)
             when {
                 choice != null -> return choice
 
                 readbackReply(heard) == ReadbackReply.NO -> {
-                    talk.say(talk.lines.leftAsIs(language), language)
+                    say(talk.lines.leftAsIs(language), language)
                     return null
                 }
 
-                else -> talk.say(talk.lines.whichOne(language), language)
+                else -> say(talk.lines.whichOne(language), language)
             }
         }
         return null
@@ -490,8 +532,7 @@ class GoalDetailViewModel @Inject internal constructor(
         val replan = state.value.replan ?: return
         val text = replan.explanation ?: return
         val language = spokenLanguage(replan.offer.goal.languageTag)
-        stopTalking()
-        talkJob = viewModelScope.launch(talkFailed) { talk.say(text, language) }
+        startTalking { say(text, language) }
     }
 
     override fun onCleared() {

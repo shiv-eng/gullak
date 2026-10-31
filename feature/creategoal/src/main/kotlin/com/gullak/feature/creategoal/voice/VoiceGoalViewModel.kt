@@ -181,7 +181,7 @@ class VoiceGoalViewModel @Inject internal constructor(
             VoiceGoalEvent.MicReady -> if (!started) {
                 started = true
                 state.update { it.copy(micDenied = false) }
-                talk = viewModelScope.launch(conversationFailed) { converse(greeting()) }
+                talk = viewModelScope.launch(conversationFailed) { converse(lines.greeting(language)) }
             }
 
             VoiceGoalEvent.MicDenied -> state.update { it.copy(micDenied = true) }
@@ -242,16 +242,6 @@ class VoiceGoalViewModel @Inject internal constructor(
             }
         } while (line != null)
         state.update { it.copy(phase = TalkPhase.WAITING, micLevel = 0f) }
-    }
-
-    /** Greets a returning saver with how far they have come. */
-    private suspend fun greeting(): String {
-        val best = observeGoals().first().goals.filter { it.saved.isPositive }.maxByOrNull { it.saved.paise }
-        return if (best == null) {
-            lines.greeting(language)
-        } else {
-            lines.greetingWithProgress(language, best.goal.name, best.saved)
-        }
     }
 
     /** True if the user talked over it. */

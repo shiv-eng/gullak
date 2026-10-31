@@ -53,7 +53,6 @@
     <string name="replan_why">यह क्यों काम करेगा</string>
     <string name="replan_apply">लागू करें</string>
     <string name="replan_listen">सुनें</string>
-    <string name="detail_talk">सुनें कि यह लक्ष्य कैसा चल रहा है</string>
     <string name="detail_kind_payout">बैंक में भेजा गया</string>
     <string name="detail_add_money">पैसे जोड़ें</string>
     <string name="detail_add_money_hint">रुपये में रक़म लिखें</string>
@@ -73,4 +72,10 @@
         <item quantity="one">अगला भुगतान %1$s का</item>
         <item quantity="other">अगले %2$d भुगतान %1$s के</item>
     </plurals>
+    <string name="detail_talk">इस लक्ष्य के बारे में गुल्लक से बात करें</string>
+    <string name="detail_talk_stop">रोकें</string>
+    <string name="detail_talk_listening">सुन रहे हैं…</string>
+    <string name="detail_talk_thinking">एक सेकंड…</string>
+    <string name="detail_talk_speaking">गुल्लक बोल रही है। रोकने के लिए स्टॉप दबाएँ।</string>
+    <string name="detail_talk_hint">बोलें \"5,000 जोड़ दो\" या \"पैसे कम पड़ रहे हैं\"। कुछ न बोलें तो इस लक्ष्य का हाल सुनेंगे।</string>
 </resources>

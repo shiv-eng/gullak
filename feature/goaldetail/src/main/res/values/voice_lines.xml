@@ -38,8 +38,6 @@
     <string-array name="voice_left_en" translatable="false"><item>All right, I will leave it as it is. You can choose on screen any time.</item></string-array>
     <string-array name="voice_left_hi" translatable="false"><item>ठीक है, अभी ऐसे ही रहने देते हैं। आप स्क्रीन पर कभी भी चुन सकते हैं।</item></string-array>
 
-    <string-array name="voice_anything_en" translatable="false"><item>Would you like to add money, or anything else?</item></string-array>
-    <string-array name="voice_anything_hi" translatable="false"><item>कुछ और पैसे जोड़ने हैं, या कुछ और?</item></string-array>
     <string-array name="voice_confirm_add_en" translatable="false"><item>Shall I add %1$s to this Gullak now? This is a demo, no real money moves.</item></string-array>
     <string-array name="voice_confirm_add_hi" translatable="false"><item>अभी %1$s इस गुल्लक में जोड़ दूँ? यह डेमो है, असली पैसा नहीं कटेगा।</item></string-array>
     <string-array name="voice_added_en" translatable="false"><item>Done, %1$s added. Well done!</item></string-array>

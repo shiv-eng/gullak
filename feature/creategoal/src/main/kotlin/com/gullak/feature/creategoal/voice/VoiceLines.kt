@@ -28,12 +28,6 @@ internal interface VoiceLines {
 
     fun greeting(language: GoalLanguage): String
 
-    fun greetingWithProgress(
-        language: GoalLanguage,
-        name: String,
-        saved: Money,
-    ): String
-
     fun anythingElse(language: GoalLanguage): String
 
     fun savings(
@@ -146,16 +140,6 @@ internal class ResourceVoiceLines @Inject constructor(@ApplicationContext privat
 
     override fun greeting(language: GoalLanguage) =
         language.pick(R.array.voice_greeting_en, R.array.voice_greeting_hinglish, R.array.voice_greeting_hi)
-
-    override fun greetingWithProgress(
-        language: GoalLanguage,
-        name: String,
-        saved: Money,
-    ) = language.pick(
-        R.array.voice_greeting_progress_en,
-        R.array.voice_greeting_progress_hinglish,
-        R.array.voice_greeting_progress_hi,
-    ).format(name, IndianMoneyFormat.format(saved))
 
     override fun savings(
         language: GoalLanguage,

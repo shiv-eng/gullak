@@ -23,6 +23,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -110,7 +111,9 @@ class GoalDetailViewModelTest {
         vm.onEvent(GoalDetailEvent.TalkClicked)
         advanceUntilIdle()
 
-        assertEquals(listOf("status", "else"), env.voice.spoken)
+        assertEquals(listOf("status"), env.voice.spoken)
+        assertEquals(1, env.speech.listens)
+        assertNull(vm.uiState.value.talkPhase)
     }
 
     @Test
@@ -223,6 +226,51 @@ class GoalDetailViewModelTest {
 
         assertTrue(env.voice.stops > 0)
         assertEquals("left", env.voice.spoken.last())
+    }
+
+    @Test
+    fun theMicListensBeforeSayingAnythingAndShowsIt() = runTest {
+        val laptop = laptopUpToFebruary()
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+        env.speech.hold = true
+
+        vm.onEvent(GoalDetailEvent.TalkClicked)
+        runCurrent()
+
+        assertEquals(GoalTalkPhase.LISTENING, vm.uiState.value.talkPhase)
+        assertTrue(env.voice.spoken.isEmpty())
+    }
+
+    @Test
+    fun aSecondTapOnTheMicStopsIt() = runTest {
+        val laptop = laptopUpToFebruary()
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+        env.speech.hold = true
+        vm.onEvent(GoalDetailEvent.TalkClicked)
+        runCurrent()
+
+        vm.onEvent(GoalDetailEvent.TalkClicked)
+        runCurrent()
+
+        assertNull(vm.uiState.value.talkPhase)
+        assertTrue(env.voice.spoken.isEmpty())
+    }
+
+    @Test
+    fun whatIsHeardIsShownWhileListening() = runTest {
+        val laptop = laptopUpToFebruary()
+        env.speech.heard += listOf(SpeechEvent.Partial("5 hazaar"), SpeechEvent.Final("5 hazaar daal do"))
+        env.speech.heard += listOf(SpeechEvent.Partial("ha"), SpeechEvent.Final("haan"))
+        val vm = viewModel(laptop)
+        advanceUntilIdle()
+
+        vm.onEvent(GoalDetailEvent.TalkClicked)
+        advanceUntilIdle()
+
+        assertEquals("haan", vm.uiState.value.youSaid)
+        assertEquals("added", vm.uiState.value.gullakSaid)
     }
 
     @Test
@@ -432,6 +480,4 @@ private object FakeGoalLines : GoalVoiceLines {
     ) = "top up"
 
     override fun topUpRequested(language: GoalLanguage) = "requested"
-
-    override fun anythingElse(language: GoalLanguage) = "else"
 }

@@ -324,7 +324,7 @@ class VoiceGoalViewModelTest {
     }
 
     @Test
-    fun aReturningSaverIsGreetedWithTheirProgress() = runTest {
+    fun startingANewGullakIsNotAboutTheOldOnes() = runTest {
         env.resetDemoData(true)
         env.postNextDebit(env.goals.goals.first().id, true)
         val vm = viewModel()
@@ -332,7 +332,7 @@ class VoiceGoalViewModelTest {
         vm.onEvent(VoiceGoalEvent.MicReady)
         advanceUntilIdle()
 
-        assertTrue(env.voice.spoken.first().startsWith("progress"))
+        assertEquals("greeting", env.voice.spoken.first())
     }
 
     @Test
@@ -564,12 +564,6 @@ private object FakeLines : VoiceLines {
     override fun defaultLanguage() = GoalLanguage.HINGLISH
 
     override fun greeting(language: GoalLanguage) = "greeting"
-
-    override fun greetingWithProgress(
-        language: GoalLanguage,
-        name: String,
-        saved: Money,
-    ) = "progress $name"
 
     override fun anythingElse(language: GoalLanguage) = "else"
 

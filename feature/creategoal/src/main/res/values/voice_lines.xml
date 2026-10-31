@@ -231,17 +231,8 @@
         <item>धन्यवाद! जब मन करे, फिर बात करेंगे।</item>
     </string-array>
 
-    <string-array name="voice_greeting_progress_en" translatable="false">
-        <item>Hello again! Your %1$s Gullak already has %2$s in it, well done! What shall we save for next?</item>
-    </string-array>
 
-    <string-array name="voice_greeting_progress_hinglish" translatable="false">
-        <item>Namaste! Aapki %1$s gullak mein %2$s jud chuke hain, bahut badhiya! Ab kis cheez ke liye bachat karein?</item>
-    </string-array>
 
-    <string-array name="voice_greeting_progress_hi" translatable="false">
-        <item>नमस्ते जी! आपकी %1$s गुल्लक में %2$s जुड़ चुके हैं, बहुत बढ़िया! अब किस चीज़ के लिए बचत करें?</item>
-    </string-array>
 
     <string-array name="voice_else_en" translatable="false">
         <item>Is there anything else?</item>

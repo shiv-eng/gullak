@@ -77,11 +77,15 @@ internal class GoalTalk @Inject constructor(
         }
     }
 
-    /** The user's words, or null if nothing usable was heard. */
-    suspend fun listen(): String? {
+    /** The user's words, or null if nothing usable was heard. [onPartial] gets what is heard so far. */
+    suspend fun listen(onPartial: (String) -> Unit = {}): String? {
         var heard: String? = null
         speech.listen(settings.settings.first().speechLanguage.tag).collect { event ->
-            if (event is SpeechEvent.Final) heard = event.text
+            when (event) {
+                is SpeechEvent.Partial -> onPartial(event.text)
+                is SpeechEvent.Final -> heard = event.text
+                else -> Unit
+            }
         }
         return heard?.takeIf { it.isNotBlank() }
     }
@@ -149,8 +153,6 @@ internal interface GoalVoiceLines {
     ): String
 
     fun topUpRequested(language: GoalLanguage): String
-
-    fun anythingElse(language: GoalLanguage): String
 }
 
 @Suppress("TooManyFunctions") // One function for each thing Gullak can say.
@@ -259,9 +261,6 @@ internal class ResourceGoalVoiceLines @Inject constructor(@ApplicationContext pr
 
     override fun topUpRequested(language: GoalLanguage) =
         language.pick(R.array.voice_top_up_sent_en, R.array.voice_top_up_sent_hi)
-
-    override fun anythingElse(language: GoalLanguage) =
-        language.pick(R.array.voice_anything_en, R.array.voice_anything_hi)
 
     override fun applyQuestion(language: GoalLanguage) = language.pick(R.array.voice_apply_en, R.array.voice_apply_hi)
 

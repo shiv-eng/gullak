@@ -53,7 +53,6 @@
     <string name="replan_why">Why this works</string>
     <string name="replan_apply">Apply</string>
     <string name="replan_listen">Listen</string>
-    <string name="detail_talk">Hear how this goal is doing</string>
     <string name="detail_kind_payout">Paid out to bank</string>
     <string name="detail_add_money">Add money</string>
     <string name="detail_add_money_hint">Enter amount in rupees</string>
@@ -73,4 +72,10 @@
         <item quantity="one">%1$s for the next payment</item>
         <item quantity="other">%1$s for each of the next %2$d payments</item>
     </plurals>
+    <string name="detail_talk">Talk to Gullak about this goal</string>
+    <string name="detail_talk_stop">Stop</string>
+    <string name="detail_talk_listening">Listening…</string>
+    <string name="detail_talk_thinking">One moment…</string>
+    <string name="detail_talk_speaking">Gullak is speaking. Tap stop to end.</string>
+    <string name="detail_talk_hint">Say \"add 5,000\" or \"short of money\". Say nothing to hear how this goal is doing.</string>
 </resources>

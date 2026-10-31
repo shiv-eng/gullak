@@ -37,7 +37,7 @@ interfaces. It is not affiliated with Paytm, and it shows no Paytm logo.
 1. **Paytm home (stand-in).** A copy of the Paytm home screen. Only Gullak works; other tiles say "Demo: only Gullak works".
    Gullak sits in the Gold & Silver card, in a promo banner, and in a "Your Gullaks" card once goals exist.
 2. **Talk to Gullak.** Tapping "Start a Gullak" opens a conversation. "Type instead" is the only other way in.
-3. **Gullak greets**, mentioning progress if the user already has savings.
+3. **Gullak greets warmly**, and asks what the new goal is for. Savings are said only if asked.
 4. **The user says the goal** in Hindi, Hinglish or English. Gullak asks for anything missing, one question at a time.
 5. **Gullak reads it back** and asks if it is right. Yes moves on, no asks what to change, and details are taken as a correction.
 6. **Gullak explains where the money goes and offers the plan:** daily, weekly or monthly.
@@ -370,8 +370,9 @@ Loop: say a line, listen, answer. The brain reads each turn; with no model, the 
 left out. "Date nahi badal sakti" marks the date as fixed. If a turn fails, the conversation stops and waits for a tap; the app does not crash.
 Saying "one moment" happens only if thinking takes over 1.2 seconds.
 
-**Goal page by voice (`GoalDetailViewModel`, `GoalTalk`):** the mic says saved, target, status and next payment, then listens for add money, pay
-out or top-up, each needing a yes read by code. A failed payment is offered aloud; choices are read by name or position ("catch up", "doosra"), then
+**Goal page by voice (`GoalDetailViewModel`, `GoalTalk`):** the mic listens at once, with what it is doing shown on screen and a second tap to stop. It
+hears add money, pay out or top-up, each needing a yes read by code; anything else, or silence, gets saved, target, status and next
+payment. A failed payment is offered aloud; choices are read by name or position ("catch up", "doosra"), then
 it is explained and applied on a yes. Reaching the goal offers the pay-out. Anything unclear changes nothing.
 
 ---

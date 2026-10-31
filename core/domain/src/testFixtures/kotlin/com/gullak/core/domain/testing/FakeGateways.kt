@@ -213,8 +213,12 @@ class FakeSpeechInput : com.gullak.core.domain.ai.SpeechInput {
     val heard = ArrayDeque<List<com.gullak.core.domain.ai.SpeechEvent>>()
     var listens = 0
 
+    /** Keeps listening until cancelled, as a real microphone does while someone is quiet. */
+    var hold = false
+
     override fun listen(languageTag: String): kotlinx.coroutines.flow.Flow<com.gullak.core.domain.ai.SpeechEvent> {
         listens++
+        if (hold) return kotlinx.coroutines.flow.flow { kotlinx.coroutines.awaitCancellation() }
         return kotlinx.coroutines.flow.flowOf(*heard.removeFirstOrNull().orEmpty().toTypedArray())
     }
 }

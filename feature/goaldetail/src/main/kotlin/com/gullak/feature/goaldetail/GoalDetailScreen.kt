@@ -35,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -193,8 +194,10 @@ internal fun GoalDetailScreen(
                 actions = {
                     IconButton(onClick = { onEvent(GoalDetailEvent.TalkClicked) }) {
                         Icon(
-                            Icons.Filled.Mic,
-                            contentDescription = stringResource(R.string.detail_talk),
+                            if (state.talkPhase == null) Icons.Filled.Mic else Icons.Filled.Stop,
+                            contentDescription = stringResource(
+                                if (state.talkPhase == null) R.string.detail_talk else R.string.detail_talk_stop,
+                            ),
                             tint = GullakTheme.colors.iconNavy,
                         )
                     }
@@ -231,6 +234,9 @@ internal fun GoalDetailScreen(
             state.unresolvedFailure?.let { failed ->
                 item { FixPlanBanner(failed = failed, onFix = { onEvent(GoalDetailEvent.OpenReplan(failed.id)) }) }
             }
+            if (state.talkPhase != null) {
+                item { TalkCard(state = state) }
+            }
             item { SavedCard(detail = detail) }
             item { MoneyCard(state = state, onEvent = onEvent) }
             if (state.demoControls) {
@@ -245,6 +251,43 @@ internal fun GoalDetailScreen(
     }
     if (state.addingMoney) AddMoneySheet(onEvent = onEvent)
     state.topUp?.let { topUp -> TopUpSheet(topUp = topUp, onEvent = onEvent) }
+}
+
+/** Shows what the voice is doing, so a tap on the mic is answered at once. */
+@Composable
+private fun TalkCard(
+    state: GoalDetailUiState,
+    modifier: Modifier = Modifier,
+) {
+    PaytmCard(modifier = modifier) {
+        Text(
+            stringResource(
+                when (state.talkPhase) {
+                    GoalTalkPhase.LISTENING -> R.string.detail_talk_listening
+                    GoalTalkPhase.THINKING -> R.string.detail_talk_thinking
+                    else -> R.string.detail_talk_speaking
+                },
+            ),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = GullakTheme.colors.iconNavy,
+        )
+        val line = when (state.talkPhase) {
+            GoalTalkPhase.LISTENING, GoalTalkPhase.THINKING -> state.youSaid
+            else -> state.gullakSaid
+        }
+        line?.let {
+            Spacer(Modifier.height(6.dp))
+            Text(it, style = MaterialTheme.typography.bodyMedium, color = GullakTheme.colors.textBody)
+        }
+        if (state.talkPhase == GoalTalkPhase.LISTENING && line == null) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(R.string.detail_talk_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = GullakTheme.colors.textMuted,
+            )
+        }
+    }
 }
 
 /** What can be done with the money: add to it any time, take it out on goal day, ask about a top-up. */
