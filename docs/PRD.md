@@ -446,7 +446,7 @@ tests use an in-memory DataStore, because the file-backed one cannot replace its
 - Interrupting can lose the first words, because the recogniser starts just after the voice stops.
 - Saying yes is the demo's approval. A real UPI AutoPay mandate needs the customer's UPI PIN in the bank or NPCI flow.
 - The top-up is a mock with no lender behind it.
-- Screenshots in `docs/screenshots` show an older look. The pitch deck's numbers (₹125, ₹880, ₹3,900), mock-ups and tech slide also predate the app.
+- The pitch deck's numbers (₹125, ₹880, ₹3,900), mock-ups and tech slide also predate the app.
 - A release build was dropped by the user's decision: run the debug build.
 
 ## 17. Decisions that override the original brief

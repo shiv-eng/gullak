@@ -13,15 +13,17 @@ choice that reaches the user unchecked, and it never moves money.
 This is a demo. No real payment happens, and it is not affiliated with or endorsed by Paytm. The home screen is a
 stand-in that shows where the feature would live.
 
-| Paytm home | Plan | AutoPay |
-| --- | --- | --- |
-| ![Home](docs/screenshots/paytm-home-gold-silver.png) | ![Plan](docs/screenshots/goal-sip-plan.png) | ![AutoPay](docs/screenshots/goal-sip-autopay.png) |
-
-| Demo bank | Demo approval | Goal detail | Recovery |
+| Paytm home | Talk to Gullak | Plan | AutoPay |
 | --- | --- | --- | --- |
-| ![Bank](docs/screenshots/autopay-bank.png) | ![Approval](docs/screenshots/autopay-approval.png) | ![Detail](docs/screenshots/goal-detail.png) | ![Replan](docs/screenshots/replan-sheet.png) |
+| ![Home](docs/screenshots/paytm-home-top.png) | ![Talk](docs/screenshots/talk-to-gullak.png) | ![Plan](docs/screenshots/goal-plan.png) | ![AutoPay](docs/screenshots/goal-autopay.png) |
 
-The screenshots were taken before the one-time payment field and the speaker buttons were added.
+| Demo bank | Demo approval | Gullak started | Your Gullaks |
+| --- | --- | --- | --- |
+| ![Bank](docs/screenshots/autopay-bank.png) | ![Approval](docs/screenshots/autopay-approval.png) | ![Started](docs/screenshots/goal-success.png) | ![Gullaks](docs/screenshots/gullak-home.png) |
+
+| Goal page | Recovery | Catching up | Back on track |
+| --- | --- | --- | --- |
+| ![Goal](docs/screenshots/goal-page.png) | ![Recovery](docs/screenshots/recovery-sheet.png) | ![Catching up](docs/screenshots/goal-catching-up.png) | ![On track](docs/screenshots/goal-back-on-track.png) |
 
 ## Voice first
 
