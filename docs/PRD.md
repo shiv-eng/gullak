@@ -3,8 +3,8 @@
 This document describes the app that exists in this repository, closely enough to build it again. Where the code and this
 document disagree, the code is right; please fix this document.
 
-Status on 30 Oct 2026: 282 automated tests pass. See [section 15](#15-what-has-not-been-proven-yet) for what has not been
-proven on a real phone.
+Status on 31 Oct 2026: 285 automated tests pass. See [section 15](#15-what-has-not-been-proven-yet) for what has not been
+proven on a real phone. To build it again, follow the phases in [section 18](#18-build-phases).
 
 ---
 
@@ -449,3 +449,68 @@ tests use an in-memory DataStore, because the file-backed one cannot replace its
 ## 17. Decisions that override the original brief
 
 The user chose: Paytm's look over the brief's palette and Inter; a Gold SIP-style flow, no chat screen, no dark theme; the user's jar image over a drawn clay jar; the name Gullak; Paytm home as the entry; "SIP" removed from Gullak's text to match the deck; voice as the hero, with Sarvam; real bank names as plain text; and model explanations in demo mode.
+
+---
+
+## 18. Build phases
+
+Build in this order. Each phase depends on the ones before it, and the next one starts only when its exit check passes. This is the
+order for building the app again, updated from the brief's eight phases. The first build reached the same result by a different
+route, moving to voice first only after the screens existed.
+
+**Every phase ends the same way:**
+
+- `./gradlew check` passes, with new tests for what the phase added.
+- Anything marked "on the phone" is checked on a real phone, never an emulator.
+- This document is updated if the build differed from it, and the work is committed.
+
+| Phase | Build | Sections | Exit check |
+| --- | --- | --- | --- |
+| **0. Prepare** | Read this document. Get a real Android phone, a Gemini key and, if available, a Sarvam key. Put the keys in `local.properties` | 1, 2, 3, 17 | `local.properties` is ignored by git |
+| **1. Scaffold** | Version catalog, `build-logic` plugins, all modules wired, Hilt app, theme tokens, Roboto, placeholder screen, ktlint, detekt | 3, 4, 9 | `:app:assembleDebug` passes; on the phone, the app opens |
+| **2. Domain and plan engine** | `core:model`, `core:domain`: `Money`, `PlanEngine`, use cases, interfaces, test fakes | 5, 6 | Every worked example in section 6 is a passing test; `:core:domain:koverHtmlReport` shows `PlanEngine`'s coverage |
+| **3. Data and mocks** | Room, DataStore, `DemoClock`, fake gateways, seed data, festivals, analytics | 5, 11, 12 | Repository, settings, clock and gateway tests pass |
+| **4. AI layer** | Gemini client, conversation brain, explanations, `NumberGuard`, `RuleBasedGoalParser`, demo answers, fallback chain | 7 | All 12 test sentences pass offline; a number the plan does not have discards the reply; `GeminiCheckReceiver` gets a real reply on the phone |
+| **5. Voice** | Speaking and hearing chains, `speakUnlessInterrupted`, `MicBargeInDetector`, mic permission | 8 | A failing voice never crashes; with no Sarvam key the next voice takes over; on the phone, a Hindi sentence is heard and a Hindi reply is spoken |
+| **6. Home and typed flow** | Paytm home, Gullak home, form, AutoPay sheet, bank, demo approval, processing, success | 2, 9 | `CreateGoalFlowUiTest` passes; `NoHardcodedTextTest` passes; on the phone, typing the laptop goal shows ₹155, ₹1,060 and ₹4,500 |
+| **7. Voice conversation** | Talk screen, `VoiceGoalViewModel`, `VoiceLines`, `readbackReply`, `bankFrom`, "Type instead" | 2, 10 | The whole flow by voice passes with fakes; injected words start nothing; on the phone, a Gullak is started by talking alone |
+| **8. Goal page, recovery and Settings** | Goal page, jar, history, recovery sheet, money card, demo controls, `GoalTalk`, Settings | 6, 9, 10, 11 | `DemoPathUiTest` passes; on the phone, the full recovery example in section 6 gives the same numbers |
+| **9. Polish** | All Hindi strings, one-line labels, empty and error states, TalkBack, 200% font | 4, 9 | Every string is in `values` and `values-hi`; on the phone, TalkBack and 200% font work on every screen |
+| **10. Acceptance** | No new features: clear section 15 and fix what it finds | 14, 15 | On the phone, the demo script in section 14 runs from start to finish by voice, both with a connection and offline. Numbers must match exactly |
+| **11. Ship and maintain** | Run from a debug build (section 16). Before each demo: Settings → Reset, and the user's own keys. After that, see below | 16 | The latest commit is pushed; the debug build installs and runs on the demo phone |
+
+**Where we are on 31 Oct 2026:** the code and automated tests for phases 1 to 9 are done. Still open:
+
+- The phone checks listed in section 15, which include parts of phases 5, 7 and 9.
+- All of phase 10, so the app has not passed acceptance yet.
+- Phase 11, where the demo-phone install and the Reset before the demo are still to do.
+
+### How this maps to the SDLC
+
+| Stage | Where |
+| --- | --- |
+| Requirements | Sections 1, 2 and 17 |
+| Design | Sections 3 to 5 and 7 to 10 |
+| Build | Phases 0 to 9 |
+| Testing | Section 13, plus the exit check of every phase |
+| Acceptance | Phase 10 |
+| Deployment | Phase 11: a debug build on one phone, by the user's decision |
+| Maintenance | The rules below |
+
+### Changing the app after it is built
+
+- A bug gets a failing test first where it can be tested in code, then the fix.
+- A change to a number, a rule or a screen updates this document in the same commit.
+- A user decision that differs from the brief is added to section 17.
+- `./gradlew check` passes before every commit.
+- A fix that depends on real sound, a real voice or a real mic is not finished until it is checked on the phone.
+
+### What a real product would still need
+
+These are left out of the prototype on purpose:
+
+- **CI:** nothing runs `./gradlew check` automatically, so it depends on running it by hand.
+- **Release build:** R8, signing and a store listing.
+- **Backend:** keys held on a server (section 3), plus login and real data storage.
+- **Real services:** real gateways behind the interfaces in section 11, and the customer's UPI PIN step for mandates (section 16).
+- **Monitoring:** crash reports and analytics beyond `LogcatAnalytics`.
