@@ -134,6 +134,11 @@ The bank and approval screens are demo stand-ins too. The approval screen is del
 the UPI PIN screen: it only counts four digits, and nothing is saved or sent. A real UPI PIN would be entered in the
 bank or NPCI flow, never inside Gullak.
 
+## Try the APK
+
+[`apk/Gullak-demo.apk`](apk/Gullak-demo.apk) is a debug build for Android 8.0 or newer. It holds no API keys, so it runs on the
+offline goal parser, written explanations and the phone's own voice. Gemini and Sarvam need a build with your own keys, as below.
+
 ## How to run
 
 You need JDK 17 and the Android SDK. Copy `local.properties.example` to `local.properties` and set:
